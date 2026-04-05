@@ -10,6 +10,7 @@ import AboutUs from './About/AboutUs'
 import { LoaderProvider } from './LoaderContext.jsx'
 import Products from './products/Products.jsx'
 import SubCategory from './products/SubCategory.jsx'
+import ProductDetail from './products/ProductDetail.jsx'
 
 function App() {
 	return (
@@ -26,6 +27,7 @@ function App() {
 					<Route path='/about-us' element={<AboutUs />} />
 					<Route path='/products' element={<Products />} />
 					<Route path='/subcategory' element={<SubCategory />} />
+					<Route path='/product' element={<ProductDetail />} />
 				</Routes>
 			</LoaderProvider>
 		</>
