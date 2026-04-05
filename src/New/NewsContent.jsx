@@ -39,7 +39,7 @@ const NewsContent = () => {
 	}, [id])
 
 	// Helper function to get product image
-	const getProductImage = (product) => {
+	const getProductImage = product => {
 		if (!product) return '/placeholder-image.jpg'
 		return product.poster || product.image || '/placeholder-image.jpg'
 	}
@@ -65,7 +65,7 @@ const NewsContent = () => {
 								src={getProductImage(hoveredProduct)}
 								alt={hoveredProduct.name}
 								className='max-w-full max-h-full object-contain'
-								onError={(e) => {
+								onError={e => {
 									e.target.src = '/placeholder-image.jpg'
 								}}
 							/>

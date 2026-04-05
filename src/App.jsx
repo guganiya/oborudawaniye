@@ -10,7 +10,8 @@ import AboutUs from './About/AboutUs'
 import { LoaderProvider } from './LoaderContext.jsx'
 import Products from './products/Products.jsx'
 import SubCategory from './products/SubCategory.jsx'
-import ProductDetail from './products/ProductDetail.jsx'
+import Product from './products/Product.jsx'
+import Support from './support/Support.jsx'
 
 function App() {
 	return (
@@ -27,7 +28,8 @@ function App() {
 					<Route path='/about-us' element={<AboutUs />} />
 					<Route path='/products' element={<Products />} />
 					<Route path='/subcategory' element={<SubCategory />} />
-					<Route path='/product' element={<ProductDetail />} />
+					<Route path='/product' element={<Product />} />
+					<Route path='/support' element={<Support />} />
 				</Routes>
 			</LoaderProvider>
 		</>
