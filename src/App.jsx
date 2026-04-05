@@ -7,7 +7,9 @@ import NewsContent from './New/NewsContent'
 import Innovations from './inovation/Innovations'
 import InnovationContent from './inovation/InnovationContent'
 import AboutUs from './About/AboutUs'
-import {LoaderProvider} from "./LoaderContext.jsx";
+import { LoaderProvider } from './LoaderContext.jsx'
+import Products from './products/Products.jsx'
+import SubCategory from './products/SubCategory.jsx'
 
 function App() {
 	return (
@@ -22,6 +24,8 @@ function App() {
 					<Route path='/innovation' element={<Innovations />} />
 					<Route path='/innovation-content' element={<InnovationContent />} />
 					<Route path='/about-us' element={<AboutUs />} />
+					<Route path='/products' element={<Products />} />
+					<Route path='/subcategory' element={<SubCategory />} />
 				</Routes>
 			</LoaderProvider>
 		</>
