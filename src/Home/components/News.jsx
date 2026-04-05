@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient from '../../api/api'
+import {useLoader} from "../../LoaderContext.jsx";
 
 const Tag = ({ text }) => (
 	<Link
@@ -67,12 +68,14 @@ const Card = ({ title, imageUrl, size = 'small', to = '#' }) => {
 
 const New = () => {
 	const [categories, setCategories] = useState([])
+	const {showLoader, hideLoader} = useLoader()
 	const [loading, setLoading] = useState(false)
 	const [news, setNews] = useState([])
 	const [lastNews, setLastNews] = useState([])
 	useEffect(() => {
 		const getCategories = async () => {
 			setLoading(true)
+			showLoader()
 			try {
 				const response = await apiClient.get('/get-news-categories')
 				const data = await response.data
@@ -82,6 +85,7 @@ const New = () => {
 				console.log(error)
 			} finally {
 				setLoading(false)
+				hideLoader()
 			}
 		}
 
@@ -91,6 +95,7 @@ const New = () => {
 				const response = await apiClient.get('/main-news')
 				const data = await response.data
 				setNews(data)
+				setLastNews(data.slice(1, 3))
 				console.log(data)
 			} catch (error) {
 				console.log(error)
@@ -98,7 +103,7 @@ const New = () => {
 				setLoading(false)
 			}
 		}
-		getNews().then(() => setLastNews(news.slice(1, 3)))
+		getNews()
 
 		getCategories()
 	}, [])

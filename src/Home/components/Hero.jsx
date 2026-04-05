@@ -2,15 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react' // Добави�
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { data, Link } from 'react-router-dom'
 import apiClient from '../../api/api'
+import {useLoader} from "../../LoaderContext.jsx";
 
 const Hero = () => {
 	const brandRed = '#e21e26'
+	const {showLoader, hideLoader} = useLoader()
 
 	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(false)
 	useEffect(() => {
 		const getBanners = async () => {
 			setLoading(true)
+			showLoader()
 			try {
 				const response = await apiClient.get('/get-banners')
 				const data = await response.data
@@ -20,6 +23,7 @@ const Hero = () => {
 				console.log(error)
 			} finally {
 				setLoading(false)
+				hideLoader()
 			}
 		}
 		getBanners()

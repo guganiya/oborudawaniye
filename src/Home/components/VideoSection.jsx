@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react'
 import apiClient from '../../api/api'
+import {useLoader} from "../../LoaderContext.jsx";
 
 const VideoSection = () => {
 	const [videoData, setVideoData] = useState([])
@@ -8,10 +9,12 @@ const VideoSection = () => {
 	const [selectedVideo, setSelectedVideo] = useState(null)
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const videoRef = useRef(null)
+	const {showLoader, hideLoader} = useLoader()
 
 	useEffect(() => {
 		const getVideos = async () => {
 			setLoading(true)
+			showLoader()
 			try {
 				const response = await apiClient.get('/videos')
 				const data = await response.data
@@ -21,6 +24,7 @@ const VideoSection = () => {
 				console.log(error)
 			} finally {
 				setLoading(false)
+				hideLoader()
 			}
 		}
 		getVideos()

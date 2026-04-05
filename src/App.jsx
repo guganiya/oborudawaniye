@@ -7,18 +7,24 @@ import NewsContent from './New/NewsContent'
 import Innovations from './inovation/Innovations'
 import InnovationContent from './inovation/InnovationContent'
 import AboutUs from './About/AboutUs'
+import {LoaderProvider} from "./LoaderContext.jsx";
+
 function App() {
 	return (
-		<Routes>
-			<Route path='/' element={<Home />} />
-			<Route path='/contacts' element={<Contacts />} />
-			<Route path='/signup' element={<Signup />} />
-			<Route path='/news' element={<News />} />
-			<Route path='/news-content/:id' element={<NewsContent />} />
-			<Route path='/innovation' element={<Innovations />} />
-			<Route path='/innovation-content' element={<InnovationContent />} />
-			<Route path='/about-us' element={<AboutUs />} />
-		</Routes>
+		<>
+			<LoaderProvider>
+				<Routes>
+					<Route path='/' element={<Home />} />
+					<Route path='/contacts' element={<Contacts />} />
+					<Route path='/signup' element={<Signup />} />
+					<Route path='/news' element={<News />} />
+					<Route path='/news-content/:id' element={<NewsContent />} />
+					<Route path='/innovation' element={<Innovations />} />
+					<Route path='/innovation-content' element={<InnovationContent />} />
+					<Route path='/about-us' element={<AboutUs />} />
+				</Routes>
+			</LoaderProvider>
+		</>
 	)
 }
 
