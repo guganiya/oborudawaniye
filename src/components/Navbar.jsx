@@ -9,12 +9,10 @@ const Navbar = () => {
 
 	const navItems = [
 		'Home',
-		'Spot On',
 		'Products',
 		'Innovation',
 		'Support',
 		'News',
-		'Sustainability',
 		'About Us',
 		'Contacts',
 	]
