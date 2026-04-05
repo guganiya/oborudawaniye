@@ -1,5 +1,4 @@
-import React, { useState } from 'react'
-import axios from 'axios'
+import React from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { Mail, Phone, MapPin, Clock, ArrowRight } from 'lucide-react'
@@ -8,54 +7,10 @@ import { motion } from 'framer-motion'
 const Contacts = () => {
 	const brandRed = '#e21e26'
 
-	// 1. Состояние для данных формы (поля как в Django моделях)
-	const [formData, setFormData] = useState({
-		full_name: '',
-		email: '',
-		message: '',
-	})
-
-	// 2. Состояние загрузки
-	const [loading, setLoading] = useState(false)
-
 	const fadeInUp = {
 		initial: { opacity: 0, y: 20 },
 		animate: { opacity: 1, y: 0 },
 		transition: { duration: 0.6 },
-	}
-
-	// 3. Обработчик изменений в полях
-	const handleChange = e => {
-		setFormData({
-			...formData,
-			[e.target.name]: e.target.value,
-		})
-	}
-
-	// 4. Функция отправки POST запроса
-	const handleSubmit = async e => {
-		e.preventDefault()
-		setLoading(true)
-
-		try {
-			// Используем VITE_API_URL из .env + путь к твоему эндпоинту (проверь точный путь у бэкенда)
-			const apiUrl = `${import.meta.env.VITE_API_URL}api/contacts/`
-
-			const response = await axios.post(apiUrl, formData)
-
-			if (response.status === 201 || response.status === 200) {
-				alert('Success! Your message has been sent.')
-				setFormData({ full_name: '', email: '', message: '' }) // Очистка формы
-			}
-		} catch (error) {
-			console.error('Submission error:', error)
-			const errorMsg =
-				error.response?.data?.detail ||
-				'Something went wrong. Please try again.'
-			alert(errorMsg)
-		} finally {
-			setLoading(false)
-		}
 	}
 
 	return (
@@ -65,6 +20,7 @@ const Contacts = () => {
 			{/* Заголовок страницы */}
 			<section className='pt-32 md:pt-40 pb-12 md:pb-20 border-b border-black/5 bg-[#fafafa] relative overflow-hidden'>
 				<div className='absolute inset-0 opacity-[0.03] pointer-events-none'>
+					{/* Исправлено: уменьшен размер текста для мобилок, чтобы не было горизонтального скролла */}
 					<span className='absolute -bottom-5 md:-bottom-10 -left-5 md:-left-10 text-[6rem] md:text-[20rem] font-black uppercase leading-none select-none'>
 						Contact
 					</span>
@@ -72,6 +28,7 @@ const Contacts = () => {
 
 				<div className='max-w-[1500px] mx-auto px-6 md:px-12 relative z-10'>
 					<motion.div {...fadeInUp}>
+						{/* Адаптивный размер шрифта: text-5xl для мобилок, text-[8rem] для десктопа */}
 						<h1 className='text-5xl md:text-[7rem] font-black uppercase tracking-tighter leading-[0.9] md:leading-[0.85]'>
 							Get in <br className='hidden md:block' />
 							<span style={{ color: brandRed }} className='italic'>
@@ -89,7 +46,7 @@ const Contacts = () => {
 			<main className='max-w-[1500px] mx-auto px-6 md:px-12 py-16 md:py-32'>
 				<div className='grid grid-cols-1 lg:grid-cols-12 gap-16 md:gap-20'>
 					{/* ЛЕВАЯ КОЛОНКА: ИНФОРМАЦИЯ */}
-					<div className='lg:col-span-5 space-y-12'>
+					<div className='lg:col-span-5 space-y-12 md:y-20'>
 						<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-10 md:gap-12'>
 							{[
 								{
@@ -125,9 +82,10 @@ const Contacts = () => {
 									viewport={{ once: true }}
 									className='group'
 								>
-									<div className='flex items-center gap-3 md:gap-4 text-gray-400 mb-2'>
+									<div className='flex items-center gap-3 md:gap-4 text-gray-400 mb-2 md:mb-4'>
 										<item.icon
-											size={16}
+											size={14}
+											md:size={16}
 											strokeWidth={3}
 											style={{ color: brandRed }}
 										/>
@@ -169,83 +127,57 @@ const Contacts = () => {
 									We typically respond within 24 hours.
 								</p>
 
-								<form
-									onSubmit={handleSubmit}
-									className='space-y-6 md:space-y-8'
-								>
+								<form className='space-y-6 md:space-y-8'>
 									<div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'>
-										{/* Full Name */}
+										{/* Поле Имени */}
 										<div className='relative'>
 											<input
 												type='text'
-												name='full_name'
-												value={formData.full_name}
-												onChange={handleChange}
 												required
+												placeholder=' '
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
-											<label
-												className={`absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all 
-    ${formData.full_name ? 'opacity-0 -top-4' : 'opacity-100'} 
-    peer-focus:opacity-0 peer-focus:-top-4`}
-											>
+											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-not-placeholder-shown:-top-4'>
 												Full Name
 											</label>
 										</div>
 
-										{/* Email Address */}
+										{/* Поле Email */}
 										<div className='relative'>
 											<input
 												type='email'
-												name='email'
-												value={formData.email}
-												onChange={handleChange}
 												required
+												placeholder=' '
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
-											<label
-												className={`absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all 
-    ${formData.email ? 'opacity-0 -top-4' : 'opacity-100'} 
-    peer-focus:opacity-0 peer-focus:-top-4`}
-											>
+											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-not-placeholder-shown:-top-4'>
 												Email Address
 											</label>
 										</div>
 									</div>
 
-									{/* Message */}
+									{/* Поле Сообщения */}
 									<div className='relative'>
 										<textarea
-											name='message'
-											value={formData.message}
-											onChange={handleChange}
 											rows='3'
 											required
+											placeholder=' '
 											className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer resize-none'
 										></textarea>
-										<label
-											className={`absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all 
-    ${formData.message ? 'opacity-0 -top-4' : 'opacity-100'} 
-    peer-focus:opacity-0 peer-focus:-top-4`}
-										>
+										<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-not-placeholder-shown:-top-4'>
 											Message
 										</label>
 									</div>
 
 									<button
 										type='submit'
-										disabled={loading}
-										className='group relative w-full py-5 md:py-6 bg-white text-black overflow-hidden rounded-full transition-all hover:bg-[#e21e26] hover:text-white cursor-pointer active:scale-95 disabled:opacity-50'
+										className='group relative w-full py-5 md:py-6 bg-white text-black overflow-hidden rounded-full transition-all hover:bg-[#e21e26] hover:text-white cursor-pointer active:scale-95'
 									>
 										<span className='relative z-10 flex items-center justify-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em]'>
-											{loading ? 'Sending...' : 'Send Request'}{' '}
+											Send Request{' '}
 											<ArrowRight
 												size={14}
-												className={
-													loading
-														? ''
-														: 'group-hover:translate-x-2 transition-transform'
-												}
+												className='group-hover:translate-x-2 transition-transform'
 											/>
 										</span>
 									</button>
