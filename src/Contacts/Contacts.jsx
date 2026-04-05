@@ -1,22 +1,17 @@
-import React, { useState } from 'react'
-import axios from 'axios'
+import React, { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { Mail, Phone, MapPin, Clock, ArrowRight } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Mail, Phone, MapPin, Clock, ArrowRight, Loader2, CheckCircle, XCircle, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import apiClient from '../api/api.js'
 
 const Contacts = () => {
 	const brandRed = '#e21e26'
-
-	// 1. Состояние для данных формы (поля как в Django моделях)
-	const [formData, setFormData] = useState({
-		full_name: '',
-		email: '',
-		message: '',
-	})
-
-	// 2. Состояние загрузки
+	const [full_name, setFullName] = useState('')
+	const [email, setEmail] = useState('')
+	const [message, setMessage] = useState('')
 	const [loading, setLoading] = useState(false)
+	const [modal, setModal] = useState({ isOpen: false, type: '', message: '' })
 
 	const fadeInUp = {
 		initial: { opacity: 0, y: 20 },
@@ -24,43 +19,154 @@ const Contacts = () => {
 		transition: { duration: 0.6 },
 	}
 
-	// 3. Обработчик изменений в полях
-	const handleChange = e => {
-		setFormData({
-			...formData,
-			[e.target.name]: e.target.value,
-		})
-	}
-
-	// 4. Функция отправки POST запроса
-	const handleSubmit = async e => {
+	const handleSubmit = async (e) => {
 		e.preventDefault()
+
+		// Basic validation
+		if (!full_name.trim() || !email.trim() || !message.trim()) {
+			setModal({
+				isOpen: true,
+				type: 'error',
+				message: 'Пожалуйста, заполните все поля'
+			})
+			return
+		}
+
+		// Email validation
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		if (!emailRegex.test(email)) {
+			setModal({
+				isOpen: true,
+				type: 'error',
+				message: 'Пожалуйста, введите корректный email адрес'
+			})
+			return
+		}
+
 		setLoading(true)
 
+		const formData = new FormData()
+		formData.append('full_name', full_name)
+		formData.append('email', email)
+		formData.append('message', message)
+
 		try {
-			// Используем VITE_API_URL из .env + путь к твоему эндпоинту (проверь точный путь у бэкенда)
-			const apiUrl = `${import.meta.env.VITE_API_URL}api/contacts/`
+			const response = await apiClient.post('/post-feedback', formData)
+			const data = await response.data
 
-			const response = await axios.post(apiUrl, formData)
+			// Success
+			setModal({
+				isOpen: true,
+				type: 'success',
+				message: 'Сообщение успешно отправлено! Мы свяжемся с вами в ближайшее время.'
+			})
 
-			if (response.status === 201 || response.status === 200) {
-				alert('Success! Your message has been sent.')
-				setFormData({ full_name: '', email: '', message: '' }) // Очистка формы
-			}
-		} catch (error) {
-			console.error('Submission error:', error)
-			const errorMsg =
-				error.response?.data?.detail ||
-				'Something went wrong. Please try again.'
-			alert(errorMsg)
+			// Clear form on success
+			setFullName('')
+			setEmail('')
+			setMessage('')
+
+		} catch(err) {
+			console.log(err)
+			// Error message based on response if available
+			const errorMessage = err.response?.data?.message || 'Что-то пошло не так. Пожалуйста, попробуйте снова.'
+			setModal({
+				isOpen: true,
+				type: 'error',
+				message: errorMessage
+			})
 		} finally {
 			setLoading(false)
 		}
 	}
 
+	const closeModal = () => {
+		setModal({ isOpen: false, type: '', message: '' })
+	}
+
+	// Close modal on Escape key
+	useEffect(() => {
+		const handleEsc = (e) => {
+			if (e.key === 'Escape' && modal.isOpen) {
+				closeModal()
+			}
+		}
+		window.addEventListener('keydown', handleEsc)
+		return () => window.removeEventListener('keydown', handleEsc)
+	}, [modal.isOpen])
+
 	return (
 		<div className='bg-white min-h-screen text-black selection:bg-[#e21e26] selection:text-white font-sans'>
 			<Navbar />
+
+			{/* Modal Component */}
+			<AnimatePresence>
+				{modal.isOpen && (
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						className='fixed inset-0 z-50 flex items-center justify-center px-4'
+					>
+						{/* Backdrop */}
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							className='absolute inset-0 bg-black/50 backdrop-blur-sm'
+							onClick={closeModal}
+						/>
+
+						{/* Modal Content */}
+						<motion.div
+							initial={{ scale: 0.9, opacity: 0, y: 20 }}
+							animate={{ scale: 1, opacity: 1, y: 0 }}
+							exit={{ scale: 0.9, opacity: 0, y: 20 }}
+							className='relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 md:p-8'
+						>
+							{/* Close button */}
+							<button
+								onClick={closeModal}
+								className='absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors'
+							>
+								<X size={20} />
+							</button>
+
+							{/* Icon */}
+							<div className='flex justify-center mb-4'>
+								{modal.type === 'success' ? (
+									<div className='w-16 h-16 rounded-full bg-green-100 flex items-center justify-center'>
+										<CheckCircle className='w-10 h-10 text-green-500' />
+									</div>
+								) : (
+									<div className='w-16 h-16 rounded-full bg-red-100 flex items-center justify-center'>
+										<XCircle className='w-10 h-10 text-red-500' />
+									</div>
+								)}
+							</div>
+
+							{/* Title */}
+							<h3 className='text-xl font-bold text-center mb-2'>
+								{modal.type === 'success' ? 'Успешно!' : 'Ошибка!'}
+							</h3>
+
+							{/* Message */}
+							<p className='text-gray-600 text-center mb-6'>
+								{modal.message}
+							</p>
+
+							{/* Button */}
+							<button
+								onClick={closeModal}
+								style={{ backgroundColor: modal.type === 'success' ? '#10b981' : brandRed }}
+								className='w-full py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-opacity'
+							>
+								{modal.type === 'success' ? 'Продолжить' : 'Попробовать снова'}
+							</button>
+						</motion.div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 
 			{/* Заголовок страницы */}
 			<section className='pt-32 md:pt-40 pb-12 md:pb-20 border-b border-black/5 bg-[#fafafa] relative overflow-hidden'>
@@ -89,7 +195,7 @@ const Contacts = () => {
 			<main className='max-w-[1500px] mx-auto px-6 md:px-12 py-16 md:py-32'>
 				<div className='grid grid-cols-1 lg:grid-cols-12 gap-16 md:gap-20'>
 					{/* ЛЕВАЯ КОЛОНКА: ИНФОРМАЦИЯ */}
-					<div className='lg:col-span-5 space-y-12'>
+					<div className='lg:col-span-5 space-y-12 md:y-20'>
 						<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-10 md:gap-12'>
 							{[
 								{
@@ -125,9 +231,9 @@ const Contacts = () => {
 									viewport={{ once: true }}
 									className='group'
 								>
-									<div className='flex items-center gap-3 md:gap-4 text-gray-400 mb-2'>
+									<div className='flex items-center gap-3 md:gap-4 text-gray-400 mb-2 md:mb-4'>
 										<item.icon
-											size={16}
+											size={14}
 											strokeWidth={3}
 											style={{ color: brandRed }}
 										/>
@@ -169,65 +275,44 @@ const Contacts = () => {
 									We typically respond within 24 hours.
 								</p>
 
-								<form
-									onSubmit={handleSubmit}
-									className='space-y-6 md:space-y-8'
-								>
+								<form onSubmit={handleSubmit} className='space-y-6 md:space-y-8'>
 									<div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'>
-										{/* Full Name */}
 										<div className='relative'>
 											<input
 												type='text'
-												name='full_name'
-												value={formData.full_name}
-												onChange={handleChange}
+												value={full_name}
+												onChange={(e) => setFullName(e.target.value)}
 												required
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
-											<label
-												className={`absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all 
-    ${formData.full_name ? 'opacity-0 -top-4' : 'opacity-100'} 
-    peer-focus:opacity-0 peer-focus:-top-4`}
-											>
+											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
 												Full Name
 											</label>
 										</div>
 
-										{/* Email Address */}
 										<div className='relative'>
 											<input
 												type='email'
-												name='email'
-												value={formData.email}
-												onChange={handleChange}
+												value={email}
+												onChange={(e) => setEmail(e.target.value)}
 												required
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
-											<label
-												className={`absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all 
-    ${formData.email ? 'opacity-0 -top-4' : 'opacity-100'} 
-    peer-focus:opacity-0 peer-focus:-top-4`}
-											>
+											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
 												Email Address
 											</label>
 										</div>
 									</div>
 
-									{/* Message */}
 									<div className='relative'>
 										<textarea
-											name='message'
-											value={formData.message}
-											onChange={handleChange}
-											rows='3'
+											rows='4'
+											value={message}
+											onChange={(e) => setMessage(e.target.value)}
 											required
 											className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer resize-none'
 										></textarea>
-										<label
-											className={`absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all 
-    ${formData.message ? 'opacity-0 -top-4' : 'opacity-100'} 
-    peer-focus:opacity-0 peer-focus:-top-4`}
-										>
+										<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
 											Message
 										</label>
 									</div>
@@ -235,18 +320,23 @@ const Contacts = () => {
 									<button
 										type='submit'
 										disabled={loading}
-										className='group relative w-full py-5 md:py-6 bg-white text-black overflow-hidden rounded-full transition-all hover:bg-[#e21e26] hover:text-white cursor-pointer active:scale-95 disabled:opacity-50'
+										className='group relative w-full py-5 md:py-6 bg-white text-black overflow-hidden rounded-full transition-all hover:bg-[#e21e26] hover:text-white cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
 									>
 										<span className='relative z-10 flex items-center justify-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em]'>
-											{loading ? 'Sending...' : 'Send Request'}{' '}
-											<ArrowRight
-												size={14}
-												className={
-													loading
-														? ''
-														: 'group-hover:translate-x-2 transition-transform'
-												}
-											/>
+											{loading ? (
+												<>
+													<Loader2 size={16} className="animate-spin" />
+													SENDING...
+												</>
+											) : (
+												<>
+													Send Request{' '}
+													<ArrowRight
+														size={14}
+														className='group-hover:translate-x-2 transition-transform'
+													/>
+												</>
+											)}
 										</span>
 									</button>
 								</form>
