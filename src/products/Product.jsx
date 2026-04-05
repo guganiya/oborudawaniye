@@ -4,6 +4,7 @@ import Footer from '../components/Footer'
 import ProductDetail from './components/ProductDetail'
 import ProductDownloads from './components/ProductDownloads'
 import ProductsVideo from './components/ProductsVideo'
+import ProductNew from './components/ProductNew'
 
 const Product = () => {
 	return (
@@ -12,6 +13,7 @@ const Product = () => {
 			<ProductDetail />
 			<ProductsVideo />
 			<ProductDownloads />
+			<ProductNew />
 
 			<Footer />
 		</div>
