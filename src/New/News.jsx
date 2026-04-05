@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { Search, ArrowRight, Loader2 } from 'lucide-react'
+import apiClient from "../api/api.js";
 
 // ─── Константы ────────────────────────────────────────────────────────────────
-const PAGE_SIZE = 25
+const PAGE_SIZE = 3 // Changed to match typical API pagination
 const brandRed = '#e21e26'
 
 const GRID_PATTERN = [3, 6, 3, 5, 4, 3, 3, 3, 6, 3, 3, 3, 3, 3]
@@ -23,78 +24,6 @@ const IMG_HEIGHT = {
 	4: 'h-[210px]',
 	5: 'h-[230px]',
 	6: 'h-[260px]',
-}
-
-// ─── Тестовые данные ───────────────────────────────────────────
-const ALL_MOCK_DATA = (() => {
-	const titles = [
-		'Robe iFORTE LTX & Anolis at Disney On Ice show in Paris',
-		'Innovation in RoboSpot Systems: Technical Update 1.4',
-		'Chameleon Touring Systems Invests in 50 iFORTE LTX Units',
-		'Light + Building 2026: The Ultimate Lighting Exhibition Recap',
-		'New Firmware Released for BMFL Series — Version 3.8',
-		'Robe Steals the Show at Eurovision Song Contest 2026',
-		'LEDBeam 350 Wins Best Product Award at PLASA 2025',
-		'MegaPointe Enters Rider of Major European Arena Tours',
-		'Robe Lighting at Coachella Valley Music and Arts Festival',
-		'Strategic Partnership Signed with Rent-All International',
-	]
-	const descriptions = [
-		'State-of-the-art lighting technology transforms live spectacle.',
-		'New technical update improves stability and adds features.',
-		'Leading rental company expands inventory with flagship units.',
-		'Façade solutions redefining the boundaries of modern architecture.',
-	]
-	const products = [
-		'iFORTE LTX',
-		'RoboSpot',
-		'Anolis',
-		'BMFL',
-		'MegaPointe',
-		'LEDBeam',
-		'Spiider',
-		'T2',
-	]
-	const topics = [
-		'Театр',
-		'Техподдержка',
-		'Закупки',
-		'Выставки',
-		'Концерты',
-		'Архитектура',
-		'Партнёрство',
-	]
-	const years = ['2024', '2025', '2026']
-	const images = [
-		'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000',
-		'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=900',
-		'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=900',
-		'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1000',
-	]
-
-	return Array.from({ length: 100 }, (_, i) => ({
-		id: i + 1,
-		title: titles[i % titles.length],
-		description: descriptions[i % descriptions.length],
-		product: products[i % products.length],
-		topic: topics[i % topics.length],
-		year: years[i % years.length],
-		image: (i + 1) % 5 === 0 ? null : images[i % images.length],
-	}))
-})()
-
-// ─── Имитация API ──────────────────────────────────────────────────────────────
-async function apiFetchNews({ page, size, filters }) {
-	await new Promise(r => setTimeout(r, 700))
-	const filtered = ALL_MOCK_DATA.filter(
-		item =>
-			(filters.product === 'Все продукты' ||
-				item.product === filters.product) &&
-			(filters.topic === 'Все темы' || item.topic === filters.topic) &&
-			(filters.year === 'Все годы' || item.year === filters.year),
-	)
-	const start = (page - 1) * size
-	return { items: filtered.slice(start, start + size), total: filtered.length }
 }
 
 // ─── Текстовая карточка ────────────────────────────────────────────
@@ -116,19 +45,19 @@ const TextCard = ({ item, span, delay }) => (
 				className='absolute top-0 right-0 text-white px-4 py-1.5 text-[9px] font-black uppercase tracking-widest z-10'
 				style={{ backgroundColor: brandRed }}
 			>
-				{item.topic}
+				{item.category || item.topic}
 			</div>
 
 			<div className='p-6 flex flex-col h-full justify-between'>
 				<div>
 					<p className='text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 mb-3'>
-						{item.year}
+						{item.date?.split('-')[0] || item.year}
 					</p>
 					<span
 						className='block font-black uppercase leading-none mb-3 tracking-tight'
 						style={{ fontSize: span >= 5 ? '2rem' : '1.5rem', color: '#111' }}
 					>
-						{item.product}
+						{item.products?.[0]?.name || item.product || 'News'}
 					</span>
 					<div
 						className='w-7 h-[3px] mb-4'
@@ -168,17 +97,20 @@ const ImageCard = ({ item, span, delay }) => (
 				className={`relative ${IMG_HEIGHT[span]} overflow-hidden bg-gray-100 flex-shrink-0`}
 			>
 				<img
-					src={item.image}
+					src={item.poster || item.image}
 					alt={item.title}
 					loading='lazy'
 					className='w-full h-full object-cover md:grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105'
+					onError={(e) => {
+						e.target.src = '/placeholder-image.jpg'
+					}}
 				/>
 				<div className='absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/25 to-transparent pointer-events-none' />
 				<div
 					className='absolute top-0 right-0 text-white px-4 py-1.5 text-[9px] font-black uppercase tracking-widest'
 					style={{ backgroundColor: brandRed }}
 				>
-					{item.topic}
+					{item.category || item.topic}
 				</div>
 			</div>
 
@@ -187,7 +119,7 @@ const ImageCard = ({ item, span, delay }) => (
 					className='text-[10px] font-black uppercase tracking-[0.15em] mb-2 block'
 					style={{ color: brandRed }}
 				>
-					{item.year} · {item.product}
+					{item.date?.split('-')[0] || item.year} · {item.products?.[0]?.name || item.product || 'News'}
 				</span>
 				<h2
 					className={`font-black uppercase tracking-tight leading-snug mb-3 group-hover:italic transition-all duration-300 group-hover:text-black/65 ${
@@ -202,7 +134,7 @@ const ImageCard = ({ item, span, delay }) => (
 				</h2>
 				{span >= 5 && (
 					<p className='hidden md:block text-[10px] text-gray-500 font-semibold uppercase tracking-wider leading-relaxed line-clamp-2 mb-3'>
-						{item.description}
+						{item.short_description || item.description}
 					</p>
 				)}
 				<div className='mt-auto flex items-center justify-end gap-1.5 text-[9px] font-black uppercase tracking-widest text-gray-400 group-hover:text-[#e21e26] transition-colors duration-300'>
@@ -218,7 +150,7 @@ const ImageCard = ({ item, span, delay }) => (
 )
 
 const NewsCard = ({ item, span, delay }) =>
-	item.image ? (
+	item.poster || item.image ? (
 		<ImageCard item={item} span={span} delay={delay} />
 	) : (
 		<TextCard item={item} span={span} delay={delay} />
@@ -237,65 +169,158 @@ const News = () => {
 		year: 'Все годы',
 	})
 
+	// Refs for infinite scroll
 	const sentinelRef = useRef(null)
 	const observerRef = useRef(null)
 	const pageRef = useRef(1)
 	const filtersRef = useRef(activeFilters)
 	const hasMoreRef = useRef(true)
 	const busyRef = useRef(false)
+	const abortControllerRef = useRef(null)
 
 	pageRef.current = page
 	filtersRef.current = activeFilters
 	hasMoreRef.current = hasMore
 
-	const loadPage = useCallback(async (pageNum, filters, append) => {
+	// Load news from API with query parameters
+	const loadNews = useCallback(async (pageNum, filters, append = false) => {
 		if (busyRef.current) return
+
+		// Cancel previous request
+		if (abortControllerRef.current) {
+			abortControllerRef.current.abort()
+		}
+
+		abortControllerRef.current = new AbortController()
 		busyRef.current = true
+
 		if (!append) setLoading(true)
 		else setLoadingMore(true)
+
 		try {
-			const { items: newItems, total: newTotal } = await apiFetchNews({
-				page: pageNum,
-				size: PAGE_SIZE,
-				filters,
+			// Build query parameters
+			const params = new URLSearchParams()
+			params.append('page', pageNum)
+			params.append('page_size', PAGE_SIZE)
+
+			// Add filters if they're not "All"
+			if (filters.product && filters.product !== 'Все продукты') {
+				params.append('product', filters.product)
+			}
+			if (filters.topic && filters.topic !== 'Все темы') {
+				params.append('category', filters.topic)
+			}
+			if (filters.year && filters.year !== 'Все годы') {
+				params.append('year', filters.year)
+			}
+
+			const url = `/news?${params.toString()}`
+			console.log('Fetching:', url)
+
+			const response = await apiClient.get(url, {
+				signal: abortControllerRef.current.signal
 			})
-			setTotal(newTotal)
-			setHasMore(pageNum * PAGE_SIZE < newTotal)
-			if (append) setItems(prev => [...prev, ...newItems])
-			else setItems(newItems)
+
+			const data = response.data
+			const newItems = data.results || data.items || []
+			const totalCount = data.count || data.total || newItems.length
+
+			setTotal(totalCount)
+			const newHasMore = pageNum * PAGE_SIZE < totalCount
+			setHasMore(newHasMore)
+
+			if (append) {
+				setItems(prev => [...prev, ...newItems])
+			} else {
+				setItems(newItems)
+			}
+
+			return newItems
 		} catch (err) {
-			console.error('News fetch error:', err)
+			if (err.name !== 'AbortError' && err.code !== 'ERR_CANCELED') {
+				console.error('News fetch error:', err)
+			}
+			return []
 		} finally {
 			setLoading(false)
 			setLoadingMore(false)
 			busyRef.current = false
+			abortControllerRef.current = null
 		}
 	}, [])
 
+	// Load initial data when filters change
 	useEffect(() => {
 		setPage(1)
 		setHasMore(true)
-		loadPage(1, activeFilters, false)
-	}, [activeFilters, loadPage])
+		setItems([])
+		loadNews(1, activeFilters, false)
+	}, [activeFilters, loadNews])
 
+	// Setup infinite scroll observer
 	useEffect(() => {
-		observerRef.current?.disconnect()
+		if (observerRef.current) {
+			observerRef.current.disconnect()
+		}
+
 		observerRef.current = new IntersectionObserver(
 			([entry]) => {
-				if (entry.isIntersecting && hasMoreRef.current && !busyRef.current) {
-					const next = pageRef.current + 1
-					setPage(next)
-					loadPage(next, filtersRef.current, true)
+				if (entry.isIntersecting && hasMoreRef.current && !busyRef.current && !loading && !loadingMore) {
+					const nextPage = pageRef.current + 1
+					console.log('Loading more items - page:', nextPage)
+					setPage(nextPage)
+					loadNews(nextPage, filtersRef.current, true)
 				}
 			},
-			{ rootMargin: '250px' },
+			{
+				rootMargin: '200px',
+				threshold: 0.1
+			}
 		)
-		if (sentinelRef.current) observerRef.current.observe(sentinelRef.current)
-		return () => observerRef.current?.disconnect()
-	}, [loadPage])
+
+		const currentSentinel = sentinelRef.current
+		if (currentSentinel) {
+			observerRef.current.observe(currentSentinel)
+		}
+
+		return () => {
+			if (observerRef.current) {
+				observerRef.current.disconnect()
+			}
+		}
+	}, [loadNews, loading, loadingMore])
+
+	// Reset scroll position when filters change
+	useEffect(() => {
+		window.scrollTo(0, 0)
+	}, [activeFilters])
 
 	const getSpan = index => GRID_PATTERN[index % GRID_PATTERN.length]
 
+	// Filter options based on your data
+	const productOptions = [
+		'Все продукты',
+		'Свет',
+		'Звук',
+		'Видео',
+		'Сцена',
+		// Add more products as needed
+	]
+
+	const [topicOptions, setTopicOptions] = useState([])
+	useEffect(() => {
+		const getOptions = async () => {
+			try{
+				const response = await apiClient("/get-news-categories")
+				const data = await response.data
+				console.log(data)
+				setTopicOptions(data)
+			}catch(e){
+				console.error(e)
+			}
+		}
+		getOptions()
+	}, [])
 	return (
 		<div className='bg-[#f2f2f2] min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
 			<Navbar />
@@ -315,69 +340,36 @@ const News = () => {
 					</div>
 
 					<div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
-						{[
-							{
-								key: 'product',
-								label: 'Продукты',
-								defaultVal: 'Все продукты',
-								options: [
-									'iFORTE LTX',
-									'RoboSpot',
-									'Anolis',
-									'BMFL',
-									'MegaPointe',
-									'LEDBeam',
-								],
-							},
-							{
-								key: 'topic',
-								label: 'Тема',
-								defaultVal: 'Все темы',
-								options: [
-									'Театр',
-									'Техподдержка',
-									'Закупки',
-									'Выставки',
-									'Концерты',
-									'Архитектура',
-								],
-							},
-							{
-								key: 'year',
-								label: 'Год',
-								defaultVal: 'Все годы',
-								options: ['2024', '2025', '2026'],
-							},
-						].map(({ key, label, defaultVal, options }) => (
-							<div key={key} className='space-y-3'>
-								<label className='text-[10px] font-black uppercase tracking-[0.2em] text-gray-400'>
-									{label}
-								</label>
-								<div className='relative'>
-									<select
-										value={activeFilters[key]}
-										onChange={e =>
-											setActiveFilters(prev => ({
-												...prev,
-												[key]: e.target.value,
-											}))
-										}
-										className='w-full bg-white border border-black/10 px-6 py-4 text-xs font-bold uppercase tracking-widest outline-none appearance-none cursor-pointer focus:border-black rounded-xl shadow-inner transition-colors'
-									>
-										<option value={defaultVal}>{defaultVal}</option>
-										{options.map(o => (
-											<option key={o} value={o}>
-												{o}
-											</option>
-										))}
-									</select>
-									<Search
-										size={14}
-										className='absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400'
-									/>
-								</div>
+
+						<div className='space-y-3'>
+							<label className='text-[10px] font-black uppercase tracking-[0.2em] text-gray-400'>
+								Категории
+							</label>
+							<div className='relative'>
+								<select
+									value={activeFilters.topic}
+									onChange={e =>
+										setActiveFilters(prev => ({
+											...prev,
+											topic: e.target.value,
+										}))
+									}
+									className='w-full bg-white border border-black/10 px-6 py-4 text-xs font-bold uppercase tracking-widest outline-none appearance-none cursor-pointer focus:border-black rounded-xl shadow-inner transition-colors'
+								>
+									<option value="" >Все категории</option>
+									{topicOptions.map(opt => (
+
+										<option key={opt} value={opt.id}>
+											{opt.name}
+										</option>
+									))}
+								</select>
+								<Search
+									size={14}
+									className='absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400'
+								/>
 							</div>
-						))}
+						</div>
 					</div>
 				</div>
 			</section>
@@ -414,7 +406,10 @@ const News = () => {
 								))}
 							</AnimatePresence>
 						</div>
+
+						{/* Sentinel for infinite scroll */}
 						<div ref={sentinelRef} className='h-2 mt-6' aria-hidden='true' />
+
 						{loadingMore && (
 							<div className='flex items-center justify-center py-10 gap-3'>
 								<Loader2
@@ -427,13 +422,30 @@ const News = () => {
 								</p>
 							</div>
 						)}
-						{!hasMore && !loadingMore && (
+
+						{!hasMore && !loadingMore && items.length > 0 && (
 							<div className='flex items-center gap-6 py-12'>
 								<div className='flex-1 h-px bg-black/10' />
 								<p className='text-[9px] font-black uppercase tracking-[0.3em] text-gray-400'>
-									Все загружено
+									Все загружено ({total} новостей)
 								</p>
 								<div className='flex-1 h-px bg-black/10' />
+							</div>
+						)}
+
+						{/* Manual load more button (fallback) */}
+						{hasMore && !loadingMore && items.length > 0 && (
+							<div className='flex justify-center py-8'>
+								<button
+									onClick={() => {
+										const nextPage = page + 1
+										setPage(nextPage)
+										loadNews(nextPage, activeFilters, true)
+									}}
+									className='px-8 py-3 bg-white border border-black/10 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all duration-300 rounded-full'
+								>
+									Загрузить еще
+								</button>
 							</div>
 						)}
 					</>
