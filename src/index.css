@@ -1,0 +1,105 @@
+@import 'tailwindcss';
+
+/* Стилизация для Chrome, Safari и Edge */
+::-webkit-scrollbar {
+	width: 4px; /* Ширина скролла */
+}
+
+::-webkit-scrollbar-track {
+	background: #f1f1f1; /* Цвет дорожки (фон) */
+}
+
+::-webkit-scrollbar-thumb {
+	background: #e21e26; /* Твой фирменный красный */
+	border-radius: 10px; /* Скругление */
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #b8181e; /* Чуть темнее при наведении */
+}
+
+/* Стилизация для Firefox */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: #e21e26 #f1f1f1;
+}
+body {
+	background-color: #f8f8f8;
+}
+
+@layer components {
+	.hero-item {
+		@apply w-[130px] h-[220px] md:w-[160px] md:h-[270px] lg:w-[200px] lg:h-[300px] 
+            list-none absolute top-1/2 -translate-y-1/2 z-10 
+            bg-center bg-cover rounded-[20px] 
+            transition-all duration-700 ease-in-out;
+		box-shadow: 0 20px 30px rgba(0, 0, 0, 0.5);
+	}
+
+	/* Первый и второй слайды (основной фон) */
+	.hero-item:nth-child(1),
+	.hero-item:nth-child(2) {
+		@apply left-0 top-0 w-full h-full translate-y-0 rounded-none shadow-none opacity-100;
+	}
+
+	/* АНИМАЦИЯ ПРИ ПЕРЕХОДЕ НАЗАД */
+	/* Когда элемент становится первым, мы плавно проявляем его */
+	.hero-item:nth-child(1) {
+		animation: fade-in 0.8s ease-in-out forwards;
+	}
+
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+			filter: brightness(0.5);
+		}
+		to {
+			opacity: 1;
+			filter: brightness(1);
+		}
+	}
+
+	/* Остальные позиции карточек */
+	.hero-item:nth-child(3) {
+		@apply left-[50%];
+	}
+	.hero-item:nth-child(4) {
+		@apply left-[calc(50%+150px)] md:left-[calc(50%+180px)] lg:left-[calc(50%+230px)];
+	}
+	.hero-item:nth-child(5) {
+		@apply left-[calc(50%+300px)] md:left-[calc(50%+360px)] lg:left-[calc(50%+460px)];
+	}
+	.hero-item:nth-child(n + 6) {
+		@apply left-[calc(50%+450px)] opacity-0;
+	}
+
+	/* Контент */
+	.hero-content {
+		@apply absolute top-1/2 -translate-y-1/2 left-6 md:left-16 w-[min(85vw,500px)]
+            text-white text-left opacity-0 hidden z-20;
+	}
+
+	/* Анимация контента для активного слайда */
+	.hero-item:nth-child(2) .hero-content {
+		@apply block;
+		animation: hero-show 0.8s ease-in-out 0.3s forwards;
+		top: 70%;
+	}
+
+	.hero-item:nth-child(2) .active-slide-overlay {
+		@apply block;
+	}
+
+	@keyframes hero-show {
+		0% {
+			filter: blur(10px);
+			opacity: 0;
+			transform: translateY(calc(-50% + 50px));
+		}
+		100% {
+			filter: blur(0);
+			opacity: 1;
+			transform: translateY(-50%);
+		}
+	}
+}
