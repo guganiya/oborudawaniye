@@ -152,7 +152,7 @@ const New = () => {
 			</div>
 
 			<Link
-				to='/all-news'
+				to='/news'
 				className='group relative px-10 py-4 bg-transparent border border-white/20 text-white font-bold uppercase tracking-widest overflow-hidden transition-all duration-300 hover:border-white'
 			>
 				<span className='relative z-10 text-sm'>Узнать больше</span>

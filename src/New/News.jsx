@@ -108,7 +108,7 @@ const TextCard = ({ item, span, delay }) => (
 		className={`${COL_SPAN[span]}`}
 	>
 		<Link
-			to={`/news/${item.id}`}
+			to={`/news-content/${item.id}`}
 			className='relative group flex flex-col justify-between bg-white border border-black/8 overflow-hidden hover:shadow-xl transition-all duration-400 h-full no-underline'
 			style={{ minHeight: span >= 6 ? 260 : span >= 5 ? 230 : 180 }}
 		>
@@ -161,7 +161,7 @@ const ImageCard = ({ item, span, delay }) => (
 		className={`${COL_SPAN[span]}`}
 	>
 		<Link
-			to={`/news/${item.id}`}
+			to={`/news-content/${item.id}`}
 			className='relative group flex flex-col bg-white border border-black/8 overflow-hidden hover:shadow-xl transition-all duration-400 h-full no-underline'
 		>
 			<div

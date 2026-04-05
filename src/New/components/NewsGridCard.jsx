@@ -12,7 +12,7 @@ const NewsGridCard = ({ item }) => {
 			className='bg-white group h-full flex flex-col shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] transition-all duration-500'
 		>
 			<Link
-				to={`/news/${item.id}`}
+				to={`/news-content/${item.id}`}
 				className='flex flex-col h-full no-underline'
 			>
 				{/* Изображение и Категория - уменьшили высоту на мобилках через aspect */}
