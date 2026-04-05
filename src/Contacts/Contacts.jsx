@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import {
-	Mail,
-	Phone,
-	MapPin,
-	Clock,
-	ArrowRight,
-	Loader2,
-	CheckCircle,
-	XCircle,
-	X,
-} from 'lucide-react'
+import { Mail, Phone, MapPin, Clock, ArrowRight, Loader2, CheckCircle, XCircle, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import apiClient from '../api/api.js'
 
@@ -161,15 +151,14 @@ const Contacts = () => {
 							</h3>
 
 							{/* Message */}
-							<p className='text-gray-600 text-center mb-6'>{modal.message}</p>
+							<p className='text-gray-600 text-center mb-6'>
+								{modal.message}
+							</p>
 
 							{/* Button */}
 							<button
 								onClick={closeModal}
-								style={{
-									backgroundColor:
-										modal.type === 'success' ? '#10b981' : brandRed,
-								}}
+								style={{ backgroundColor: modal.type === 'success' ? '#10b981' : brandRed }}
 								className='w-full py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-opacity'
 							>
 								{modal.type === 'success' ? 'Продолжить' : 'Попробовать снова'}
@@ -182,7 +171,6 @@ const Contacts = () => {
 			{/* Заголовок страницы */}
 			<section className='pt-32 md:pt-40 pb-12 md:pb-20 border-b border-black/5 bg-[#fafafa] relative overflow-hidden'>
 				<div className='absolute inset-0 opacity-[0.03] pointer-events-none'>
-					{/* Исправлено: уменьшен размер текста для мобилок, чтобы не было горизонтального скролла */}
 					<span className='absolute -bottom-5 md:-bottom-10 -left-5 md:-left-10 text-[6rem] md:text-[20rem] font-black uppercase leading-none select-none'>
 						Contact
 					</span>
@@ -190,7 +178,6 @@ const Contacts = () => {
 
 				<div className='max-w-[1500px] mx-auto px-6 md:px-12 relative z-10'>
 					<motion.div {...fadeInUp}>
-						{/* Адаптивный размер шрифта: text-5xl для мобилок, text-[8rem] для десктопа */}
 						<h1 className='text-5xl md:text-[7rem] font-black uppercase tracking-tighter leading-[0.9] md:leading-[0.85]'>
 							Get in <br className='hidden md:block' />
 							<span style={{ color: brandRed }} className='italic'>
@@ -288,18 +275,14 @@ const Contacts = () => {
 									We typically respond within 24 hours.
 								</p>
 
-								<form
-									onSubmit={handleSubmit}
-									className='space-y-6 md:space-y-8'
-								>
+								<form onSubmit={handleSubmit} className='space-y-6 md:space-y-8'>
 									<div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'>
 										<div className='relative'>
 											<input
 												type='text'
 												value={full_name}
-												onChange={e => setFullName(e.target.value)}
+												onChange={(e) => setFullName(e.target.value)}
 												required
-												placeholder=' '
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
 											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
@@ -311,9 +294,8 @@ const Contacts = () => {
 											<input
 												type='email'
 												value={email}
-												onChange={e => setEmail(e.target.value)}
+												onChange={(e) => setEmail(e.target.value)}
 												required
-												placeholder=' '
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
 											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
@@ -326,9 +308,8 @@ const Contacts = () => {
 										<textarea
 											rows='4'
 											value={message}
-											onChange={e => setMessage(e.target.value)}
+											onChange={(e) => setMessage(e.target.value)}
 											required
-											placeholder=' '
 											className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer resize-none'
 										></textarea>
 										<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
@@ -344,7 +325,7 @@ const Contacts = () => {
 										<span className='relative z-10 flex items-center justify-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em]'>
 											{loading ? (
 												<>
-													<Loader2 size={16} className='animate-spin' />
+													<Loader2 size={16} className="animate-spin" />
 													SENDING...
 												</>
 											) : (
