@@ -1,51 +1,130 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import apiClient from '../api/api'
 
-// ─── Тестовые данные ────────────────────────────────────────────────────────
-const MOCK_INNOVATIONS = [
-	{
-		id: 'echo2',
-		title: 'ECHO2™',
-		image:
-			'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=1000',
-		description:
-			'Для повышения светоотдачи в компактном T10 мощностью 200 Вт без перегрузки светодиодов разработана технология ECHO2™ (Enhanced Colour Homogenisation and Output).',
-	},
-	{
-		id: 'firm',
-		title: 'FIRM™',
-		image:
-			'https://images.unsplash.com/photo-1548512198-d1a1b18d2d64?q=80&w=1000',
-		description:
-			'Запатентованное встроенное устройство FIRM™ (Frost Insert Ring Mechanism) позволяет добиться идеальной диффузии поворотом колеса.',
-	},
-	{
-		id: 'xrle',
-		title: 'XRLE™',
-		image:
-			'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1000',
-		description:
-			'XRLE™ (XR Light Enhancer) сужает луч для увеличения интенсивности светового потока iFORTE LTX на 15 % в режиме Long-Throw.',
-	},
-]
+// ─── Константы ────────────────────────────────────────────────────────────────
+const PAGE_SIZE = 3
+const brandRed = '#e21e26'
 
 const Innovations = () => {
 	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(true)
+	const [loadingMore, setLoadingMore] = useState(false)
+	const [hasMore, setHasMore] = useState(true)
+	const [total, setTotal] = useState(0)
+	const [page, setPage] = useState(1)
 
-	useEffect(() => {
-		const fetchData = async () => {
-			setLoading(true)
-			await new Promise(r => setTimeout(r, 800))
-			setItems(MOCK_INNOVATIONS)
-			setLoading(false)
+	// Refs for infinite scroll
+	const sentinelRef = useRef(null)
+	const observerRef = useRef(null)
+	const pageRef = useRef(1)
+	const hasMoreRef = useRef(true)
+	const busyRef = useRef(false)
+	const abortControllerRef = useRef(null)
+
+	pageRef.current = page
+	hasMoreRef.current = hasMore
+
+	// Load innovations from API with query parameters
+	const loadInnovations = useCallback(async (pageNum, append = false) => {
+		if (busyRef.current) return
+
+		// Cancel previous request
+		if (abortControllerRef.current) {
+			abortControllerRef.current.abort()
 		}
-		fetchData()
+
+		abortControllerRef.current = new AbortController()
+		busyRef.current = true
+
+		if (!append) setLoading(true)
+		else setLoadingMore(true)
+
+		try {
+			// Build query parameters
+			const params = new URLSearchParams()
+			params.append('page', pageNum)
+			params.append('page_size', PAGE_SIZE)
+
+			const url = `/innovations?${params.toString()}`
+			console.log('Fetching:', url)
+
+			const response = await apiClient.get(url, {
+				signal: abortControllerRef.current.signal
+			})
+
+			const data = response.data
+			const newItems = data.results
+			const totalCount = data.count || data.total || (data.results ? data.count : newItems.length)
+			console.log(data)
+			setTotal(totalCount)
+			const newHasMore = pageNum * PAGE_SIZE < totalCount
+			setHasMore(newHasMore)
+
+			if (append) {
+				setItems(prev => [...prev, ...newItems])
+			} else {
+				setItems(newItems)
+			}
+
+			return newItems
+		} catch (err) {
+			if (err.name !== 'AbortError' && err.code !== 'ERR_CANCELED') {
+				console.error('Innovations fetch error:', err)
+			}
+			return []
+		} finally {
+			setLoading(false)
+			setLoadingMore(false)
+			busyRef.current = false
+			abortControllerRef.current = null
+		}
 	}, [])
+
+	// Load initial data
+	useEffect(() => {
+		setPage(1)
+		setHasMore(true)
+		setItems([])
+		loadInnovations(1, false)
+	}, [loadInnovations])
+
+	// Setup infinite scroll observer
+	useEffect(() => {
+		if (observerRef.current) {
+			observerRef.current.disconnect()
+		}
+
+		observerRef.current = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting && hasMoreRef.current && !busyRef.current && !loading && !loadingMore) {
+					const nextPage = pageRef.current + 1
+					console.log('Loading more innovations - page:', nextPage)
+					setPage(nextPage)
+					loadInnovations(nextPage, true)
+				}
+			},
+			{
+				rootMargin: '200px',
+				threshold: 0.1
+			}
+		)
+
+		const currentSentinel = sentinelRef.current
+		if (currentSentinel) {
+			observerRef.current.observe(currentSentinel)
+		}
+
+		return () => {
+			if (observerRef.current) {
+				observerRef.current.disconnect()
+			}
+		}
+	}, [loadInnovations, loading, loadingMore])
 
 	return (
 		<div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
@@ -89,14 +168,64 @@ const Innovations = () => {
 							Загрузка технологий...
 						</p>
 					</div>
-				) : (
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20'>
-						<AnimatePresence>
-							{items.map((item, index) => (
-								<InnovationCard key={item.id} item={item} index={index} />
-							))}
-						</AnimatePresence>
+				) : items.length === 0 ? (
+					<div className='flex items-center justify-center py-40'>
+						<p className='text-[10px] font-black uppercase tracking-[0.3em] text-gray-400'>
+							Ничего не найдено
+						</p>
 					</div>
+				) : (
+					<>
+						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20'>
+							<AnimatePresence>
+								{items.map((item, index) => (
+									<InnovationCard key={item.id} item={item} index={index} />
+								))}
+							</AnimatePresence>
+						</div>
+
+						{/* Sentinel for infinite scroll */}
+						<div ref={sentinelRef} className='h-2 mt-6' aria-hidden='true' />
+
+						{loadingMore && (
+							<div className='flex items-center justify-center py-10 gap-3 mt-8'>
+								<Loader2
+									className='animate-spin'
+									style={{ color: brandRed }}
+									size={22}
+								/>
+								<p className='text-[9px] font-black uppercase tracking-[0.3em] text-gray-400'>
+									Загружаем ещё...
+								</p>
+							</div>
+						)}
+
+						{!hasMore && !loadingMore && items.length > 0 && (
+							<div className='flex items-center gap-6 py-12 mt-8'>
+								<div className='flex-1 h-px bg-gray-200' />
+								<p className='text-[9px] font-black uppercase tracking-[0.3em] text-gray-400'>
+									Все загружено ({total} инноваций)
+								</p>
+								<div className='flex-1 h-px bg-gray-200' />
+							</div>
+						)}
+
+						{/* Manual load more button (fallback) */}
+						{hasMore && !loadingMore && items.length > 0 && (
+							<div className='flex justify-center py-8 mt-8'>
+								<button
+									onClick={() => {
+										const nextPage = page + 1
+										setPage(nextPage)
+										loadInnovations(nextPage, true)
+									}}
+									className='px-8 py-3 bg-white border border-gray-300 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white hover:border-black transition-all duration-300 rounded-full'
+								>
+									Загрузить еще
+								</button>
+							</div>
+						)}
+					</>
 				)}
 			</main>
 
@@ -110,7 +239,7 @@ const InnovationCard = ({ item, index }) => (
 		initial={{ opacity: 0, y: 30 }}
 		whileInView={{ opacity: 1, y: 0 }}
 		viewport={{ once: true }}
-		transition={{ duration: 0.5, delay: index * 0.1 }}
+		transition={{ duration: 0.5, delay: Math.min(index * 0.1, 0.5) }}
 		className='group'
 	>
 		<Link
@@ -130,7 +259,7 @@ const InnovationCard = ({ item, index }) => (
 
 			<div className='flex flex-col items-center text-center px-4'>
 				<h3 className='text-black text-lg font-black uppercase tracking-widest mb-4 group-hover:text-[#e21e26] transition-colors duration-300'>
-					{item.title}
+					{item.name}
 				</h3>
 				<p className='text-gray-500 text-[13px] leading-relaxed font-medium line-clamp-4'>
 					{item.description}
