@@ -270,25 +270,14 @@ const ProductDetail = ({ productDetails }) => {
 					</h1>
 
 					{/* Language variants if available */}
-					{(product.titleEn || product.titleRu || product.titleTk) && (
+
 						<div className='mb-6 flex flex-wrap gap-3'>
-							{product.titleEn && (
+
 								<div className='text-xs text-gray-400'>
-									<span className='font-bold'>EN:</span> {product.titleEn}
+									 {product.title}
 								</div>
-							)}
-							{product.titleRu && (
-								<div className='text-xs text-gray-400'>
-									<span className='font-bold'>RU:</span> {product.titleRu}
-								</div>
-							)}
-							{product.titleTk && (
-								<div className='text-xs text-gray-400'>
-									<span className='font-bold'>TK:</span> {product.titleTk}
-								</div>
-							)}
 						</div>
-					)}
+
 
 					<div className='relative mb-12'>
 						<motion.div
@@ -334,7 +323,7 @@ const ProductDetail = ({ productDetails }) => {
 										onMouseLeave={() => setActiveInno(null)}
 									>
 										<Link
-											to={`/innovation/${inno.id}`}
+											to={`/innovations/${inno.id}`}
 											className='aspect-square border border-gray-100 flex items-center justify-center p-2 hover:border-[#e21e26] hover:shadow-lg transition-all duration-300 bg-white group relative z-20'
 										>
 											{inno.icon ? (
