@@ -31,7 +31,7 @@ function App() {
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/products" element={<Products />} />
           <Route path="/subcategory/:categoryId" element={<SubCategory />} />
-          <Route path="/product" element={<Product />} />
+          <Route path="/product/:id" element={<Product />} />
           <Route path="/support" element={<Support />} />
           <Route
             path="products/:subId"

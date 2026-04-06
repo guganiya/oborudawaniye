@@ -96,7 +96,7 @@ const New = () => {
 				const data = await response.data
 				setNews(data)
 				setLastNews(data.slice(1, 3))
-				console.log(data)
+				console.log("News:", data)
 			} catch (error) {
 				console.log(error)
 			} finally {

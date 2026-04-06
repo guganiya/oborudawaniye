@@ -41,7 +41,7 @@ const NewsContent = () => {
 	// Helper function to get product image
 	const getProductImage = product => {
 		if (!product) return '/placeholder-image.jpg'
-		return product.poster || product.image || '/placeholder-image.jpg'
+		return product.poster
 	}
 
 	return (
@@ -156,7 +156,7 @@ const NewsContent = () => {
 								to='/news'
 								className='inline-block bg-[#e21e26] text-white px-12 py-4 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-black transition-all shadow-lg shadow-red-500/20 active:scale-95 no-underline'
 							>
-								Развернуть
+								Все новости
 							</Link>
 						</div>
 					</div>

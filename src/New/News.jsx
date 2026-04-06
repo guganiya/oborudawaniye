@@ -297,16 +297,6 @@ const News = () => {
 
 	const getSpan = index => GRID_PATTERN[index % GRID_PATTERN.length]
 
-	// Filter options based on your data
-	const productOptions = [
-		'Все продукты',
-		'Свет',
-		'Звук',
-		'Видео',
-		'Сцена',
-		// Add more products as needed
-	]
-
 	const [topicOptions, setTopicOptions] = useState([])
 	useEffect(() => {
 		const getOptions = async () => {

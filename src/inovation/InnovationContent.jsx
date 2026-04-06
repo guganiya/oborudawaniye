@@ -146,22 +146,18 @@ const InnovationContent = () => {
 										transition={{ delay: index * 0.1 }}
 									>
 										<Link
-											to={`/products/${product.id}`}
+											to={`/product/${product.id}`}
 											className='group flex flex-col items-center text-center no-underline'
 										>
 											<div className='relative w-full max-w-[260px] sm:max-w-none aspect-square bg-[#f9f9f9] mb-6 p-8 sm:p-12 overflow-hidden flex items-center justify-center transition-shadow duration-500 group-hover:shadow-lg'>
 												<img
-													src={product.poster || product.image}
+													src={product.poster}
 													alt={product.name}
 													className='max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-700'
 													onError={(e) => {
 														e.target.src = '/placeholder-image.jpg'
 													}}
 												/>
-												{/* Optional: Show "New" badge if needed */}
-												{/* <div className='absolute top-0 right-0 bg-[#e21e26] text-white text-[8px] font-bold px-2 py-1 uppercase tracking-tighter'>
-													New
-												</div> */}
 											</div>
 
 											<h4 className='text-[13px] font-black uppercase tracking-widest text-black group-hover:text-[#e21e26] transition-colors'>
