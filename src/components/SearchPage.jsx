@@ -49,7 +49,7 @@ const SearchPage = () => {
 					{/* ГЛОБАЛЬНЫЙ ПОИСК (С ИКОНКОЙ) */}
 					<div className='relative mb-20 group'>
 						{/* ИКОНКА ПОИСКА */}
-						<div className='absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-black/20 group-focus-within:text-black transition-colors'>
+						<div className='absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-black '>
 							<Search size={28} strokeWidth={1.5} />
 						</div>
 
@@ -59,7 +59,7 @@ const SearchPage = () => {
 							placeholder='WHAT ARE YOU LOOKING FOR?'
 							value={mainSearch}
 							onChange={e => setMainSearch(e.target.value)}
-							className='w-full text-2xl md:text-4xl font-light border-b-2 border-black/10 pl-12 md:pl-16 py-6 focus:outline-none focus:border-black transition-colors uppercase tracking-tight bg-transparent placeholder:text-black/10'
+							className='w-full text-2xl md:text-4xl font-light border-b-2 border-black pl-12 md:pl-16 py-6 focus:outline-none placeholder:text-[#e21e26]'
 						/>
 					</div>
 
@@ -86,7 +86,7 @@ const SearchPage = () => {
 					</div>
 
 					{/* СЕКЦИЯ РЕЗУЛЬТАТОВ */}
-					<div className='border-t border-black/5 pt-12 min-h-[300px] flex items-center justify-center text-black/10'>
+					<div className='border-t border-black pt-12 min-h-[300px] flex items-center justify-center text-black'>
 						<div className='text-center'>
 							<Search size={48} strokeWidth={1} className='mx-auto mb-4' />
 							<p className='text-[11px] uppercase tracking-[0.4em]'>
@@ -128,7 +128,7 @@ const SmartSelect = ({ label, options, value, onChange }) => {
 			</label>
 
 			<div
-				className={`relative border transition-all duration-300 ${isOpen ? 'border-black shadow-2xl' : 'border-black/10'}`}
+				className={`relative border transition-all duration-300 ${isOpen ? 'border-black shadow-2xl' : 'border-black'}`}
 			>
 				<div
 					className='flex items-center justify-between px-4 py-4 cursor-text bg-white'
@@ -136,7 +136,7 @@ const SmartSelect = ({ label, options, value, onChange }) => {
 				>
 					<input
 						type='text'
-						className='w-full bg-transparent focus:outline-none text-[13px] font-bold uppercase tracking-widest placeholder:text-black/20'
+						className='w-full bg-transparent focus:outline-none text-[13px] font-bold uppercase tracking-widest placeholder:text-black/50'
 						placeholder={value || 'Select...'}
 						value={searchTerm}
 						onChange={e => {
