@@ -165,19 +165,15 @@ const News = () => {
 	const [total, setTotal] = useState(0)
 	const [page, setPage] = useState(1)
 	const [topicOptions, setTopicOptions] = useState([])
-	const [productsOptions, setProductsOptions] = useState([])
-	const [yearsOptions, setYearsOptions] = useState([])
 
-	const [activeFilters, setActiveFilters] = useState({
-		product: '',
-		topic: ''
-	})
-
-	// URL params
+	// Get URL params
 	const [searchParams, setSearchParams] = useSearchParams()
-	const category_id = searchParams.get('category_id')
-	const product_id = searchParams.get('product_id')
-	const year = searchParams.get('year')
+	const category_id = searchParams.get('category_id') || ''
+
+	// Initialize filters from URL params directly
+	const [activeFilters, setActiveFilters] = useState({
+		topic: category_id
+	})
 
 	// Refs for infinite scroll
 	const sentinelRef = useRef(null)
@@ -187,24 +183,11 @@ const News = () => {
 	const hasMoreRef = useRef(true)
 	const busyRef = useRef(false)
 	const abortControllerRef = useRef(null)
+	const isInitialMount = useRef(true)
 
 	pageRef.current = page
 	filtersRef.current = activeFilters
 	hasMoreRef.current = hasMore
-
-	// Sync URL params with filters
-	useEffect(() => {
-		const newFilters = { ...activeFilters }
-
-		if (category_id) {
-			newFilters.topic = category_id
-		}
-		if (product_id) {
-			newFilters.product = product_id
-		}
-
-		setActiveFilters(newFilters)
-	}, [category_id, product_id])
 
 	// Load news from API
 	const loadNews = useCallback(async (pageNum, filters, append = false) => {
@@ -226,15 +209,9 @@ const News = () => {
 			params.append('page', pageNum)
 			params.append('page_size', PAGE_SIZE)
 
-			// Add filters
-			if (filters.product && filters.product !== '') {
-				params.append('product', filters.product)
-			}
+			// Add category filter if present
 			if (filters.topic && filters.topic !== '') {
 				params.append('category', filters.topic)
-			}
-			if (filters.year && filters.year !== '') {
-				params.append('year', filters.year)
 			}
 
 			const url = `/news?${params.toString()}`
@@ -274,11 +251,22 @@ const News = () => {
 
 	// Load initial data when filters change
 	useEffect(() => {
+		// Skip the first mount to avoid double fetch
+		if (isInitialMount.current) {
+			isInitialMount.current = false
+			return
+		}
+
 		setPage(1)
 		setHasMore(true)
 		setItems([])
 		loadNews(1, activeFilters, false)
-	}, [activeFilters, loadNews])
+	}, [activeFilters.topic, loadNews]) // Only depend on topic, not entire activeFilters
+
+	// Initial load
+	useEffect(() => {
+		loadNews(1, activeFilters, false)
+	}, []) // Empty deps - run once on mount
 
 	// Setup infinite scroll observer
 	useEffect(() => {
@@ -315,18 +303,17 @@ const News = () => {
 
 	// Reset scroll position when filters change
 	useEffect(() => {
-		window.scrollTo({ top: 0, behavior: 'smooth' })
-	}, [activeFilters])
+		if (!isInitialMount.current) {
+			window.scrollTo({ top: 0, behavior: 'smooth' })
+		}
+	}, [activeFilters.topic])
 
 	// Fetch filter options
 	useEffect(() => {
 		const fetchOptions = async () => {
 			try {
-				const [categoriesRes] = await Promise.all([
-					apiClient("/get-news-categories")
-				])
-
-				setTopicOptions(categoriesRes.data)
+				const response = await apiClient("/get-news-categories")
+				setTopicOptions(response.data)
 			} catch (e) {
 				console.error('Error fetching filter options:', e)
 			}
@@ -342,25 +329,19 @@ const News = () => {
 		// Update URL params
 		const newParams = new URLSearchParams()
 		if (newFilters.topic) newParams.set('category_id', newFilters.topic)
-		if (newFilters.product) newParams.set('product_id', newFilters.product)
-		if (newFilters.year) newParams.set('year', newFilters.year)
-
 		setSearchParams(newParams, { replace: true })
 	}
 
 	// Clear all filters
 	const clearFilters = () => {
-		setActiveFilters({
-			product: '',
-			topic: ''
-		})
+		setActiveFilters({ topic: '' })
 		setSearchParams({}, { replace: true })
 	}
 
 	const getSpan = index => GRID_PATTERN[index % GRID_PATTERN.length]
 
 	// Check if any filters are active
-	const hasActiveFilters = activeFilters.topic || activeFilters.product || activeFilters.year
+	const hasActiveFilters = !!activeFilters.topic
 
 	return (
 		<div className='bg-[#f2f2f2] min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>

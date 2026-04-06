@@ -54,7 +54,7 @@ const ProductDetail = ({ productDetails }) => {
 					titleRu: productDetails.name_ru,
 					titleTk: productDetails.name_tk,
 					category: 'Moving Heads',
-					image: productDetails.poster || 'https://via.placeholder.com/800x1000?text=No+Image',
+					image: productDetails.poster,
 					description: productDetails.description || productDetails.shortDescription || 'No description available',
 					shortDescription: productDetails.shortDescription,
 					size: productDetails.size,
@@ -165,9 +165,6 @@ const ProductDetail = ({ productDetails }) => {
 								src={product.gallery[currentImageIndex]?.url || product.image}
 								alt={product.gallery[currentImageIndex]?.alt || product.title}
 								className='w-full h-full object-cover transition-all duration-1000'
-								onError={(e) => {
-									e.target.src = 'https://via.placeholder.com/800x1000?text=No+Image'
-								}}
 							/>
 						</motion.div>
 
