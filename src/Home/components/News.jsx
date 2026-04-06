@@ -5,10 +5,10 @@ import {useLoader} from "../../LoaderContext.jsx";
 
 const Tag = ({ text }) => (
 	<Link
-		to={`/category/${text}`}
+		to={`/news?category_id=${text.id}`}
 		className='px-4 py-2 border border-white/20 bg-black/40 backdrop-blur-md text-white text-sm font-medium hover:bg-white hover:text-black transition-all duration-300 rounded-sm'
 	>
-		{text}
+		{text.name}
 	</Link>
 )
 
@@ -124,7 +124,7 @@ const New = () => {
 
 			<div className='relative z-10 flex flex-wrap justify-center gap-3 max-w-5xl mb-16'>
 				{categories.map((cat, index) => (
-					<Tag key={index} text={cat.name} />
+					<Tag key={index} text={cat} />
 				))}
 			</div>
 

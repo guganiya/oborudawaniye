@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { Search, ArrowRight, Loader2 } from 'lucide-react'
-import apiClient from "../api/api.js";
+import { Search, ArrowRight, Loader2, X } from 'lucide-react'
+import apiClient from "../api/api.js"
 
 // ─── Константы ────────────────────────────────────────────────────────────────
-const PAGE_SIZE = 3 // Changed to match typical API pagination
+const PAGE_SIZE = 3
 const brandRed = '#e21e26'
 
 const GRID_PATTERN = [3, 6, 3, 5, 4, 3, 3, 3, 6, 3, 3, 3, 3, 3]
@@ -157,17 +157,27 @@ const NewsCard = ({ item, span, delay }) =>
 	)
 
 const News = () => {
+	// State
 	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
 	const [total, setTotal] = useState(0)
 	const [page, setPage] = useState(1)
+	const [topicOptions, setTopicOptions] = useState([])
+	const [productsOptions, setProductsOptions] = useState([])
+	const [yearsOptions, setYearsOptions] = useState([])
+
 	const [activeFilters, setActiveFilters] = useState({
-		product: 'Все продукты',
-		topic: 'Все темы',
-		year: 'Все годы',
+		product: '',
+		topic: ''
 	})
+
+	// URL params
+	const [searchParams, setSearchParams] = useSearchParams()
+	const category_id = searchParams.get('category_id')
+	const product_id = searchParams.get('product_id')
+	const year = searchParams.get('year')
 
 	// Refs for infinite scroll
 	const sentinelRef = useRef(null)
@@ -182,7 +192,21 @@ const News = () => {
 	filtersRef.current = activeFilters
 	hasMoreRef.current = hasMore
 
-	// Load news from API with query parameters
+	// Sync URL params with filters
+	useEffect(() => {
+		const newFilters = { ...activeFilters }
+
+		if (category_id) {
+			newFilters.topic = category_id
+		}
+		if (product_id) {
+			newFilters.product = product_id
+		}
+
+		setActiveFilters(newFilters)
+	}, [category_id, product_id])
+
+	// Load news from API
 	const loadNews = useCallback(async (pageNum, filters, append = false) => {
 		if (busyRef.current) return
 
@@ -198,19 +222,18 @@ const News = () => {
 		else setLoadingMore(true)
 
 		try {
-			// Build query parameters
 			const params = new URLSearchParams()
 			params.append('page', pageNum)
 			params.append('page_size', PAGE_SIZE)
 
-			// Add filters if they're not "All"
-			if (filters.product && filters.product !== 'Все продукты') {
+			// Add filters
+			if (filters.product && filters.product !== '') {
 				params.append('product', filters.product)
 			}
-			if (filters.topic && filters.topic !== 'Все темы') {
+			if (filters.topic && filters.topic !== '') {
 				params.append('category', filters.topic)
 			}
-			if (filters.year && filters.year !== 'Все годы') {
+			if (filters.year && filters.year !== '') {
 				params.append('year', filters.year)
 			}
 
@@ -292,25 +315,53 @@ const News = () => {
 
 	// Reset scroll position when filters change
 	useEffect(() => {
-		window.scrollTo(0, 0)
+		window.scrollTo({ top: 0, behavior: 'smooth' })
 	}, [activeFilters])
+
+	// Fetch filter options
+	useEffect(() => {
+		const fetchOptions = async () => {
+			try {
+				const [categoriesRes] = await Promise.all([
+					apiClient("/get-news-categories")
+				])
+
+				setTopicOptions(categoriesRes.data)
+			} catch (e) {
+				console.error('Error fetching filter options:', e)
+			}
+		}
+		fetchOptions()
+	}, [])
+
+	// Handle filter changes
+	const handleFilterChange = (filterType, value) => {
+		const newFilters = { ...activeFilters, [filterType]: value }
+		setActiveFilters(newFilters)
+
+		// Update URL params
+		const newParams = new URLSearchParams()
+		if (newFilters.topic) newParams.set('category_id', newFilters.topic)
+		if (newFilters.product) newParams.set('product_id', newFilters.product)
+		if (newFilters.year) newParams.set('year', newFilters.year)
+
+		setSearchParams(newParams, { replace: true })
+	}
+
+	// Clear all filters
+	const clearFilters = () => {
+		setActiveFilters({
+			product: '',
+			topic: ''
+		})
+		setSearchParams({}, { replace: true })
+	}
 
 	const getSpan = index => GRID_PATTERN[index % GRID_PATTERN.length]
 
-	const [topicOptions, setTopicOptions] = useState([])
-	useEffect(() => {
-		const getOptions = async () => {
-			try{
-				const response = await apiClient("/get-news-categories")
-				const data = await response.data
-				console.log(data)
-				setTopicOptions(data)
-			}catch(e){
-				console.error(e)
-			}
-		}
-		getOptions()
-	}, [])
+	// Check if any filters are active
+	const hasActiveFilters = activeFilters.topic || activeFilters.product || activeFilters.year
+
 	return (
 		<div className='bg-[#f2f2f2] min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
 			<Navbar />
@@ -330,26 +381,20 @@ const News = () => {
 					</div>
 
 					<div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
-
+						{/* Category Filter */}
 						<div className='space-y-3'>
 							<label className='text-[10px] font-black uppercase tracking-[0.2em] text-gray-400'>
 								Категории
 							</label>
 							<div className='relative'>
 								<select
-									value={activeFilters.topic}
-									onChange={e =>
-										setActiveFilters(prev => ({
-											...prev,
-											topic: e.target.value,
-										}))
-									}
+									value={activeFilters.topic || ''}
+									onChange={(e) => handleFilterChange('topic', e.target.value)}
 									className='w-full bg-white border border-black/10 px-6 py-4 text-xs font-bold uppercase tracking-widest outline-none appearance-none cursor-pointer focus:border-black rounded-xl shadow-inner transition-colors'
 								>
-									<option value="" >Все категории</option>
+									<option value="">Все категории</option>
 									{topicOptions.map(opt => (
-
-										<option key={opt} value={opt.id}>
+										<option key={opt.id} value={String(opt.id)}>
 											{opt.name}
 										</option>
 									))}
@@ -360,6 +405,34 @@ const News = () => {
 								/>
 							</div>
 						</div>
+
+						{/* Active Filters Display */}
+						{hasActiveFilters && (
+							<div className='md:col-span-3 mt-4 flex flex-wrap gap-2 items-center'>
+								<span className='text-[9px] font-black uppercase tracking-[0.15em] text-gray-400'>
+									Активные фильтры:
+								</span>
+								{activeFilters.topic && (
+									<div className='flex items-center gap-2 px-3 py-1.5 bg-white border border-black/10 rounded-full'>
+										<span className='text-[10px] font-bold uppercase'>
+											{topicOptions.find(opt => String(opt.id) === activeFilters.topic)?.name || activeFilters.topic}
+										</span>
+										<button
+											onClick={() => handleFilterChange('topic', '')}
+											className='hover:text-[#e21e26] transition-colors'
+										>
+											<X size={12} />
+										</button>
+									</div>
+								)}
+								<button
+									onClick={clearFilters}
+									className='text-[9px] font-black uppercase tracking-[0.15em] text-gray-400 hover:text-[#e21e26] transition-colors ml-2'
+								>
+									Очистить все
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 			</section>
@@ -377,10 +450,18 @@ const News = () => {
 						</p>
 					</div>
 				) : items.length === 0 ? (
-					<div className='flex items-center justify-center py-40'>
+					<div className='flex flex-col items-center justify-center py-40 gap-4'>
 						<p className='text-[10px] font-black uppercase tracking-[0.3em] text-gray-400'>
 							Ничего не найдено
 						</p>
+						{hasActiveFilters && (
+							<button
+								onClick={clearFilters}
+								className='px-6 py-3 bg-white border border-black/10 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all duration-300 rounded-full'
+							>
+								Очистить фильтры
+							</button>
+						)}
 					</div>
 				) : (
 					<>
