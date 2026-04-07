@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react'
 import apiClient from '../../api/api'
 import { useLoader } from '../../LoaderContext.jsx'
+import { useTranslation } from 'react-i18next' // Добавлено
 
 const VideoSection = () => {
+	const { t } = useTranslation() // Добавлено
 	const [videoData, setVideoData] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [selectedVideo, setSelectedVideo] = useState(null)
@@ -69,7 +71,7 @@ const VideoSection = () => {
 	if (loading) {
 		return (
 			<div className='min-h-screen bg-white flex items-center justify-center'>
-				<div className='text-black text-xl'>Загрузка...</div>
+				<div className='text-black text-xl'>{t('video_loading')}</div>
 			</div>
 		)
 	}
@@ -77,7 +79,7 @@ const VideoSection = () => {
 	if (!videoData || videoData.length === 0) {
 		return (
 			<div className='min-h-screen bg-white flex items-center justify-center'>
-				<div className='text-black text-xl'>Нет видео</div>
+				<div className='text-black text-xl'>{t('video_no_data')}</div>
 			</div>
 		)
 	}
@@ -89,7 +91,7 @@ const VideoSection = () => {
 		<>
 			<div className='min-h-screen bg-white py-12 md:py-24 px-4 md:px-6 flex flex-col items-center font-sans overflow-hidden'>
 				<h2 className='text-black text-4xl md:text-5xl font-black mb-12 md:mb-16 uppercase tracking-tighter text-center'>
-					видео
+					{t('video_title')}
 				</h2>
 
 				<div className='grid max-w-[1300px] w-full grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-stretch mb-20'>
@@ -191,7 +193,7 @@ const VideoSection = () => {
 									/>
 								</div>
 								<span className='text-[10px] md:text-[11px] font-black uppercase tracking-tighter text-black transition-colors group-hover:text-[#e21e26]'>
-									предыдущее
+									{t('video_btn_prev')}
 								</span>
 							</button>
 
@@ -203,7 +205,7 @@ const VideoSection = () => {
 								disabled={videoData.length === 0}
 							>
 								<span className='text-[10px] md:text-[11px] font-black uppercase tracking-tighter text-black transition-colors group-hover:text-[#e21e26]'>
-									следующее
+									{t('video_btn_next')}
 								</span>
 								<div className='relative w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden rounded-full bg-white text-black transition-colors group-hover:bg-[#e21e26] group-hover:text-white shrink-0 shadow-sm'>
 									<ChevronRight
@@ -257,7 +259,7 @@ const VideoSection = () => {
 						>
 							<source src={selectedVideo.file} type='video/webm' />
 							<source src={selectedVideo.file} type='video/mp4' />
-							Your browser does not support the video tag.
+							{t('video_not_supported')}
 						</video>
 					</div>
 				</div>

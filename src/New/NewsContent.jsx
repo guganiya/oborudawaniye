@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Rss } from 'lucide-react'
+import { useTranslation } from 'react-i18next' // Добавлено
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import NewsGalery from './components/NewsGalery.jsx'
@@ -12,6 +13,7 @@ const brandRed = '#e21e26'
 
 const NewsContent = () => {
 	const { id } = useParams()
+	const { t } = useTranslation() // Добавлено
 	const [hoveredProduct, setHoveredProduct] = useState(null)
 	const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
 	const [newsItem, setNewsItem] = useState({})
@@ -97,7 +99,7 @@ const NewsContent = () => {
 					{newsItem.products && newsItem.products.length > 0 && (
 						<div className='text-center mb-16 relative'>
 							<h3 className='text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4'>
-								Продукты в данной статье
+								{t('news_products_in_article')}
 							</h3>
 							<div className='flex flex-wrap justify-center gap-6'>
 								{newsItem.products?.map(prod => (
@@ -132,7 +134,8 @@ const NewsContent = () => {
 				<section className='bg-white py-20 px-6'>
 					<div className='max-w-[1400px] mx-auto'>
 						<h2 className='text-2xl md:text-3xl font-black uppercase tracking-tighter mb-10 italic'>
-							Связанные новости<span style={{ color: brandRed }}>.</span>
+							{t('news_related_title')}
+							<span style={{ color: brandRed }}>.</span>
 						</h2>
 
 						<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8'>
@@ -156,7 +159,7 @@ const NewsContent = () => {
 								to='/news'
 								className='inline-block bg-[#e21e26] text-white px-12 py-4 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-black transition-all shadow-lg shadow-red-500/20 active:scale-95 no-underline'
 							>
-								Все новости
+								{t('news_all_btn')}
 							</Link>
 						</div>
 					</div>

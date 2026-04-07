@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next' // Добавлено
 
 const NewsGalery = ({ gallery, galery }) => {
+	const { t } = useTranslation() // Добавлено
 	// Accept both prop names and use whichever is provided
 	const initialData = gallery || galery || []
 	const [newsData, setNewsData] = useState(initialData)
@@ -21,7 +23,7 @@ const NewsGalery = ({ gallery, galery }) => {
 		return (
 			<section className='py-8 md:py-12 px-4 md:px-6'>
 				<div className='max-w-[1100px] mx-auto text-center text-gray-500'>
-					No images available
+					{t('gallery_no_images')}
 				</div>
 			</section>
 		)
@@ -79,17 +81,24 @@ const NewsGalery = ({ gallery, galery }) => {
 							className={`absolute inset-0 transition-all duration-300 ease-in-out ${getSlideAnimation()}`}
 						>
 							<img
-								src={mainNews?.image || mainNews?.poster || '/placeholder-image.jpg'}
+								src={
+									mainNews?.image ||
+									mainNews?.poster ||
+									'/placeholder-image.jpg'
+								}
 								className='w-full h-full object-cover opacity-80'
 								alt={mainNews?.name || mainNews?.title || 'News image'}
-								onError={(e) => {
+								onError={e => {
 									e.target.src = '/placeholder-image.jpg'
 								}}
 							/>
 							<div className='absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent' />
 							<div className='absolute bottom-6 left-6 md:left-8 text-white z-10'>
 								<h3 className='font-black text-lg md:text-3xl tracking-tighter uppercase italic leading-tight max-w-[90%]'>
-									{mainNews?.name || mainNews?.name_ru || mainNews?.title || 'Untitled'}
+									{mainNews?.name ||
+										mainNews?.name_ru ||
+										mainNews?.title ||
+										t('gallery_untitled')}
 								</h3>
 							</div>
 						</div>
@@ -103,16 +112,23 @@ const NewsGalery = ({ gallery, galery }) => {
 								className={`absolute inset-0 transition-all duration-300 ease-in-out ${getSideSlideAnimation()}`}
 							>
 								<img
-									src={sideNews?.image || sideNews?.poster || '/placeholder-image.jpg'}
+									src={
+										sideNews?.image ||
+										sideNews?.poster ||
+										'/placeholder-image.jpg'
+									}
 									className='w-full h-full object-cover opacity-60'
 									alt={sideNews?.name || sideNews?.title || 'News image'}
-									onError={(e) => {
+									onError={e => {
 										e.target.src = '/placeholder-image.jpg'
 									}}
 								/>
 								<div className='absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-black/80 via-black/30 to-transparent'>
 									<p className='text-lg font-black tracking-tighter uppercase text-white italic leading-tight'>
-										{sideNews?.name || sideNews?.name_ru || sideNews?.title || 'Untitled'}
+										{sideNews?.name ||
+											sideNews?.name_ru ||
+											sideNews?.title ||
+											t('gallery_untitled')}
 									</p>
 								</div>
 							</div>
@@ -138,7 +154,7 @@ const NewsGalery = ({ gallery, galery }) => {
 									/>
 								</div>
 								<span className='text-[9px] font-black uppercase tracking-tighter text-gray-400 transition-colors group-hover:text-[#e21e26] pr-1'>
-									назад
+									{t('gallery_prev')}
 								</span>
 							</button>
 
@@ -150,7 +166,7 @@ const NewsGalery = ({ gallery, galery }) => {
 								className='group flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
 							>
 								<span className='text-[9px] font-black uppercase tracking-tighter text-gray-400 transition-colors group-hover:text-[#e21e26] pl-1'>
-									далее
+									{t('gallery_next')}
 								</span>
 								<div className='relative w-9 h-9 md:w-10 md:h-10 flex items-center justify-center overflow-hidden rounded-xl bg-gray-100 text-black transition-colors group-hover:bg-[#e21e26] group-hover:text-white shrink-0'>
 									<ChevronRight

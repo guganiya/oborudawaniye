@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react' // Добави�
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { data, Link } from 'react-router-dom'
 import apiClient from '../../api/api'
-import {useLoader} from "../../LoaderContext.jsx";
+import { useLoader } from '../../LoaderContext.jsx'
+import { useTranslation } from 'react-i18next' // Добавлено
 
 const Hero = () => {
+	const { t } = useTranslation() // Добавлено
 	const brandRed = '#e21e26'
-	const {showLoader, hideLoader} = useLoader()
+	const { showLoader, hideLoader } = useLoader()
 
 	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(false)
@@ -82,7 +84,7 @@ const Hero = () => {
 										href={item.url}
 										className='inline-block px-6 py-3 md:px-10 md:py-4 border-2 border-white text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#e21e26] hover:border-[#e21e26]'
 									>
-										Read More
+										{t('hero_btn_more')}
 									</a>
 								</div>
 							</li>

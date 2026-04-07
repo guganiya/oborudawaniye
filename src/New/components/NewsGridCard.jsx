@@ -1,8 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-
+import { useTranslation } from 'react-i18next' // Добавлено
 const NewsGridCard = ({ item }) => {
+	const { t } = useTranslation() // Добавлено
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 20 }}
@@ -24,7 +25,7 @@ const NewsGridCard = ({ item }) => {
 					/>
 					{/* Серая плашка категории - чуть меньше на мобилках */}
 					<div className='absolute top-0 right-0 bg-[#555] text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 md:px-4 md:py-1.5 z-10'>
-						{item.topic || 'Закупки'}
+						{item.topic || t('news_category_default')}
 					</div>
 				</div>
 

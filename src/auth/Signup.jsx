@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react'
-import {Link, useNavigate} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Loader2, CheckCircle, XCircle, X } from 'lucide-react'
-import apiClient from "../api/api.js";
+import { useTranslation } from 'react-i18next' // Добавлено
+import apiClient from '../api/api.js'
 
 const Signup = () => {
+	const { t } = useTranslation() // Добавлено
 	const brandRed = '#e21e26'
 	const [full_name, setFullName] = useState('')
 	const [email, setEmail] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [modal, setModal] = useState({ isOpen: false, type: '', message: '' })
 	const navigate = useNavigate()
-	const handleSubmit = async (e) => {
+
+	const handleSubmit = async e => {
 		e.preventDefault()
 
 		// Basic validation
@@ -19,7 +22,7 @@ const Signup = () => {
 			setModal({
 				isOpen: true,
 				type: 'error',
-				message: 'Please fill in all fields'
+				message: t('auth_error_fill_fields'),
 			})
 			return
 		}
@@ -30,7 +33,7 @@ const Signup = () => {
 			setModal({
 				isOpen: true,
 				type: 'error',
-				message: 'Please enter a valid email address'
+				message: t('auth_error_invalid_email'),
 			})
 			return
 		}
@@ -43,29 +46,28 @@ const Signup = () => {
 
 		try {
 			const response = await apiClient.post('/post-user-credential', formData)
-			const data = await response.data
 
 			// Success
 			setModal({
 				isOpen: true,
 				type: 'success',
-				message: 'Account created successfully! Please check your email.'
+				message: t('auth_success_signup'),
 			})
+
 			setTimeout(() => {
 				navigate('/')
 			}, 2000)
-			// Clear form on success
+
 			setFullName('')
 			setEmail('')
-
-		} catch(err) {
+		} catch (err) {
 			console.log(err)
-			// Error message based on response if available
-			const errorMessage = err.response?.data?.message || 'Something went wrong. Please try again.'
+			const errorMessage =
+				err.response?.data?.message || t('auth_error_general')
 			setModal({
 				isOpen: true,
 				type: 'error',
-				message: errorMessage
+				message: errorMessage,
 			})
 		} finally {
 			setLoading(false)
@@ -76,9 +78,8 @@ const Signup = () => {
 		setModal({ isOpen: false, type: '', message: '' })
 	}
 
-	// Close modal on Escape key
 	useEffect(() => {
-		const handleEsc = (e) => {
+		const handleEsc = e => {
 			if (e.key === 'Escape' && modal.isOpen) {
 				closeModal()
 			}
@@ -95,10 +96,11 @@ const Signup = () => {
 				className='w-full max-w-[450px] bg-white p-10 md:p-14 border border-black/5 shadow-sm'
 			>
 				<h1 className='text-3xl font-black uppercase tracking-tighter mb-2 italic text-center'>
-					Create Account<span style={{ color: brandRed }}>.</span>
+					{t('auth_signup_title')}
+					<span style={{ color: brandRed }}>.</span>
 				</h1>
 				<p className='text-center text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-10'>
-					Join our professional lighting network
+					{t('auth_signup_subtitle')}
 				</p>
 
 				<form onSubmit={handleSubmit} className='space-y-8'>
@@ -106,12 +108,12 @@ const Signup = () => {
 						<input
 							type='text'
 							value={full_name}
-							onChange={(e) => setFullName(e.target.value)}
+							onChange={e => setFullName(e.target.value)}
 							required
 							className='w-full bg-transparent border-b border-gray-200 py-3 text-xs font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 						/>
 						<label className='absolute left-0 top-3 text-[9px] font-black uppercase tracking-widest text-gray-400 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
-							Full Name
+							{t('auth_field_fullname')}
 						</label>
 					</div>
 
@@ -119,12 +121,12 @@ const Signup = () => {
 						<input
 							type='email'
 							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							onChange={e => setEmail(e.target.value)}
 							required
 							className='w-full bg-transparent border-b border-gray-200 py-3 text-xs font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 						/>
 						<label className='absolute left-0 top-3 text-[9px] font-black uppercase tracking-widest text-gray-400 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
-							Email Address
+							{t('auth_field_email')}
 						</label>
 					</div>
 
@@ -136,12 +138,12 @@ const Signup = () => {
 					>
 						{loading ? (
 							<>
-								<Loader2 size={16} className="animate-spin" />
-								PROCESSING...
+								<Loader2 size={16} className='animate-spin' />
+								{t('auth_btn_processing')}
 							</>
 						) : (
 							<>
-								Register <ArrowRight size={16} />
+								{t('auth_btn_register')} <ArrowRight size={16} />
 							</>
 						)}
 					</button>
@@ -157,7 +159,6 @@ const Signup = () => {
 						exit={{ opacity: 0 }}
 						className='fixed inset-0 z-50 flex items-center justify-center px-4'
 					>
-						{/* Backdrop */}
 						<motion.div
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
@@ -166,14 +167,12 @@ const Signup = () => {
 							onClick={closeModal}
 						/>
 
-						{/* Modal Content */}
 						<motion.div
 							initial={{ scale: 0.9, opacity: 0, y: 20 }}
 							animate={{ scale: 1, opacity: 1, y: 0 }}
 							exit={{ scale: 0.9, opacity: 0, y: 20 }}
 							className='relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 md:p-8'
 						>
-							{/* Close button */}
 							<button
 								onClick={closeModal}
 								className='absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors'
@@ -181,7 +180,6 @@ const Signup = () => {
 								<X size={20} />
 							</button>
 
-							{/* Icon */}
 							<div className='flex justify-center mb-4'>
 								{modal.type === 'success' ? (
 									<div className='w-16 h-16 rounded-full bg-green-100 flex items-center justify-center'>
@@ -194,23 +192,25 @@ const Signup = () => {
 								)}
 							</div>
 
-							{/* Title */}
 							<h3 className='text-xl font-bold text-center mb-2'>
-								{modal.type === 'success' ? 'Success!' : 'Error!'}
+								{modal.type === 'success'
+									? t('modal_success_title')
+									: t('modal_error_title')}
 							</h3>
 
-							{/* Message */}
-							<p className='text-gray-600 text-center mb-6'>
-								{modal.message}
-							</p>
+							<p className='text-gray-600 text-center mb-6'>{modal.message}</p>
 
-							{/* Button */}
 							<button
 								onClick={closeModal}
-								style={{ backgroundColor: modal.type === 'success' ? '#10b981' : brandRed }}
+								style={{
+									backgroundColor:
+										modal.type === 'success' ? '#10b981' : brandRed,
+								}}
 								className='w-full py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-opacity'
 							>
-								{modal.type === 'success' ? 'Continue' : 'Try Again'}
+								{modal.type === 'success'
+									? t('modal_btn_continue')
+									: t('modal_btn_retry')}
 							</button>
 						</motion.div>
 					</motion.div>

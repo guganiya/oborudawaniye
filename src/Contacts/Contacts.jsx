@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { Mail, Phone, MapPin, Clock, ArrowRight, Loader2, CheckCircle, XCircle, X } from 'lucide-react'
+import {
+	Mail,
+	Phone,
+	MapPin,
+	Clock,
+	ArrowRight,
+	Loader2,
+	CheckCircle,
+	XCircle,
+	X,
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next' // Импорт
 import apiClient from '../api/api.js'
 
 const Contacts = () => {
+	const { t } = useTranslation() // Инициализация
 	const brandRed = '#e21e26'
 	const [full_name, setFullName] = useState('')
 	const [email, setEmail] = useState('')
@@ -19,26 +31,24 @@ const Contacts = () => {
 		transition: { duration: 0.6 },
 	}
 
-	const handleSubmit = async (e) => {
+	const handleSubmit = async e => {
 		e.preventDefault()
 
-		// Basic validation
 		if (!full_name.trim() || !email.trim() || !message.trim()) {
 			setModal({
 				isOpen: true,
 				type: 'error',
-				message: 'Пожалуйста, заполните все поля'
+				message: t('contacts_err_fill_all'),
 			})
 			return
 		}
 
-		// Email validation
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 		if (!emailRegex.test(email)) {
 			setModal({
 				isOpen: true,
 				type: 'error',
-				message: 'Пожалуйста, введите корректный email адрес'
+				message: t('contacts_err_email_invalid'),
 			})
 			return
 		}
@@ -51,29 +61,25 @@ const Contacts = () => {
 		formData.append('message', message)
 
 		try {
-			const response = await apiClient.post('/post-feedback', formData)
-			const data = await response.data
+			await apiClient.post('/post-feedback', formData)
 
-			// Success
 			setModal({
 				isOpen: true,
 				type: 'success',
-				message: 'Сообщение успешно отправлено! Мы свяжемся с вами в ближайшее время.'
+				message: t('contacts_success_msg'),
 			})
 
-			// Clear form on success
 			setFullName('')
 			setEmail('')
 			setMessage('')
-
-		} catch(err) {
+		} catch (err) {
 			console.log(err)
-			// Error message based on response if available
-			const errorMessage = err.response?.data?.message || 'Что-то пошло не так. Пожалуйста, попробуйте снова.'
+			const errorMessage =
+				err.response?.data?.message || t('contacts_err_generic')
 			setModal({
 				isOpen: true,
 				type: 'error',
-				message: errorMessage
+				message: errorMessage,
 			})
 		} finally {
 			setLoading(false)
@@ -84,9 +90,8 @@ const Contacts = () => {
 		setModal({ isOpen: false, type: '', message: '' })
 	}
 
-	// Close modal on Escape key
 	useEffect(() => {
-		const handleEsc = (e) => {
+		const handleEsc = e => {
 			if (e.key === 'Escape' && modal.isOpen) {
 				closeModal()
 			}
@@ -99,7 +104,6 @@ const Contacts = () => {
 		<div className='bg-white min-h-screen text-black selection:bg-[#e21e26] selection:text-white font-sans'>
 			<Navbar />
 
-			{/* Modal Component */}
 			<AnimatePresence>
 				{modal.isOpen && (
 					<motion.div
@@ -108,7 +112,6 @@ const Contacts = () => {
 						exit={{ opacity: 0 }}
 						className='fixed inset-0 z-50 flex items-center justify-center px-4'
 					>
-						{/* Backdrop */}
 						<motion.div
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
@@ -117,14 +120,12 @@ const Contacts = () => {
 							onClick={closeModal}
 						/>
 
-						{/* Modal Content */}
 						<motion.div
 							initial={{ scale: 0.9, opacity: 0, y: 20 }}
 							animate={{ scale: 1, opacity: 1, y: 0 }}
 							exit={{ scale: 0.9, opacity: 0, y: 20 }}
 							className='relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 md:p-8'
 						>
-							{/* Close button */}
 							<button
 								onClick={closeModal}
 								className='absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors'
@@ -132,7 +133,6 @@ const Contacts = () => {
 								<X size={20} />
 							</button>
 
-							{/* Icon */}
 							<div className='flex justify-center mb-4'>
 								{modal.type === 'success' ? (
 									<div className='w-16 h-16 rounded-full bg-green-100 flex items-center justify-center'>
@@ -145,48 +145,48 @@ const Contacts = () => {
 								)}
 							</div>
 
-							{/* Title */}
 							<h3 className='text-xl font-bold text-center mb-2'>
-								{modal.type === 'success' ? 'Успешно!' : 'Ошибка!'}
+								{modal.type === 'success'
+									? t('contacts_modal_success_title')
+									: t('contacts_modal_error_title')}
 							</h3>
 
-							{/* Message */}
-							<p className='text-gray-600 text-center mb-6'>
-								{modal.message}
-							</p>
+							<p className='text-gray-600 text-center mb-6'>{modal.message}</p>
 
-							{/* Button */}
 							<button
 								onClick={closeModal}
-								style={{ backgroundColor: modal.type === 'success' ? '#10b981' : brandRed }}
+								style={{
+									backgroundColor:
+										modal.type === 'success' ? '#10b981' : brandRed,
+								}}
 								className='w-full py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-opacity'
 							>
-								{modal.type === 'success' ? 'Продолжить' : 'Попробовать снова'}
+								{modal.type === 'success'
+									? t('contacts_modal_btn_continue')
+									: t('contacts_modal_btn_retry')}
 							</button>
 						</motion.div>
 					</motion.div>
 				)}
 			</AnimatePresence>
 
-			{/* Заголовок страницы */}
 			<section className='pt-32 md:pt-40 pb-12 md:pb-20 border-b border-black/5 bg-[#fafafa] relative overflow-hidden'>
 				<div className='absolute inset-0 opacity-[0.03] pointer-events-none'>
 					<span className='absolute -bottom-5 md:-bottom-10 -left-5 md:-left-10 text-[6rem] md:text-[20rem] font-black uppercase leading-none select-none'>
-						Contact
+						{t('contacts_bg_text')}
 					</span>
 				</div>
 
 				<div className='max-w-[1500px] mx-auto px-6 md:px-12 relative z-10'>
 					<motion.div {...fadeInUp}>
 						<h1 className='text-5xl md:text-[7rem] font-black uppercase tracking-tighter leading-[0.9] md:leading-[0.85]'>
-							Get in <br className='hidden md:block' />
+							{t('contacts_hero_title_1')} <br className='hidden md:block' />
 							<span style={{ color: brandRed }} className='italic'>
-								Touch.
+								{t('contacts_hero_title_2')}
 							</span>
 						</h1>
 						<p className='mt-6 md:mt-8 text-gray-400 text-[10px] md:text-sm uppercase tracking-[0.2em] md:tracking-[0.4em] font-bold max-w-xl leading-relaxed'>
-							Have a project in mind? Our global support network is ready to
-							bring your vision to life with professional lighting solutions.
+							{t('contacts_hero_desc')}
 						</p>
 					</motion.div>
 				</div>
@@ -194,32 +194,31 @@ const Contacts = () => {
 
 			<main className='max-w-[1500px] mx-auto px-6 md:px-12 py-16 md:py-32'>
 				<div className='grid grid-cols-1 lg:grid-cols-12 gap-16 md:gap-20'>
-					{/* ЛЕВАЯ КОЛОНКА: ИНФОРМАЦИЯ */}
 					<div className='lg:col-span-5 space-y-12 md:y-20'>
 						<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-10 md:gap-12'>
 							{[
 								{
 									icon: Mail,
-									label: 'Email Us',
+									label: t('contacts_label_email'),
 									value: 'pro-sales@lumina.com',
 									href: 'mailto:pro-sales@lumina.com',
 								},
 								{
 									icon: Phone,
-									label: 'Call Us',
+									label: t('contacts_label_call'),
 									value: '+420 123 456 789',
 									href: 'tel:+420123456789',
 								},
 								{
 									icon: MapPin,
-									label: 'Office',
+									label: t('contacts_label_office'),
 									value: 'Hazlov 541, Czech Republic',
 									href: '#',
 								},
 								{
 									icon: Clock,
-									label: 'Hours',
-									value: 'Mon - Fri: 08:00 - 17:00',
+									label: t('contacts_label_hours'),
+									value: t('contacts_value_hours'),
 									href: null,
 								},
 							].map((item, idx) => (
@@ -258,7 +257,6 @@ const Contacts = () => {
 						</div>
 					</div>
 
-					{/* ПРАВАЯ КОЛОНКА: ФОРМА */}
 					<div className='lg:col-span-7'>
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
@@ -269,24 +267,30 @@ const Contacts = () => {
 						>
 							<div className='relative z-10'>
 								<h3 className='text-2xl md:text-3xl font-black uppercase tracking-tighter mb-2'>
-									Send a <span style={{ color: brandRed }}>Message</span>
+									{t('contacts_form_title')}{' '}
+									<span style={{ color: brandRed }}>
+										{t('contacts_form_title_accent')}
+									</span>
 								</h3>
 								<p className='text-gray-500 text-xs md:text-sm mb-8 md:mb-12 font-medium'>
-									We typically respond within 24 hours.
+									{t('contacts_form_subtitle')}
 								</p>
 
-								<form onSubmit={handleSubmit} className='space-y-6 md:space-y-8'>
+								<form
+									onSubmit={handleSubmit}
+									className='space-y-6 md:space-y-8'
+								>
 									<div className='grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8'>
 										<div className='relative'>
 											<input
 												type='text'
 												value={full_name}
-												onChange={(e) => setFullName(e.target.value)}
+												onChange={e => setFullName(e.target.value)}
 												required
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
 											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
-												Full Name
+												{t('contacts_input_name')}
 											</label>
 										</div>
 
@@ -294,12 +298,12 @@ const Contacts = () => {
 											<input
 												type='email'
 												value={email}
-												onChange={(e) => setEmail(e.target.value)}
+												onChange={e => setEmail(e.target.value)}
 												required
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
 											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
-												Email Address
+												{t('contacts_input_email')}
 											</label>
 										</div>
 									</div>
@@ -308,12 +312,12 @@ const Contacts = () => {
 										<textarea
 											rows='4'
 											value={message}
-											onChange={(e) => setMessage(e.target.value)}
+											onChange={e => setMessage(e.target.value)}
 											required
 											className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer resize-none'
 										></textarea>
 										<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
-											Message
+											{t('contacts_input_message')}
 										</label>
 									</div>
 
@@ -325,12 +329,12 @@ const Contacts = () => {
 										<span className='relative z-10 flex items-center justify-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em]'>
 											{loading ? (
 												<>
-													<Loader2 size={16} className="animate-spin" />
-													SENDING...
+													<Loader2 size={16} className='animate-spin' />
+													{t('contacts_btn_sending')}
 												</>
 											) : (
 												<>
-													Send Request{' '}
+													{t('contacts_btn_send')}{' '}
 													<ArrowRight
 														size={14}
 														className='group-hover:translate-x-2 transition-transform'

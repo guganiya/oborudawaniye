@@ -5,8 +5,10 @@ import { ArrowLeft, Loader2 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import apiClient from '../api/api'
+import { useTranslation } from 'react-i18next' // Добавлено
 
 const InnovationContent = () => {
+	const { t } = useTranslation() // Добавлено
 	const { id } = useParams()
 	const [innovation, setInnovation] = useState(null)
 	const [loading, setLoading] = useState(true)
@@ -23,7 +25,7 @@ const InnovationContent = () => {
 				console.log('Innovation data:', data)
 			} catch (err) {
 				console.error('Error fetching innovation:', err)
-				setError(err.response?.data?.message || 'Не удалось загрузить инновацию')
+				setError(err.response?.data?.message || t('innovation_err_load'))
 			} finally {
 				setLoading(false)
 			}
@@ -35,7 +37,7 @@ const InnovationContent = () => {
 
 		// Scroll to top on mount
 		window.scrollTo(0, 0)
-	}, [id])
+	}, [id, t])
 
 	if (loading) {
 		return (
@@ -44,7 +46,7 @@ const InnovationContent = () => {
 				<div className='flex flex-col items-center justify-center min-h-[60vh] gap-4'>
 					<Loader2 className='animate-spin text-[#e21e26]' size={40} />
 					<p className='text-[10px] font-black uppercase tracking-[0.3em] text-gray-400'>
-						Загрузка инновации...
+						{t('innovation_loading')}
 					</p>
 				</div>
 				<Footer />
@@ -57,13 +59,15 @@ const InnovationContent = () => {
 			<div className='bg-white min-h-screen font-sans'>
 				<Navbar />
 				<div className='flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6'>
-					<p className='text-red-500 text-sm font-medium'>{error || 'Инновация не найдена'}</p>
+					<p className='text-red-500 text-sm font-medium'>
+						{error || t('innovation_not_found')}
+					</p>
 					<Link
 						to='/innovation'
 						className='inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#e21e26] transition-colors'
 					>
 						<ArrowLeft size={14} className='transition-transform' />
-						Вернуться к инновациям
+						{t('innovation_back_to_list')}
 					</Link>
 				</div>
 				<Footer />
@@ -86,7 +90,7 @@ const InnovationContent = () => {
 							size={14}
 							className='group-hover:-translate-x-1 transition-transform'
 						/>
-						Назад к инновациям
+						{t('innovation_back_to_list')}
 					</Link>
 
 					{/* Заголовок и Текст */}
@@ -118,7 +122,7 @@ const InnovationContent = () => {
 							src={innovation.image || innovation.poster}
 							className='w-full h-full object-cover'
 							alt={innovation.name || innovation.title}
-							onError={(e) => {
+							onError={e => {
 								e.target.src = '/placeholder-image.jpg'
 							}}
 						/>
@@ -127,13 +131,11 @@ const InnovationContent = () => {
 						</div>
 					</motion.div>
 
-
-
 					{/* Блок "Реализовано в" - Products that use this innovation */}
 					{innovation.products && innovation.products.length > 0 && (
 						<section className='border-t border-gray-100 pt-20'>
 							<h2 className='text-center text-[16px] font-black uppercase tracking-[0.4em] text-black mb-16'>
-								Связанные продукты
+								{t('innovation_related_products')}
 							</h2>
 
 							<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 px-8 sm:px-0'>
@@ -154,7 +156,7 @@ const InnovationContent = () => {
 													src={product.poster}
 													alt={product.name}
 													className='max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-700'
-													onError={(e) => {
+													onError={e => {
 														e.target.src = '/placeholder-image.jpg'
 													}}
 												/>
@@ -176,7 +178,7 @@ const InnovationContent = () => {
 						<section className='border-t border-gray-100 pt-20'>
 							<div className='text-center'>
 								<p className='text-gray-400 text-[11px] font-black uppercase tracking-[0.3em]'>
-									Продукты с этой технологией появятся скоро
+									{t('innovation_products_coming_soon')}
 								</p>
 							</div>
 						</section>

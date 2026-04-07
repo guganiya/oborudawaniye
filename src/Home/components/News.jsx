@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient from '../../api/api'
-import {useLoader} from "../../LoaderContext.jsx";
+import { useLoader } from '../../LoaderContext.jsx'
+import { useTranslation } from 'react-i18next' // Только это добавлено
 
 const Tag = ({ text }) => (
 	<Link
@@ -67,8 +68,9 @@ const Card = ({ title, imageUrl, size = 'small', to = '#' }) => {
 }
 
 const New = () => {
+	const { t } = useTranslation() // Добавлено
 	const [categories, setCategories] = useState([])
-	const {showLoader, hideLoader} = useLoader()
+	const { showLoader, hideLoader } = useLoader()
 	const [loading, setLoading] = useState(false)
 	const [news, setNews] = useState([])
 	const [lastNews, setLastNews] = useState([])
@@ -96,7 +98,7 @@ const New = () => {
 				const data = await response.data
 				setNews(data)
 				setLastNews(data.slice(1, 3))
-				console.log("News:", data)
+				console.log('News:', data)
 			} catch (error) {
 				console.log(error)
 			} finally {
@@ -119,7 +121,7 @@ const New = () => {
 			}}
 		>
 			<h2 className='relative z-10 text-white text-4xl md:text-5xl font-black mb-12 uppercase tracking-tighter'>
-				Новости
+				{t('news_main_title')}
 			</h2>
 
 			<div className='relative z-10 flex flex-wrap justify-center gap-3 max-w-5xl mb-16'>
@@ -155,7 +157,7 @@ const New = () => {
 				to='/news'
 				className='group relative px-10 py-4 bg-transparent border border-white/20 text-white font-bold uppercase tracking-widest overflow-hidden transition-all duration-300 hover:border-white'
 			>
-				<span className='relative z-10 text-sm'>Узнать больше</span>
+				<span className='relative z-10 text-sm'>{t('news_btn_more')}</span>
 				<div className='absolute inset-0 bg-white translate-y-[101%] group-hover:translate-y-0 transition-transform duration-300'></div>
 				<style
 					dangerouslySetInnerHTML={{

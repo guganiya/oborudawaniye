@@ -1,7 +1,10 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next' // Добавлено
 
 const ProductCard = ({ item, isHovered, onHoverChange }) => {
+	const { i18n } = useTranslation() // Добавлено для получения текущего языка
+
 	return (
 		<Link to={`/news-content/${item.id}`}>
 			<div
@@ -19,7 +22,7 @@ const ProductCard = ({ item, isHovered, onHoverChange }) => {
 						src={item.poster}
 						alt={item.title}
 						className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-110'
-						loading="lazy"
+						loading='lazy'
 					/>
 					{/* Метка категории */}
 					<div className='absolute top-4 right-4 bg-[#4a4a4a] text-white text-[10px] font-black px-3 py-1 uppercase tracking-[0.1em]'>
@@ -30,11 +33,14 @@ const ProductCard = ({ item, isHovered, onHoverChange }) => {
 				{/* Текстовый контент */}
 				<div className='p-6 flex flex-col gap-2 relative bg-white'>
 					<span className='text-gray-400 text-[11px] font-bold tracking-widest'>
-						{new Date(item.created_at || item.date).toLocaleDateString('ru-RU', {
-							year: 'numeric',
-							month: 'long',
-							day: 'numeric'
-						})}
+						{new Date(item.created_at || item.date).toLocaleDateString(
+							i18n.language === 'tk' ? 'tr-TR' : i18n.language,
+							{
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric',
+							},
+						)}
 					</span>
 
 					<h3
@@ -64,13 +70,13 @@ const ProductCard = ({ item, isHovered, onHoverChange }) => {
 }
 
 const ProductNew = ({ productNews = [] }) => {
+	const { t } = useTranslation() // Добавлено
 	const [hoveredStates, setHoveredStates] = useState({})
 
 	const handleHoverChange = (index, isHovered) => {
 		setHoveredStates(prev => ({ ...prev, [index]: isHovered }))
 	}
 
-	// Don't render if no news
 	if (!productNews || productNews.length === 0) {
 		return null
 	}
@@ -80,7 +86,7 @@ const ProductNew = ({ productNews = [] }) => {
 			<div className='max-w-[1200px] mx-auto'>
 				{/* Заголовок секции */}
 				<h2 className='text-2xl md:text-3xl font-black uppercase tracking-tighter mb-10 italic'>
-					Связанные <span className='text-[#e21e26]'>новости.</span>
+					{t('news_related_title')} <span className='text-[#e21e26]'>.</span>
 				</h2>
 
 				{/* Сетка карточек */}
@@ -90,7 +96,7 @@ const ProductNew = ({ productNews = [] }) => {
 							key={item.id}
 							item={item}
 							isHovered={hoveredStates[index] || false}
-							onHoverChange={(isHovered) => handleHoverChange(index, isHovered)}
+							onHoverChange={isHovered => handleHoverChange(index, isHovered)}
 						/>
 					))}
 				</div>
@@ -101,7 +107,7 @@ const ProductNew = ({ productNews = [] }) => {
 						to='/news'
 						className='inline-block bg-[#e21e26] text-white px-12 py-4 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-black transition-all shadow-lg shadow-red-500/20 active:scale-95 no-underline'
 					>
-						Посмотреть все новости
+						{t('news_all_btn')}
 					</Link>
 				</div>
 			</div>

@@ -5,12 +5,14 @@ import { Loader2 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import apiClient from '../api/api'
+import { useTranslation } from 'react-i18next' // Добавлено
 
 // ─── Константы ────────────────────────────────────────────────────────────────
 const PAGE_SIZE = 3
 const brandRed = '#e21e26'
 
 const Innovations = () => {
+	const { t } = useTranslation() // Добавлено
 	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
@@ -54,12 +56,15 @@ const Innovations = () => {
 			console.log('Fetching:', url)
 
 			const response = await apiClient.get(url, {
-				signal: abortControllerRef.current.signal
+				signal: abortControllerRef.current.signal,
 			})
 
 			const data = response.data
 			const newItems = data.results
-			const totalCount = data.count || data.total || (data.results ? data.count : newItems.length)
+			const totalCount =
+				data.count ||
+				data.total ||
+				(data.results ? data.count : newItems.length)
 			console.log(data)
 			setTotal(totalCount)
 			const newHasMore = pageNum * PAGE_SIZE < totalCount
@@ -101,7 +106,13 @@ const Innovations = () => {
 
 		observerRef.current = new IntersectionObserver(
 			([entry]) => {
-				if (entry.isIntersecting && hasMoreRef.current && !busyRef.current && !loading && !loadingMore) {
+				if (
+					entry.isIntersecting &&
+					hasMoreRef.current &&
+					!busyRef.current &&
+					!loading &&
+					!loadingMore
+				) {
 					const nextPage = pageRef.current + 1
 					console.log('Loading more innovations - page:', nextPage)
 					setPage(nextPage)
@@ -110,8 +121,8 @@ const Innovations = () => {
 			},
 			{
 				rootMargin: '200px',
-				threshold: 0.1
-			}
+				threshold: 0.1,
+			},
 		)
 
 		const currentSentinel = sentinelRef.current
@@ -135,7 +146,7 @@ const Innovations = () => {
 				{/* ФОНОВЫЙ ТЕКСТ (Watermark) */}
 				<div className='absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden'>
 					<span className='absolute bottom-2 md:-bottom-10 -left-10 text-[6rem] md:text-[18rem] font-black uppercase leading-none'>
-						Innovations
+						{t('innovations_watermark')}
 					</span>
 				</div>
 
@@ -145,7 +156,8 @@ const Innovations = () => {
 						animate={{ opacity: 1, y: 0 }}
 						className='text-4xl md:text-6xl font-black uppercase tracking-tighter italic mb-8'
 					>
-						Инновации<span className='text-[#e21e26]'>.</span>
+						{t('innovations_title_main')}
+						<span className='text-[#e21e26]'>.</span>
 					</motion.h1>
 					<motion.p
 						initial={{ opacity: 0 }}
@@ -153,9 +165,7 @@ const Innovations = () => {
 						transition={{ delay: 0.2 }}
 						className='text-gray-500 text-sm md:text-base leading-relaxed font-medium px-4'
 					>
-						Robe разработали несколько запатентованных технологических решений
-						для обеспечения превосходного качества и работы приборов. Патенты и
-						торговые марки © Robe lighting s.r.o
+						{t('innovations_subtitle')}
 					</motion.p>
 				</div>
 			</header>
@@ -165,13 +175,13 @@ const Innovations = () => {
 					<div className='flex flex-col items-center justify-center py-40 gap-4'>
 						<Loader2 className='animate-spin text-[#e21e26]' size={40} />
 						<p className='text-[10px] font-black uppercase tracking-[0.3em] text-gray-400'>
-							Загрузка технологий...
+							{t('innovations_loading')}
 						</p>
 					</div>
 				) : items.length === 0 ? (
 					<div className='flex items-center justify-center py-40'>
 						<p className='text-[10px] font-black uppercase tracking-[0.3em] text-gray-400'>
-							Ничего не найдено
+							{t('innovations_empty')}
 						</p>
 					</div>
 				) : (
@@ -195,7 +205,7 @@ const Innovations = () => {
 									size={22}
 								/>
 								<p className='text-[9px] font-black uppercase tracking-[0.3em] text-gray-400'>
-									Загружаем ещё...
+									{t('innovations_loading_more')}
 								</p>
 							</div>
 						)}
@@ -204,7 +214,7 @@ const Innovations = () => {
 							<div className='flex items-center gap-6 py-12 mt-8'>
 								<div className='flex-1 h-px bg-gray-200' />
 								<p className='text-[9px] font-black uppercase tracking-[0.3em] text-gray-400'>
-									Все загружено ({total} инноваций)
+									{t('innovations_all_loaded', { count: total })}
 								</p>
 								<div className='flex-1 h-px bg-gray-200' />
 							</div>
@@ -221,7 +231,7 @@ const Innovations = () => {
 									}}
 									className='px-8 py-3 bg-white border border-gray-300 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white hover:border-black transition-all duration-300 rounded-full'
 								>
-									Загрузить еще
+									{t('innovations_btn_more')}
 								</button>
 							</div>
 						)}
