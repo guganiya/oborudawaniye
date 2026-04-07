@@ -24,7 +24,7 @@ const NewsContent = () => {
 				const response = await apiClient.get(`/get-exact-news/${id}`)
 				const data = response.data
 				setNewsItem(data)
-				console.log(data)
+
 			} catch (error) {
 				console.log(error)
 			}

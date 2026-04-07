@@ -23,7 +23,6 @@ const Product = () => {
             try{
                 const response = await apiClient.get(`/get-product/${id}`);
                 const data = await response.data;
-                console.log(data);
                 setProductDetails({
                     "id": data.id,
                     "name": data.name,

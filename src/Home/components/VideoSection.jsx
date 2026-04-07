@@ -21,7 +21,7 @@ const VideoSection = () => {
 				const response = await apiClient.get('/videos')
 				const data = await response.data
 				setVideoData(data.results)
-				console.log(data.results)
+
 			} catch (error) {
 				console.log(error)
 			} finally {

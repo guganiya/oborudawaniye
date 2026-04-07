@@ -82,7 +82,7 @@ const New = () => {
 				const response = await apiClient.get('/get-news-categories')
 				const data = await response.data
 				setCategories(data)
-				console.log(data)
+
 			} catch (error) {
 				console.log(error)
 			} finally {
@@ -98,7 +98,6 @@ const New = () => {
 				const data = await response.data
 				setNews(data)
 				setLastNews(data.slice(1, 3))
-				console.log('News:', data)
 			} catch (error) {
 				console.log(error)
 			} finally {
@@ -145,6 +144,7 @@ const New = () => {
 				<div className='flex flex-col gap-6'>
 					{lastNews.map(news => (
 						<Card
+							key={news.id}
 							to={`news-content/${news.id}`}
 							title={news.title}
 							imageUrl={news.poster}

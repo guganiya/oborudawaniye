@@ -53,7 +53,7 @@ const Innovations = () => {
 			params.append('page_size', PAGE_SIZE)
 
 			const url = `/innovations?${params.toString()}`
-			console.log('Fetching:', url)
+
 
 			const response = await apiClient.get(url, {
 				signal: abortControllerRef.current.signal,
@@ -65,7 +65,7 @@ const Innovations = () => {
 				data.count ||
 				data.total ||
 				(data.results ? data.count : newItems.length)
-			console.log(data)
+
 			setTotal(totalCount)
 			const newHasMore = pageNum * PAGE_SIZE < totalCount
 			setHasMore(newHasMore)

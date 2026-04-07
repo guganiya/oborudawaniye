@@ -144,7 +144,7 @@ const Support = () => {
 	return (
 		<div className='flex flex-col min-h-screen bg-white'>
 			<Navbar />
-			<main className='flex-grow pt-10'>
+			<main className='flex-grow pt-10 mt-20'>
 				<div className='max-w-6xl mx-auto p-6 pt-12'>
 					<h1 className='text-3xl font-bold text-gray-900 mb-8'>
 						{t('support_title')}

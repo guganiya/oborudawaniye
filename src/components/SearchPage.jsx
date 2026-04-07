@@ -133,7 +133,7 @@ const SearchPage = () => {
 			}
 
 			const url = `/products?${params.toString()}`
-			console.log('Fetching:', url)
+
 
 			const response = await apiClient.get(url, {
 				signal: abortControllerRef.current.signal

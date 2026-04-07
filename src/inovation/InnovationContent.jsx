@@ -22,7 +22,6 @@ const InnovationContent = () => {
 				const response = await apiClient.get(`/innovations/${id}`)
 				const data = response.data
 				setInnovation(data)
-				console.log('Innovation data:', data)
 			} catch (err) {
 				console.error('Error fetching innovation:', err)
 				setError(err.response?.data?.message || t('innovation_err_load'))

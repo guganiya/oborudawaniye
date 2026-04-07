@@ -20,7 +20,6 @@ const Hero = () => {
 				const response = await apiClient.get('/get-banners')
 				const data = await response.data
 				setItems(data)
-				console.log(data)
 			} catch (error) {
 				console.log(error)
 			} finally {

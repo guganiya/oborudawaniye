@@ -125,7 +125,10 @@ const Navbar = () => {
 								{Object.keys(languages).map(lng => (
 									<button
 										key={lng}
-										onClick={() => changeLanguage(lng)}
+										onClick={() => {
+											changeLanguage(lng)
+											window.location.reload()
+										}}
 										className='w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors'
 									>
 										<div className='flex items-center gap-3'>
@@ -189,6 +192,7 @@ const Navbar = () => {
 									key={lng}
 									onClick={() => {
 										changeLanguage(lng)
+										window.location.reload()
 										setIsOpen(false)
 									}}
 									className='flex flex-col items-center gap-2'
