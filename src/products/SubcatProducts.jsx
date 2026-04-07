@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useTranslation } from 'react-i18next' // Добавлено
+import { useTranslation } from 'react-i18next'
 import {
 	Loader2,
 	ChevronRight,
@@ -17,10 +17,10 @@ import apiClient from '../api/api'
 const SubCategoryProducts = () => {
 	const { subId } = useParams()
 	const navigate = useNavigate()
-	const { t, i18n } = useTranslation() // Добавлено
+	const { t, i18n } = useTranslation()
 
 	// State
-	const [items, setItems] = useState([])
+	const [items, setItems] = useState([]) // Храним все загруженные товары здесь
 	const [searchTerm, setSearchTerm] = useState('')
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
@@ -28,16 +28,13 @@ const SubCategoryProducts = () => {
 	const [page, setPage] = useState(1)
 	const [total, setTotal] = useState(0)
 
-	// Refs for Infinite Scroll
+	// Refs
 	const sentinelRef = useRef(null)
 	const observerRef = useRef(null)
 	const pageRef = useRef(1)
 	const busyRef = useRef(false)
-	const abortControllerRef = useRef(null)
 
-	pageRef.current = page
-
-	// Хелпер для локализации полей из БД
+	// Хелпер для локализации
 	const getLoc = (item, field) => {
 		if (!item) return ''
 		const lang = i18n.language
@@ -46,32 +43,36 @@ const SubCategoryProducts = () => {
 		return item[`${field}_ru`] || item[field]
 	}
 
+	// --- ОФЛАЙН ФИЛЬТРАЦИЯ ---
+	// Этот массив пересчитывается мгновенно при вводе в поиск
+	const filteredItems = items.filter(product => {
+		const name = getLoc(product, 'name').toLowerCase()
+		const desc = getLoc(product, 'short_description').toLowerCase()
+		const query = searchTerm.toLowerCase()
+		return name.includes(query) || desc.includes(query)
+	})
+
 	const loadProducts = useCallback(
-		async (pageNum, query = '', append = false) => {
+		async (pageNum, append = false) => {
 			if (busyRef.current) return
-
-			if (abortControllerRef.current) abortControllerRef.current.abort()
-			abortControllerRef.current = new AbortController()
-
 			busyRef.current = true
+
 			if (!append) setLoading(true)
 			else setLoadingMore(true)
 
 			try {
-				const params = new URLSearchParams()
-				params.append('subcategory', subId)
-				params.append('page', pageNum)
-				if (query) params.append('search', query)
-
-				const response = await apiClient.get(`/products?${params.toString()}`, {
-					signal: abortControllerRef.current.signal,
+				// В офлайн-режиме мы НЕ передаем 'search' в API
+				const response = await apiClient.get('/products', {
+					params: {
+						subcategory: subId,
+						page: pageNum,
+					},
 				})
 
 				const data = response.data
 				const newItems = data.results || []
-				const totalCount = data.count || 0
 
-				setTotal(totalCount)
+				setTotal(data.count || 0)
 				setHasMore(data.next !== null)
 
 				if (append) {
@@ -80,32 +81,41 @@ const SubCategoryProducts = () => {
 					setItems(newItems)
 				}
 			} catch (err) {
-				if (err.name !== 'AbortError') console.error('Fetch error:', err)
+				console.error('Fetch error:', err)
 			} finally {
 				setLoading(false)
 				setLoadingMore(false)
 				busyRef.current = false
-				abortControllerRef.current = null
 			}
 		},
 		[subId],
 	)
 
+	// Сброс при смене категории
 	useEffect(() => {
 		setPage(1)
-		setHasMore(true)
-		loadProducts(1, searchTerm, false)
-	}, [subId, searchTerm, loadProducts])
+		pageRef.current = 1
+		setItems([])
+		loadProducts(1, false)
+	}, [subId, loadProducts])
 
+	// Infinite Scroll (работает только когда поиск пустой)
 	useEffect(() => {
 		if (observerRef.current) observerRef.current.disconnect()
 
 		observerRef.current = new IntersectionObserver(
 			([entry]) => {
-				if (entry.isIntersecting && hasMore && !busyRef.current && !loading) {
+				// Подгружаем только если: доскроллили, есть еще данные, не заняты И ПОЛЕ ПОИСКА ПУСТОЕ
+				if (
+					entry.isIntersecting &&
+					hasMore &&
+					!busyRef.current &&
+					searchTerm === ''
+				) {
 					const nextPage = pageRef.current + 1
 					setPage(nextPage)
-					loadProducts(nextPage, searchTerm, true)
+					pageRef.current = nextPage
+					loadProducts(nextPage, true)
 				}
 			},
 			{ rootMargin: '400px' },
@@ -113,9 +123,8 @@ const SubCategoryProducts = () => {
 
 		if (sentinelRef.current) observerRef.current.observe(sentinelRef.current)
 		return () => observerRef.current?.disconnect()
-	}, [hasMore, loading, loadProducts, searchTerm])
+	}, [hasMore, loadProducts, searchTerm])
 
-	// Данные для шапки и крошек (берем из первого товара)
 	const categoryName =
 		items.length > 0 ? getLoc(items[0], 'category') : t('products_catalog')
 	const subcategoryName =
@@ -125,6 +134,7 @@ const SubCategoryProducts = () => {
 		<div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
 			<Navbar />
 
+			{/* Фоновый текст (декоративный) */}
 			<div className='absolute top-44 left-0 w-full opacity-[0.02] pointer-events-none select-none overflow-hidden'>
 				<div className='text-[15rem] md:text-[25rem] font-black uppercase leading-none block whitespace-nowrap'>
 					{subcategoryName}
@@ -143,7 +153,7 @@ const SubCategoryProducts = () => {
 						<ChevronRight size={10} className='text-slate-300' />
 						<button
 							onClick={() => navigate(-1)}
-							className='hover:text-[#e21e26] transition-colors duration-300 uppercase tracking-[0.15em]'
+							className='hover:text-[#e21e26] transition-colors duration-300 uppercase'
 						>
 							{categoryName}
 						</button>
@@ -153,13 +163,14 @@ const SubCategoryProducts = () => {
 						</span>
 					</nav>
 
+					{/* Input поиска */}
 					<div className='relative w-full md:w-80 group'>
 						<input
 							type='text'
 							placeholder={t('products_search_placeholder')}
 							value={searchTerm}
 							onChange={e => setSearchTerm(e.target.value)}
-							className='w-full bg-transparent border border-black p-3 pr-10 text-[11px] font-black uppercase tracking-widest focus:border-[#e21e26] transition-all outline-none placeholder:text-gray-300 rounded-2xl'
+							className='w-full bg-transparent border border-black p-3 pr-10 text-[11px] font-black uppercase tracking-widest focus:border-[#e21e26] transition-all outline-none rounded-2xl'
 						/>
 						<div className='absolute right-3 top-1/2 -translate-y-1/2'>
 							{searchTerm ? (
@@ -197,7 +208,7 @@ const SubCategoryProducts = () => {
 					<>
 						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16'>
 							<AnimatePresence mode='popLayout'>
-								{items.map(product => (
+								{filteredItems.map(product => (
 									<ProductCard
 										key={product.id}
 										product={product}
@@ -207,7 +218,17 @@ const SubCategoryProducts = () => {
 							</AnimatePresence>
 						</div>
 
-						<div ref={sentinelRef} className='h-20' />
+						{/* Сообщение если ничего не найдено офлайн */}
+						{filteredItems.length === 0 && (
+							<div className='text-center py-20'>
+								<p className='text-gray-300 text-[10px] font-black uppercase tracking-widest'>
+									{t('no_results_found')}
+								</p>
+							</div>
+						)}
+
+						{/* Сентинель для скролла виден только если поиск пустой */}
+						{searchTerm === '' && <div ref={sentinelRef} className='h-20' />}
 
 						{loadingMore && (
 							<div className='flex justify-center py-10'>
@@ -215,7 +236,7 @@ const SubCategoryProducts = () => {
 							</div>
 						)}
 
-						{!hasMore && items.length > 0 && (
+						{!hasMore && items.length > 0 && searchTerm === '' && (
 							<div className='text-center py-20 border-t border-gray-50 mt-10'>
 								<p className='text-gray-300 text-[9px] font-black uppercase tracking-[0.5em]'>
 									{t('products_end_of_catalog')} — {total}{' '}
@@ -247,12 +268,12 @@ const ProductCard = ({ product, getLoc }) => (
 					className='w-full h-full object-cover transition-all duration-700 md:grayscale group-hover:grayscale-0 group-hover:scale-110'
 				/>
 				<div className='absolute top-4 right-4'>
-					<span className='bg-black text-white text-[8px] font-black uppercase px-3 py-1.5 tracking-tighter rounded-full'>
+					<span className='bg-black text-white text-[8px] font-black uppercase px-3 py-1.5 rounded-full'>
 						{product.size}
 					</span>
 				</div>
-				<div className='absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center'>
-					<div className='bg-white p-4 rounded-full scale-50 group-hover:scale-100 transition-transform duration-500 shadow-xl'>
+				<div className='absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
+					<div className='bg-white p-4 rounded-full scale-50 group-hover:scale-100 transition-transform shadow-xl'>
 						<Maximize2 size={20} className='text-black' />
 					</div>
 				</div>
@@ -260,7 +281,7 @@ const ProductCard = ({ product, getLoc }) => (
 
 			<div className='space-y-3'>
 				<div className='flex justify-between items-start'>
-					<h3 className='text-black text-xl font-black uppercase tracking-tighter leading-none group-hover:text-[#e21e26] transition-colors duration-300'>
+					<h3 className='text-black text-xl font-black uppercase tracking-tighter leading-none group-hover:text-[#e21e26] transition-colors'>
 						{getLoc(product, 'name')}
 					</h3>
 					<ArrowRight
@@ -268,7 +289,7 @@ const ProductCard = ({ product, getLoc }) => (
 						className='opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#e21e26]'
 					/>
 				</div>
-				<p className='text-gray-400 text-[11px] font-medium leading-relaxed line-clamp-2 uppercase'>
+				<p className='text-gray-400 text-[11px] font-medium line-clamp-2 uppercase'>
 					{getLoc(product, 'short_description')}
 				</p>
 			</div>
