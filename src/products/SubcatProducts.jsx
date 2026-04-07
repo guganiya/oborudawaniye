@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import {useParams, Link, useNavigate} from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
@@ -12,6 +12,7 @@ import {
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import apiClient from "../api/api";
+import {nav} from "framer-motion/m";
 
 const PAGE_SIZE = 4; // Adjusted for a 4-column grid
 const brandRed = "#e21e26";
@@ -119,30 +120,46 @@ const SubCategoryProducts = () => {
   // Labels for Breadcrumbs
   const categoryName = items[0]?.category || "Catalog";
   const subcategoryName = items[0]?.subcategory || "Products";
-
+  const navigate = useNavigate()
   return (
     <div className="bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white">
       <Navbar />
 
       <div className="absolute top-44 left-0 w-full opacity-[0.02] pointer-events-none select-none overflow-hidden">
-        <span className="text-[15rem] md:text-[25rem] font-black uppercase leading-none block whitespace-nowrap">
+        <button onClick={() => navigate(-1)} className="text-[15rem] md:text-[25rem] font-black uppercase leading-none block whitespace-nowrap">
           {subcategoryName}
-        </span>
+        </button>
       </div>
 
       <main className="max-w-[1400px] mx-auto px-6 pt-44 pb-32 relative z-10">
         {/* HEADER & SEARCH */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 border-b border-gray-100 pb-8">
-          <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-            <Link to="/products" className="hover:text-black transition-colors">
-              Catalog
+          <nav className="flex items-center gap-2.5 text-[10px] sf-bold uppercase tracking-[0.15em] text-slate-400">
+            {/* Главная/Каталог */}
+            <Link
+                to="/products"
+                className="hover:text-[#1d70a2] transition-colors duration-300 flex items-center gap-1"
+            >
+             Catalog
             </Link>
-            <ChevronRight size={12} />
-            <span>{categoryName}</span>
-            <ChevronRight size={12} />
-            <span className="text-[#e21e26]">{subcategoryName}</span>
-          </nav>
 
+            <ChevronRight size={10} className="text-slate-300" />
+
+            {/* Категория (Кликабельная) */}
+            <button
+                onClick={() => navigate(-1)}
+                className="hover:text-[#1d70a2] transition-colors duration-300 uppercase tracking-[0.15em] cursor-pointer"
+            >
+              {categoryName}
+            </button>
+
+            <ChevronRight size={10} className="text-slate-300" />
+
+            {/* Подкатегория (Активная страница) */}
+            <span className="text-[#e21e26] font-black truncate max-w-[150px]">
+    {subcategoryName}
+  </span>
+          </nav>
           <div className="relative w-full md:w-80 group">
             <input
               type="text"
