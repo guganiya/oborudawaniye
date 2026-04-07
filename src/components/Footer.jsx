@@ -17,7 +17,7 @@ const Footer = () => {
 		const getCategories = async () => {
 			try {
 				const response = await apiClient.get('/get-news-categories')
-				setCategories(response.data)
+				setCategories(response.data.slice(0, 5))
 			} catch (error) {
 				console.error('Ошибка при загрузке категорий:', error)
 			}
