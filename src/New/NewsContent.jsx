@@ -51,37 +51,35 @@ const NewsContent = () => {
 
 			<AnimatePresence>
 				{hoveredProduct && (
-					<Link to={`/product/${hoveredProduct.id}`}>
-						<motion.div
-							initial={{ opacity: 0, scale: 0.8, y: 10 }}
-							animate={{ opacity: 1, scale: 1, y: 0 }}
-							exit={{ opacity: 0, scale: 0.8 }}
-							className='fixed z-[100] pointer-events-none bg-white p-2 shadow-2xl border border-gray-100 rounded-lg'
-							style={{
-								left: Math.min(mousePos.x + 20, window.innerWidth - 200),
-								top: Math.min(mousePos.y - 120, window.innerHeight - 200),
-							}}
-						>
-							<div className='w-40 h-40 bg-gray-50 flex items-center justify-center rounded'>
-								<img
-									src={getProductImage(hoveredProduct)}
-									alt={hoveredProduct.name}
-									className='max-w-full max-h-full object-contain m-auto'
-									onError={e => {
-										e.target.src = '/placeholder-image.jpg'
-									}}
-								/>
-							</div>
-							<p className='text-[10px] font-black uppercase mt-2 text-center text-gray-900'>
-								{hoveredProduct.name}
+					<motion.div
+						initial={{ opacity: 0, scale: 0.8, y: 10 }}
+						animate={{ opacity: 1, scale: 1, y: 0 }}
+						exit={{ opacity: 0, scale: 0.8 }}
+						className='fixed z-[100] pointer-events-none bg-white p-2 shadow-2xl border border-gray-100 rounded-lg'
+						style={{
+							left: Math.min(mousePos.x + 20, window.innerWidth - 200),
+							top: Math.min(mousePos.y - 120, window.innerHeight - 200),
+						}}
+					>
+						<div className='w-40 h-40 bg-gray-50 flex items-center justify-center rounded'>
+							<img
+								src={getProductImage(hoveredProduct)}
+								alt={hoveredProduct.name}
+								className='max-w-full max-h-full object-contain m-auto'
+								onError={e => {
+									e.target.src = '/placeholder-image.jpg'
+								}}
+							/>
+						</div>
+						<p className='text-[10px] font-black uppercase mt-2 text-center text-gray-900'>
+							{hoveredProduct.name}
+						</p>
+						{hoveredProduct.category && (
+							<p className='text-[8px] text-gray-500 text-center mt-1'>
+								{hoveredProduct.category}
 							</p>
-							{hoveredProduct.category && (
-								<p className='text-[8px] text-gray-500 text-center mt-1'>
-									{hoveredProduct.category}
-								</p>
-							)}
-						</motion.div>
-					</Link>
+						)}
+					</motion.div>
 				)}
 			</AnimatePresence>
 
@@ -104,7 +102,8 @@ const NewsContent = () => {
 							</h3>
 							<div className='flex flex-wrap justify-center gap-6'>
 								{newsItem.products?.map(prod => (
-									<span
+									<Link
+										to={`/product/${prod.id}`}
 										key={prod.id}
 										onMouseEnter={() => setHoveredProduct(prod)}
 										onMouseLeave={() => setHoveredProduct(null)}
@@ -113,7 +112,7 @@ const NewsContent = () => {
 										style={{ color: brandRed }}
 									>
 										{prod.name}
-									</span>
+									</Link>
 								))}
 							</div>
 						</div>
