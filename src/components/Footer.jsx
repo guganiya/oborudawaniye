@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Twitter, Youtube, ArrowUp } from 'lucide-react'
+import { FaTiktok, FaInstagram, FaPhoneAlt } from 'react-icons/fa' // Импорт иконок
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/api'
 
 const Footer = () => {
 	const { t } = useTranslation()
-	const [categories, setCategories] = useState([]) // Состояние для категорий из API
+	const [categories, setCategories] = useState([])
 
 	const scrollToTop = () => {
 		window.scrollTo({ top: 0, behavior: 'smooth' })
 	}
 
-	// Эффект для получения категорий, как в компоненте New
 	useEffect(() => {
 		const getCategories = async () => {
 			try {
@@ -25,11 +25,32 @@ const Footer = () => {
 		getCategories()
 	}, [])
 
-	// Формируем секции. Колонку "Products" теперь строим динамически на основе категорий
+	const devAndContactLinks = [
+		{
+			icon: <FaTiktok />,
+			path: 'https://www.tiktok.com/@kadyr.muhammedow2',
+			label: 'TikTok',
+		},
+		{
+			icon: <FaInstagram />,
+			path: 'https://www.instagram.com/codeassasinking',
+			label: 'Instagram',
+		},
+		{
+			icon: <FaPhoneAlt />,
+			path: 'tel:+99361862535',
+			label: '+993 61 86 25 35',
+		},
+		{
+			icon: <FaPhoneAlt />,
+			path: 'tel:+99361068912',
+			label: '+993 61 06 89 12',
+		},
+	]
+
 	const sections = [
 		{
 			title: t('footer_sec_products'),
-			// Здесь мы мапим данные из API в формат ссылок
 			links: categories.map(cat => ({
 				name: cat.name,
 				path: `/news?category_id=${cat.id}`,
@@ -77,7 +98,6 @@ const Footer = () => {
 						</div>
 					</div>
 
-					{/* Динамические колонки */}
 					{sections.map(section => (
 						<div key={section.title} className='space-y-6'>
 							<h4 className='text-[12px] font-black uppercase tracking-[0.3em] text-white'>
@@ -99,15 +119,44 @@ const Footer = () => {
 					))}
 				</div>
 
-				{/* НИЖНЯЯ ЧАСТЬ */}
-				<div className='pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6'>
-					<div className='text-[11px] text-white/40 font-bold uppercase tracking-widest'>
+				{/* НИЖНЯЯ ЧАСТЬ (Copyright + Developers + Back to top) */}
+				<div className='pt-10 border-t border-white/10 flex flex-col lg:flex-row justify-between items-center gap-10'>
+					{/* Copyright */}
+					<div className='text-[11px] text-white/40 font-bold uppercase tracking-widest whitespace-nowrap order-3 lg:order-1'>
 						{t('footer_copyright')}
 					</div>
 
+					{/* DEVELOPERS BLOCK */}
+					<div className='flex flex-wrap items-center justify-center gap-x-8 gap-y-4 order-1 lg:order-2'>
+						<div className='text-white/30 text-[10px] uppercase font-black tracking-[0.2em]'>
+							Developed by:
+						</div>
+						<div className='flex flex-wrap items-center justify-center gap-x-6 gap-y-3'>
+							{devAndContactLinks.map((item, idx) => (
+								<a
+									key={idx}
+									href={item.path}
+									target={item.path.startsWith('tel:') ? '_self' : '_blank'}
+									rel='noopener noreferrer'
+									className='text-white/50 hover:text-[#e21e26] transition-all duration-300 flex items-center gap-2 group'
+								>
+									<span className='text-base group-hover:scale-110 transition-transform'>
+										{item.icon}
+									</span>
+									{item.path.startsWith('tel:') && (
+										<span className='text-[11px] font-mono whitespace-nowrap tracking-tighter'>
+											{item.label}
+										</span>
+									)}
+								</a>
+							))}
+						</div>
+					</div>
+
+					{/* Back to Top */}
 					<button
 						onClick={scrollToTop}
-						className='group flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-colors hover:text-[#e21e26]'
+						className='group flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-colors hover:text-[#e21e26] order-2 lg:order-3'
 					>
 						{t('footer_back_to_top')}
 						<div className='p-2 border border-white/20 group-hover:border-[#e21e26] transition-colors'>

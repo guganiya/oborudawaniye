@@ -126,7 +126,7 @@ const NewsContent = () => {
 					)}
 
 					<div className='mb-12'>
-						<p className='text-gray-900 text-xl md:text-2xl font-bold leading-tight tracking-tight text-justify [text-align-last:left] text-balance'>
+						<p className='text-gray-900 text-xl md:text-2xl leading-tight tracking-tight text-justify [text-align-last:left] text-balance'>
 							{/* text-justify ровняет края */}
 							{/* text-align-last:left не дает последней строке растягиваться */}
 							{/* text-balance распределяет слова так, чтобы строки были одинаковой длины */}
