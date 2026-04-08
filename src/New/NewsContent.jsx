@@ -61,11 +61,11 @@ const NewsContent = () => {
 							top: Math.min(mousePos.y - 120, window.innerHeight - 200),
 						}}
 					>
-						<div className='w-40 h-40 bg-gray-50 flex items-center justify-center rounded'>
+						<div className='w-40 h-40 bg-gray-50 grid place-items-center rounded overflow-hidden'>
 							<img
 								src={getProductImage(hoveredProduct)}
 								alt={hoveredProduct.name}
-								className='block m-auto max-w-full max-h-full object-contain'
+								className='max-w-full max-h-full object-contain display-block'
 								onError={e => {
 									e.target.src = '/placeholder-image.jpg'
 								}}
