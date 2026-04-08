@@ -32,7 +32,7 @@ const resources = {
 			footer_logo_alt: 'AlyX Logo',
 			footer_description:
 				'World leader in moving light technology. High-quality products for concerts, theaters, and television.',
-			footer_sec_products: 'Products',
+			footer_sec_products: 'News',
 			footer_sec_company: 'Company',
 			footer_sec_support: 'Support',
 			footer_link_moving_lights: 'Moving Lights',
@@ -333,7 +333,7 @@ const resources = {
 			footer_logo_alt: 'Логотип Alyx',
 			footer_description:
 				'Мировой лидер в технологии управляемого света. Высококачественные продукты для концертов, театров и телевидения.',
-			footer_sec_products: 'Продукты',
+			footer_sec_products: 'Новости',
 			footer_sec_company: 'Компания',
 			footer_sec_support: 'Поддержка',
 			footer_link_moving_lights: 'Вращающиеся головы',
@@ -649,7 +649,7 @@ const resources = {
 			footer_logo_alt: 'Alyx Logotipi',
 			footer_description:
 				'Öwrülýän yşyk tehnologiýasynda dünýä lideri. Konsertler, teatrlary we telewideniýe üçin ýokary hilli önümler.',
-			footer_sec_products: 'Önümler',
+			footer_sec_products: 'Täzelikler',
 			footer_sec_company: 'Kompaniýa',
 			footer_sec_support: 'Goldaw',
 			footer_link_moving_lights: 'Öwrülýän yşyklar',
