@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Twitter, Youtube, ArrowUp } from 'lucide-react'
+import { FaTiktok, FaInstagram, FaPhoneAlt } from 'react-icons/fa' // Импорт иконок для новых ссылок
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/api'
 
 const Footer = () => {
 	const { t } = useTranslation()
-	const [categories, setCategories] = useState([]) // Состояние для категорий из API
+	const [categories, setCategories] = useState([])
 
 	const scrollToTop = () => {
 		window.scrollTo({ top: 0, behavior: 'smooth' })
 	}
 
-	// Эффект для получения категорий, как в компоненте New
 	useEffect(() => {
 		const getCategories = async () => {
 			try {
@@ -25,31 +25,70 @@ const Footer = () => {
 		getCategories()
 	}, [])
 
-	// Формируем секции. Колонку "Products" теперь строим динамически на основе категорий
+	// Массив дополнительных контактов (Разработчики)
+	const devAndContactLinks = [
+		{
+			icon: <FaTiktok size={14} />,
+			path: 'https://www.tiktok.com/@kadyr.muhammedow2',
+			label: 'TikTok',
+		},
+		{
+			icon: <FaInstagram size={14} />,
+			path: 'https://www.instagram.com/codeassasinking',
+			label: 'Instagram',
+		},
+		{
+			icon: <FaPhoneAlt size={12} />,
+			path: 'tel:+99361862535',
+			label: '+993 61 86 25 35',
+		},
+		{
+			icon: <FaPhoneAlt size={12} />,
+			path: 'tel:+99361068912',
+			label: '+993 61 06 89 12',
+		},
+	]
+
 	const sections = [
 		{
 			title: t('footer_sec_products'),
-			// Здесь мы мапим данные из API в формат ссылок
 			links: categories.map(cat => ({
 				name: cat.name,
 				path: `/news?category_id=${cat.id}`,
+				isExternal: false,
 			})),
 		},
 		{
 			title: t('footer_sec_company'),
 			links: [
-				{ name: t('footer_link_about'), path: '/about-us' },
-				{ name: t('footer_link_sustainability'), path: '/products' },
-				{ name: t('footer_link_innovation'), path: '/innovation' },
-				{ name: t('footer_link_careers'), path: '/news' },
+				{ name: t('footer_link_about'), path: '/about-us', isExternal: false },
+				{
+					name: t('footer_link_sustainability'),
+					path: '/products',
+					isExternal: false,
+				},
+				{
+					name: t('footer_link_innovation'),
+					path: '/innovation',
+					isExternal: false,
+				},
+				{ name: t('footer_link_careers'), path: '/news', isExternal: false },
 			],
+		},
+		{
+			title: 'Developers / Contacts', // Заголовок для новой секции
+			links: devAndContactLinks.map(link => ({
+				name: link.label,
+				path: link.path,
+				icon: link.icon,
+				isExternal: true,
+			})),
 		},
 	]
 
 	return (
 		<footer className='relative z-10 bg-[#080808] py-20 border-t border-white/5 text-white font-sans'>
 			<div className='max-w-[1500px] mx-auto px-6 md:px-12'>
-				{/* ВЕРХНЯЯ ЧАСТЬ */}
 				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-20'>
 					<div className='lg:col-span-2 space-y-8'>
 						<Link to='/'>
@@ -77,7 +116,6 @@ const Footer = () => {
 						</div>
 					</div>
 
-					{/* Динамические колонки */}
 					{sections.map(section => (
 						<div key={section.title} className='space-y-6'>
 							<h4 className='text-[12px] font-black uppercase tracking-[0.3em] text-white'>
@@ -86,12 +124,24 @@ const Footer = () => {
 							<ul className='space-y-4'>
 								{section.links.map((link, idx) => (
 									<li key={idx}>
-										<Link
-											to={link.path}
-											className='text-[12px] font-bold uppercase tracking-widest text-white/70 transition-colors duration-300 hover:text-[#e21e26]'
-										>
-											{link.name}
-										</Link>
+										{link.isExternal ? (
+											<a
+												href={link.path}
+												target='_blank'
+												rel='noreferrer'
+												className='flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-white/70 transition-colors duration-300 hover:text-[#e21e26]'
+											>
+												{link.icon && link.icon}
+												{link.name}
+											</a>
+										) : (
+											<Link
+												to={link.path}
+												className='text-[12px] font-bold uppercase tracking-widest text-white/70 transition-colors duration-300 hover:text-[#e21e26]'
+											>
+												{link.name}
+											</Link>
+										)}
 									</li>
 								))}
 							</ul>
@@ -99,8 +149,7 @@ const Footer = () => {
 					))}
 				</div>
 
-				{/* НИЖНЯЯ ЧАСТЬ */}
-				<div className='pt-9 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6'>
+				<div className='pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6'>
 					<div className='text-[11px] text-white/40 font-bold uppercase tracking-widest'>
 						{t('footer_copyright')}
 					</div>
