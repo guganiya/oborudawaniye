@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import {
-	Facebook,
-	Instagram,
-	Twitter,
-	Youtube,
-	ArrowUp,
-	Phone,
-	MessageSquare,
-} from 'lucide-react'
+import { Facebook, Instagram, Twitter, Youtube, ArrowUp } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/api'
 
 const Footer = () => {
 	const { t } = useTranslation()
-	const [categories, setCategories] = useState([])
+	const [categories, setCategories] = useState([]) // Состояние для категорий из API
 
 	const scrollToTop = () => {
 		window.scrollTo({ top: 0, behavior: 'smooth' })
 	}
 
+	// Эффект для получения категорий, как в компоненте New
 	useEffect(() => {
 		const getCategories = async () => {
 			try {
@@ -32,9 +25,11 @@ const Footer = () => {
 		getCategories()
 	}, [])
 
+	// Формируем секции. Колонку "Products" теперь строим динамически на основе категорий
 	const sections = [
 		{
 			title: t('footer_sec_products'),
+			// Здесь мы мапим данные из API в формат ссылок
 			links: categories.map(cat => ({
 				name: cat.name,
 				path: `/news?category_id=${cat.id}`,
@@ -54,6 +49,7 @@ const Footer = () => {
 	return (
 		<footer className='relative z-10 bg-[#080808] py-20 border-t border-white/5 text-white font-sans'>
 			<div className='max-w-[1500px] mx-auto px-6 md:px-12'>
+				{/* ВЕРХНЯЯ ЧАСТЬ */}
 				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-20'>
 					<div className='lg:col-span-2 space-y-8'>
 						<Link to='/'>
@@ -81,6 +77,7 @@ const Footer = () => {
 						</div>
 					</div>
 
+					{/* Динамические колонки */}
 					{sections.map(section => (
 						<div key={section.title} className='space-y-6'>
 							<h4 className='text-[12px] font-black uppercase tracking-[0.3em] text-white'>
@@ -100,54 +97,12 @@ const Footer = () => {
 							</ul>
 						</div>
 					))}
-
-					{/* КОЛОНКА РАЗРАБОТЧИКОВ */}
-					<div className='space-y-6'>
-						<h4 className='text-[12px] font-black uppercase tracking-[0.3em] text-[#e21e26]'>
-							Developers
-						</h4>
-						<div className='space-y-4'>
-							<a
-								href='tel:+79991234567'
-								className='flex items-center gap-3 text-[11px] font-bold text-white/60 hover:text-white transition-colors'
-							>
-								<Phone size={14} /> +7 (999) 123-45-67
-							</a>
-							<div className='flex gap-4'>
-								<a
-									href='https://instagram.com/dev_handle'
-									target='_blank'
-									rel='noreferrer'
-									className='text-white/60 hover:text-[#e21e26] transition-all'
-								>
-									<Instagram size={18} />
-								</a>
-								<a
-									href='https://tiktok.com/@dev_handle'
-									target='_blank'
-									rel='noreferrer'
-									className='text-white/60 hover:text-[#e21e26] transition-all'
-								>
-									<MessageSquare size={18} />{' '}
-									{/* Заменил на иконку мессенджера/тикток */}
-								</a>
-							</div>
-						</div>
-					</div>
 				</div>
 
 				{/* НИЖНЯЯ ЧАСТЬ */}
 				<div className='pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6'>
 					<div className='text-[11px] text-white/40 font-bold uppercase tracking-widest'>
 						{t('footer_copyright')}
-					</div>
-
-					{/* Дополнительная подпись в самом низу */}
-					<div className='text-[10px] text-white/20 uppercase tracking-widest font-medium'>
-						Handcrafted by{' '}
-						<span className='text-white/40 group-hover:text-[#e21e26] transition-colors'>
-							Dev Name
-						</span>
 					</div>
 
 					<button
