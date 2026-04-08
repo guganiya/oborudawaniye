@@ -65,7 +65,7 @@ const NewsContent = () => {
 							<img
 								src={getProductImage(hoveredProduct)}
 								alt={hoveredProduct.name}
-								className='max-w-full max-h-full object-contain m-auto'
+								className='block m-auto max-w-full max-h-full object-contain'
 								onError={e => {
 									e.target.src = '/placeholder-image.jpg'
 								}}
