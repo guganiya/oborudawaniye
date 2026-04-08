@@ -55,30 +55,37 @@ const NewsContent = () => {
 						initial={{ opacity: 0, scale: 0.8, y: 10 }}
 						animate={{ opacity: 1, scale: 1, y: 0 }}
 						exit={{ opacity: 0, scale: 0.8 }}
-						className='fixed z-[100] pointer-events-none bg-white p-2 shadow-2xl border border-gray-100 rounded-lg'
+						className='fixed z-[100] pointer-events-none bg-white p-2 shadow-2xl border border-gray-100 rounded-lg flex flex-col items-center'
 						style={{
 							left: Math.min(mousePos.x + 20, window.innerWidth - 200),
-							top: Math.min(mousePos.y - 120, window.innerHeight - 200),
+							top: Math.min(mousePos.y - 120, window.innerHeight - 250),
+							width: '180px', // Фиксированная ширина карточки
 						}}
 					>
-						<div className='w-40 h-40 bg-gray-50 grid place-items-center rounded overflow-hidden'>
+						{/* Контейнер картинки: используем shrink-0, чтобы текст не сжимал блок */}
+						<div className='w-40 h-40 bg-gray-50 flex items-center justify-center rounded shrink-0 overflow-hidden'>
 							<img
 								src={getProductImage(hoveredProduct)}
 								alt={hoveredProduct.name}
-								className='max-w-full max-h-full object-contain display-block'
+								className='max-w-[90%] max-h-[90%] object-contain block'
 								onError={e => {
 									e.target.src = '/placeholder-image.jpg'
 								}}
 							/>
 						</div>
-						<p className='text-[10px] font-black uppercase mt-2 text-center text-gray-900'>
-							{hoveredProduct.name}
-						</p>
-						{hoveredProduct.category && (
-							<p className='text-[8px] text-gray-500 text-center mt-1'>
-								{hoveredProduct.category}
+
+						{/* Контейнер текста: отделен от картинки */}
+						<div className='w-full mt-2 flex flex-col items-center'>
+							<p className='text-[10px] font-black uppercase text-center text-gray-900 leading-tight w-full break-words px-1'>
+								{hoveredProduct.name}
 							</p>
-						)}
+
+							{hoveredProduct.category && (
+								<p className='text-[8px] text-gray-500 text-center mt-1 italic'>
+									{hoveredProduct.category}
+								</p>
+							)}
+						</div>
 					</motion.div>
 				)}
 			</AnimatePresence>
@@ -118,8 +125,8 @@ const NewsContent = () => {
 						</div>
 					)}
 
-					<div className='space-y-6 text-gray-700 leading-relaxed text-[15px] md:text-[16px]'>
-						<p className='font-bold text-gray-900 text-lg mb-8'>
+					<div className='max-w-3xl mx-auto space-y-6 text-gray-700 leading-relaxed text-[15px] md:text-[17px]'>
+						<p className='font-medium text-gray-900 text-xl md:text-2xl mb-10 leading-snug text-balance'>
 							{newsItem.content}
 						</p>
 					</div>
