@@ -4,13 +4,14 @@ import Footer from '../components/Footer'
 import { Search, ChevronDown, Check, Loader2, X } from 'lucide-react'
 import apiClient from '../api/api.js'
 import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next' // Импорт хука
+import { useTranslation } from 'react-i18next'
+import { motion } from 'framer-motion' // Добавил импорт для анимаций
 
 const PAGE_SIZE = 3
 const brandRed = '#e21e26'
 
 const SearchPage = () => {
-	const { t } = useTranslation() // Инициализация
+	const { t } = useTranslation()
 
 	// Search states
 	const [mainSearch, setMainSearch] = useState('')
@@ -219,32 +220,55 @@ const SearchPage = () => {
 		<div className='min-h-screen flex flex-col bg-white overflow-hidden text-black'>
 			<Navbar />
 
-			<main className='flex-grow pt-32 md:pt-48 pb-20 px-6'>
-				<div className='relative max-w-[1200px] mx-auto z-10'>
-					<div className='relative mb-20 md:mb-32'>
-						<div className='absolute -top-12 md:-top-24 right-0 md:right-0 opacity-[0.04] pointer-events-none -z-10'>
-							<span className='text-[7rem] md:text-[22rem] font-black uppercase leading-none select-none whitespace-nowrap'>
-								{t('search.bg_text')}
-							</span>
-						</div>
-						<h1 className='relative text-5xl md:text-8xl font-bold uppercase tracking-tighter'>
-							{t('search.title')} <span style={{ color: brandRed }}>.</span>
-						</h1>
-					</div>
+			<header className='relative pt-52 pb-20 px-6 bg-black overflow-hidden'>
+				{/* ГРАДИЕНТНЫЙ ФОН */}
+				<div
+					className='absolute inset-0 z-0'
+					style={{
+						background:
+							'linear-gradient(to left, rgba(226, 30, 38, 0.15) 0%, rgba(0, 0, 0, 1) 70%)',
+					}}
+				/>
 
-					<div className='relative mb-20 group'>
-						<div className='absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-black'>
-							<Search size={28} strokeWidth={1.5} />
+				{/* Световое пятно справа */}
+				<div className='absolute top-1/2 right-[-10%] -translate-y-1/2 w-[600px] h-[600px] bg-[#e21e26]/15 blur-[130px] rounded-full pointer-events-none' />
+
+				{/* ФОНОВЫЙ ТЕКСТ (Watermark) */}
+				<div className='absolute inset-0 opacity-[0.05] pointer-events-none select-none overflow-hidden'>
+					<span
+						className='absolute -bottom-10 -left-10 text-[8rem] md:text-[22rem] font-black uppercase leading-none text-transparent whitespace-nowrap'
+						style={{ WebkitTextStroke: '2px white' }}
+					>
+						{t('search.bg_text')}
+					</span>
+				</div>
+
+				<div className='max-w-[1200px] mx-auto relative z-10'>
+					<motion.h1
+						initial={{ opacity: 0, x: -20 }}
+						animate={{ opacity: 1, x: 0 }}
+						className='text-6xl md:text-9xl font-[1000] uppercase tracking-tighter leading-none text-white italic mb-16'
+					>
+						{t('search.title')}{' '}
+					</motion.h1>
+
+					<div className='relative group'>
+						<div className='absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-[#e21e26] pl-2'>
+							<Search size={32} strokeWidth={2} />
 						</div>
 						<input
 							type='text'
 							placeholder={t('search.placeholder')}
 							value={mainSearch}
 							onChange={e => setMainSearch(e.target.value)}
-							className='w-full text-2xl md:text-4xl font-light border-b-2 border-black pl-12 md:pl-16 py-6 focus:outline-none placeholder:text-[#e21e26]'
+							className='w-full text-2xl md:text-5xl font-light bg-transparent border-b border-white/20 pl-14 md:pl-20 py-8 focus:outline-none focus:border-[#e21e26] transition-all text-white placeholder:text-white/20'
 						/>
 					</div>
+				</div>
+			</header>
 
+			<main className='flex-grow pb-20 px-6 pt-16'>
+				<div className='max-w-[1200px] mx-auto'>
 					<div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-16'>
 						<SmartSelect
 							label={t('search.filter_category')}
