@@ -19,7 +19,6 @@ const SubCategoryProducts = () => {
 	const navigate = useNavigate()
 	const { t, i18n } = useTranslation()
 
-	// State
 	const [items, setItems] = useState([])
 	const [searchTerm, setSearchTerm] = useState('')
 	const [loading, setLoading] = useState(true)
@@ -28,13 +27,11 @@ const SubCategoryProducts = () => {
 	const [page, setPage] = useState(1)
 	const [total, setTotal] = useState(0)
 
-	// Refs
 	const sentinelRef = useRef(null)
 	const observerRef = useRef(null)
 	const pageRef = useRef(1)
 	const busyRef = useRef(false)
 
-	// Хелпер для локализации
 	const getLoc = (item, field) => {
 		if (!item) return ''
 		const lang = i18n.language
@@ -128,9 +125,7 @@ const SubCategoryProducts = () => {
 		<div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white text-black'>
 			<Navbar />
 
-			{/* ТОЛЬКО HEADER ТЕМНЫЙ */}
 			<header className='relative pt-52 pb-20 px-6 bg-black overflow-hidden'>
-				{/* Градиент хедера */}
 				<div
 					className='absolute inset-0 z-0'
 					style={{
@@ -139,7 +134,6 @@ const SubCategoryProducts = () => {
 					}}
 				/>
 
-				{/* Фоновый текст (Watermark) */}
 				<div className='absolute inset-0 opacity-[0.05] pointer-events-none select-none overflow-hidden z-0'>
 					<div
 						className='text-[10rem] md:text-[20rem] font-black uppercase leading-none block whitespace-nowrap text-transparent'
@@ -171,7 +165,6 @@ const SubCategoryProducts = () => {
 							</span>
 						</nav>
 
-						{/* Поиск */}
 						<div className='relative w-full md:w-80 group'>
 							<input
 								type='text'
@@ -200,13 +193,12 @@ const SubCategoryProducts = () => {
 						className='text-6xl md:text-9xl font-[1000] uppercase tracking-tighter italic leading-none text-white'
 					>
 						{subcategoryName}
-						<span className='text-[#e21e26] not-italic'>.</span>
+						{/* Точка удалена отсюда, если нужно было только в заголовке, либо в карточке (см. ниже) */}
 					</motion.h1>
 				</div>
 			</header>
 
-			{/* ОСТАЛЬНОЙ КОНТЕНТ НА БЕЛОМ ФОНЕ */}
-			<main className='max-w-[1400px] mx-auto px-6 py-24 relative z-10'>
+			<main className='max-w-[1400px] mx-auto px-4 md:px-6 py-12 md:py-24 relative z-10'>
 				{loading && items.length === 0 ? (
 					<div className='flex flex-col items-center py-40 gap-4'>
 						<Loader2 className='animate-spin text-[#e21e26]' size={40} />
@@ -216,7 +208,8 @@ const SubCategoryProducts = () => {
 					</div>
 				) : (
 					<>
-						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16'>
+						{/* Сетка: на мобилках 2 колонки, карточки меньше, зазоры меньше */}
+						<div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-3 md:gap-x-8 gap-y-10 md:gap-y-16'>
 							<AnimatePresence mode='popLayout'>
 								{filteredItems.map(product => (
 									<ProductCard
@@ -269,36 +262,39 @@ const ProductCard = ({ product, getLoc }) => (
 		exit={{ opacity: 0, scale: 0.95 }}
 		className='group'
 	>
-		<Link to={`/product/${product.id}`} className='block no-underline'>
-			<div className='relative aspect-[4/5] overflow-hidden bg-[#f9f9f9] mb-6'>
+		<Link to={`/product/${product.id}`} className='block no-underline h-full'>
+			{/* Добавлен border-black/5 для легкого контура */}
+			<div className='relative aspect-[4/5] overflow-hidden bg-[#f9f9f9] mb-4 md:mb-6 border border-black/5'>
 				<img
 					src={product.poster}
 					alt={getLoc(product, 'name')}
 					className='w-full h-full object-cover transition-all duration-700 md:grayscale group-hover:grayscale-0 group-hover:scale-110'
 				/>
-				<div className='absolute top-4 right-4'>
-					<span className='bg-black text-white text-[8px] font-black uppercase px-3 py-1.5 rounded-full'>
+				<div className='absolute top-2 right-2 md:top-4 md:right-4'>
+					<span className='bg-black text-white text-[7px] md:text-[8px] font-black uppercase px-2 py-1 md:px-3 md:py-1.5 rounded-full'>
 						{product.size}
 					</span>
 				</div>
-				<div className='absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
+				{/* Скрываем лупу на мобилках для чистоты дизайна */}
+				<div className='hidden md:flex absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center'>
 					<div className='bg-white p-4 rounded-full scale-50 group-hover:scale-100 transition-transform shadow-xl'>
 						<Maximize2 size={20} className='text-black' />
 					</div>
 				</div>
 			</div>
 
-			<div className='space-y-3'>
+			<div className='space-y-2 md:space-y-3'>
 				<div className='flex justify-between items-start'>
-					<h3 className='text-black text-xl font-black uppercase tracking-tighter leading-none group-hover:text-[#e21e26] transition-colors'>
+					{/* Убрал точку из названия. Размер шрифта уменьшен для мобилок */}
+					<h3 className='text-black text-sm md:text-xl font-black uppercase tracking-tighter leading-none group-hover:text-[#e21e26] transition-colors'>
 						{getLoc(product, 'name')}
 					</h3>
 					<ArrowRight
-						size={18}
-						className='opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#e21e26]'
+						size={16}
+						className='hidden md:block opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#e21e26]'
 					/>
 				</div>
-				<p className='text-gray-400 text-[11px] font-medium line-clamp-2 uppercase'>
+				<p className='text-gray-400 text-[9px] md:text-[11px] font-medium line-clamp-2 uppercase leading-tight'>
 					{getLoc(product, 'short_description')}
 				</p>
 			</div>
