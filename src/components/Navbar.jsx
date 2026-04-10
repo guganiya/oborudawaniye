@@ -26,12 +26,11 @@ const Navbar = () => {
 			flag: '/flag/ru.png',
 			code: 'RU',
 		},
-		tk: {
-			name: t('lang_tk'),
-			// Временная ссылка на флаг Туркменистана
-			flag: '/flag/tm.png',
-			code: 'TK',
-		},
+		// tk: {
+		// 	name: t('lang_tk'),
+		// 	flag: '/flag/tm.png',
+		// 	code: 'TK',
+		// },
 	}
 
 	const currentLang = languages[i18n.language] || languages.en
@@ -73,7 +72,7 @@ const Navbar = () => {
 					<img
 						src='/logo/LOGO-ALYX-BLACK.png'
 						alt={t('nav_logo_alt')}
-						className='h-10 md:h-14 w-auto object-contain'
+						className='h-16 md:h-18 w-auto object-contain'
 					/>
 				</Link>
 

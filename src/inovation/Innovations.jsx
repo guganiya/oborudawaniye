@@ -54,7 +54,6 @@ const Innovations = () => {
 
 			const url = `/innovations?${params.toString()}`
 
-
 			const response = await apiClient.get(url, {
 				signal: abortControllerRef.current.signal,
 			})
@@ -142,32 +141,56 @@ const Innovations = () => {
 			<Navbar />
 
 			{/* Шапка страницы с фоновым текстом */}
-			<header className='relative pt-44 pb-20 px-6 border-b border-gray-50 overflow-hidden'>
-				{/* ФОНОВЫЙ ТЕКСТ (Watermark) */}
-				<div className='absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden'>
-					<span className='absolute bottom-2 md:-bottom-10 -left-10 text-[6rem] md:text-[18rem] font-black uppercase leading-none'>
+			<header className='relative pt-52 pb-24 px-6 bg-black overflow-hidden'>
+				{/* ГРАДИЕНТНЫЙ ФОН: От черного к красному справа */}
+				<div
+					className='absolute inset-0 z-0'
+					style={{
+						background:
+							'linear-gradient(to left, rgba(226, 30, 38, 0.12) 0%, rgba(0, 0, 0, 1) 60%)',
+					}}
+				/>
+
+				{/* Световое пятно для объема сверху-справа */}
+				<div className='absolute top-0 right-[-5%] w-[600px] h-[600px] bg-[#e21e26]/15 blur-[120px] rounded-full pointer-events-none' />
+
+				{/* ФОНОВЫЙ ТЕКСТ (Watermark) в новом стиле */}
+				<div className='absolute inset-0 opacity-[0.05] pointer-events-none select-none overflow-hidden z-0'>
+					<span
+						className='absolute bottom-2 md:-bottom-12 -left-10 text-[8rem] md:text-[22rem] font-black uppercase leading-none text-transparent'
+						style={{ WebkitTextStroke: '2px white' }}
+					>
 						{t('innovations_watermark')}
 					</span>
 				</div>
 
-				<div className='max-w-4xl mx-auto text-center relative z-10'>
+				<div className='max-w-5xl mx-auto text-center relative z-10'>
 					<motion.h1
-						initial={{ opacity: 0, y: -20 }}
+						initial={{ opacity: 0, y: 30 }}
 						animate={{ opacity: 1, y: 0 }}
-						className='text-4xl md:text-6xl font-black uppercase tracking-tighter italic mb-8'
+						transition={{ duration: 0.8, ease: 'easeOut' }}
+						className='text-5xl md:text-8xl font-[1000] uppercase tracking-tighter leading-[0.85] text-white mb-8 italic'
 					>
 						{t('innovations_title_main')}
-						<span className='text-[#e21e26]'>.</span>
 					</motion.h1>
-					<motion.p
+
+					<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
-						transition={{ delay: 0.2 }}
-						className='text-gray-500 text-sm md:text-base leading-relaxed font-medium px-4'
+						transition={{ delay: 0.4 }}
+						className='relative inline-block'
 					>
-						{t('innovations_subtitle')}
-					</motion.p>
+						{/* Линия-разделитель */}
+						<div className='w-24 h-[1px] bg-[#e21e26] mx-auto mb-8' />
+
+						<p className='text-gray-400 text-sm md:text-lg leading-relaxed font-medium max-w-2xl mx-auto px-4'>
+							{t('innovations_subtitle')}
+						</p>
+					</motion.div>
 				</div>
+
+				{/* Нижний декор: эффект сканирующей линии */}
+				<div className='absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#e21e26]/50 to-transparent' />
 			</header>
 
 			<main className='max-w-[1400px] mx-auto px-6 py-20'>

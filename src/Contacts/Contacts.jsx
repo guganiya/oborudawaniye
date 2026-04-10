@@ -169,23 +169,36 @@ const Contacts = () => {
 					</motion.div>
 				)}
 			</AnimatePresence>
+			<section className='relative pt-32 md:pt-52 pb-12 md:pb-24 bg-black border-b border-white/10 overflow-hidden'>
+				{/* ГРАДИЕНТНЫЙ ФОН */}
+				<div
+					className='absolute inset-0 z-0'
+					style={{
+						background:
+							'linear-gradient(to left, rgba(226, 30, 38, 0.15) 0%, rgba(0, 0, 0, 1) 70%)',
+					}}
+				/>
 
-			<section className='pt-32 md:pt-40 pb-12 md:pb-20 border-b border-black/5 bg-[#fafafa] relative overflow-hidden'>
-				<div className='absolute inset-0 opacity-[0.03] pointer-events-none'>
-					<span className='absolute -bottom-5 md:-bottom-10 -left-5 md:-left-10 text-[6rem] md:text-[20rem] font-black uppercase leading-none select-none'>
+				{/* ФОНОВЫЙ ТЕКСТ (Watermark) */}
+				<div className='absolute inset-0 opacity-[0.03] pointer-events-none z-0'>
+					<span className='absolute -bottom-5 md:-bottom-10 -left-5 md:-left-10 text-[6rem] md:text-[20rem] font-black uppercase leading-none select-none text-white'>
 						{t('contacts_bg_text')}
 					</span>
 				</div>
 
 				<div className='max-w-[1500px] mx-auto px-6 md:px-12 relative z-10'>
 					<motion.div {...fadeInUp}>
-						<h1 className='text-5xl md:text-[7rem] font-black uppercase tracking-tighter leading-[0.9] md:leading-[0.85]'>
+						<h1 className='text-5xl md:text-[8rem] font-[1000] uppercase tracking-tighter leading-[0.9] md:leading-[0.85] text-white'>
 							{t('contacts_hero_title_1')} <br className='hidden md:block' />
-							<span style={{ color: brandRed }} className='italic'>
+							<span style={{ color: '#e21e26' }} className='italic'>
 								{t('contacts_hero_title_2')}
 							</span>
 						</h1>
-						<p className='mt-6 md:mt-8 text-gray-400 text-[10px] md:text-sm uppercase tracking-[0.2em] md:tracking-[0.4em] font-bold max-w-xl leading-relaxed'>
+
+						{/* Декоративная линия перед описанием */}
+						<div className='w-12 h-[2px] bg-[#e21e26] mt-8 mb-4 md:mt-12' />
+
+						<p className='text-gray-400 text-[10px] md:text-sm uppercase tracking-[0.2em] md:tracking-[0.4em] font-bold max-w-xl leading-relaxed'>
 							{t('contacts_hero_desc')}
 						</p>
 					</motion.div>

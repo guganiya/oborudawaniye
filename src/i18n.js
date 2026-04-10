@@ -53,7 +53,7 @@ const resources = {
 			//contact
 			contacts_bg_text: 'Contact',
 			contacts_hero_title_1: 'Get in',
-			contacts_hero_title_2: 'Touch.',
+			contacts_hero_title_2: 'Touch',
 			contacts_hero_desc:
 				'Have a project in mind? Our global support network is ready to bring your vision to life with professional lighting solutions.',
 			contacts_label_email: 'Email Us',
@@ -354,7 +354,7 @@ const resources = {
 			//contact
 			contacts_bg_text: 'Контакт',
 			contacts_hero_title_1: 'Будьте на',
-			contacts_hero_title_2: 'Связи.',
+			contacts_hero_title_2: 'Связи',
 			contacts_hero_desc:
 				'У вас есть проект? Наша глобальная сеть поддержки готова воплотить ваше видение в жизнь с помощью профессиональных световых решений.',
 			contacts_label_email: 'Напишите нам',
@@ -670,7 +670,7 @@ const resources = {
 			//contact
 			contacts_bg_text: 'Habarlaşmak',
 			contacts_hero_title_1: 'Biz bilen',
-			contacts_hero_title_2: 'Habarlaşyň.',
+			contacts_hero_title_2: 'Habarlaşyň',
 			contacts_hero_desc:
 				'Taslamaňyz barmy? Biziň global goldaw ulgamymyz hünär derejeli yşyklandyryş çözgütleri bilen siziň garaýyşlaryňyzy durmuşa geçirmäge taýýar.',
 			contacts_label_email: 'E-poçta ýazyň',

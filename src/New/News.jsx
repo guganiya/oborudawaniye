@@ -342,18 +342,27 @@ const News = () => {
 		<div className='bg-[#f2f2f2] min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
 			<Navbar />
 
-			<section className='pt-40 pb-16 bg-[#fafafa] border-b border-black/5 relative overflow-hidden'>
+			<section className='relative pt-40 pb-16 bg-black border-b border-white/10 overflow-hidden'>
+				{/* ГРАДИЕНТНЫЙ ФОН */}
+				<div
+					className='absolute inset-0 z-0'
+					style={{
+						background:
+							'linear-gradient(to left, rgba(226, 30, 38, 0.15) 0%, rgba(0, 0, 0, 1) 70%)',
+					}}
+				/>
+
+				{/* ФОНОВЫЙ ТЕКСТ (Watermark) */}
 				<div className='absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden'>
-					<span className='absolute bottom-0 left-0 md:-bottom-10 md:-left-10 text-[7rem] sm:text-[10rem] md:text-[20rem] font-black uppercase leading-[0.8]'>
+					<span className='absolute bottom-0 left-0 md:-bottom-10 md:-left-10 text-[7rem] sm:text-[10rem] md:text-[20rem] font-black uppercase leading-[0.8] text-white'>
 						{t('news_watermark')}
 					</span>
 				</div>
 
 				<div className='max-w-[1500px] mx-auto px-6 md:px-12 relative z-10'>
 					<div className='flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14'>
-						<h1 className='text-5xl md:text-8xl font-black uppercase tracking-tighter italic leading-none'>
+						<h1 className='text-5xl md:text-8xl font-black uppercase tracking-tighter italic leading-none text-white'>
 							{t('news_title_main')}
-							<span style={{ color: brandRed }}>.</span>
 						</h1>
 					</div>
 
@@ -366,11 +375,17 @@ const News = () => {
 								<select
 									value={activeFilters.topic || ''}
 									onChange={e => handleFilterChange('topic', e.target.value)}
-									className='w-full bg-white border border-black/10 px-6 py-4 text-xs font-bold uppercase tracking-widest outline-none appearance-none cursor-pointer focus:border-black rounded-xl shadow-inner transition-colors'
+									className='w-full bg-white/5 border border-white/10 px-6 py-4 text-xs font-bold uppercase tracking-widest outline-none appearance-none cursor-pointer focus:border-[#e21e26] rounded-xl transition-colors text-white'
 								>
-									<option value=''>{t('news_filter_all')}</option>
+									<option value='' className='bg-black text-white'>
+										{t('news_filter_all')}
+									</option>
 									{topicOptions.map(opt => (
-										<option key={opt.id} value={String(opt.id)}>
+										<option
+											key={opt.id}
+											value={String(opt.id)}
+											className='bg-black text-white'
+										>
 											{opt.name}
 										</option>
 									))}
@@ -388,15 +403,15 @@ const News = () => {
 									{t('news_active_filters')}:
 								</span>
 								{activeFilters.topic && (
-									<div className='flex items-center gap-2 px-3 py-1.5 bg-white border border-black/10 rounded-full'>
-										<span className='text-[10px] font-bold uppercase'>
+									<div className='flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full'>
+										<span className='text-[10px] font-bold uppercase text-white'>
 											{topicOptions.find(
 												opt => String(opt.id) === activeFilters.topic,
 											)?.name || activeFilters.topic}
 										</span>
 										<button
 											onClick={() => handleFilterChange('topic', '')}
-											className='hover:text-[#e21e26] transition-colors'
+											className='hover:text-[#e21e26] transition-colors text-white'
 										>
 											<X size={12} />
 										</button>

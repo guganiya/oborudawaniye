@@ -48,7 +48,7 @@ const AnimatedNumber = ({ value }) => {
 	return (
 		<span
 			ref={ref}
-			className='text-3xl md:text-5xl font-black text-black italic leading-none'
+			className='text-3xl md:text-5xl font-black text-white italic leading-none'
 		>
 			{displayValue}
 			<span>{value.includes('+') ? '+' : ''}</span>
@@ -216,9 +216,19 @@ const AboutUs = () => {
 		<div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
 			<Navbar />
 
-			<section className='relative pt-44 pb-20 px-6 overflow-hidden border-b border-gray-50'>
-				<div className='absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden'>
-					<span className='absolute bottom-0 left-0 md:-bottom-10 md:-left-10 text-[8rem] sm:text-[12rem] md:text-[22rem] font-black uppercase leading-[0.8] whitespace-nowrap'>
+			<section className='relative pt-52 pb-24 px-6 bg-black overflow-hidden border-b border-white/10'>
+				{/* ГРАДИЕНТНЫЙ ФОН */}
+				<div
+					className='absolute inset-0 z-0'
+					style={{
+						background:
+							'linear-gradient(to left, rgba(226, 30, 38, 0.15) 0%, rgba(0, 0, 0, 1) 70%)',
+					}}
+				/>
+
+				{/* ФОНОВЫЙ ТЕКСТ (Watermark) */}
+				<div className='absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden z-0'>
+					<span className='absolute bottom-0 left-0 md:-bottom-10 md:-left-10 text-[8rem] sm:text-[12rem] md:text-[22rem] font-black uppercase leading-[0.8] whitespace-nowrap text-white'>
 						{t('about_hero_bg')}
 					</span>
 				</div>
@@ -227,10 +237,9 @@ const AboutUs = () => {
 					<motion.h1
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						className='text-5xl md:text-8xl font-black uppercase tracking-tighter italic mb-12'
+						className='text-6xl md:text-9xl font-[1000] uppercase tracking-tighter italic mb-12 text-white'
 					>
 						{t('about_title')}
-						<span className='text-[#e21e26]'>.</span>
 					</motion.h1>
 
 					<div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-end'>
@@ -238,16 +247,16 @@ const AboutUs = () => {
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ delay: 0.2 }}
-							className='text-gray-500 text-lg md:text-xl leading-relaxed font-medium max-w-2xl'
+							className='text-gray-400 text-lg md:text-xl leading-relaxed font-medium max-w-2xl'
 						>
 							{t('about_description')}
 						</motion.p>
 
+						{/* Здесь будет компонент статистики, убедись что в нем белые/серые тексты */}
 						<CompanyStats />
 					</div>
 				</div>
 			</section>
-
 			<main className='max-w-[1400px] mx-auto px-6 py-24'>
 				<section className='grid grid-cols-1 lg:grid-cols-12 gap-16 mb-32 items-center'>
 					<div className='lg:col-span-7'>
