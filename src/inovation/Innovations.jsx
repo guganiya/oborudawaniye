@@ -1,24 +1,28 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { Loader2, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import apiClient from '../api/api'
-import { useTranslation } from 'react-i18next' // Добавлено
+import { useTranslation } from 'react-i18next'
 
 // ─── Константы ────────────────────────────────────────────────────────────────
-const PAGE_SIZE = 3
+const PAGE_SIZE = 5
 const brandRed = '#e21e26'
 
 const Innovations = () => {
-	const { t } = useTranslation() // Добавлено
+	const { t } = useTranslation()
 	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
 	const [total, setTotal] = useState(0)
 	const [page, setPage] = useState(1)
+
+	// Slider state
+	const [currentSlide, setCurrentSlide] = useState(0)
+	const [sliderItems, setSliderItems] = useState([])
 
 	// Refs for infinite scroll
 	const sentinelRef = useRef(null)
@@ -27,6 +31,15 @@ const Innovations = () => {
 	const hasMoreRef = useRef(true)
 	const busyRef = useRef(false)
 	const abortControllerRef = useRef(null)
+	const headerRef = useRef(null)
+	const sliderIntervalRef = useRef(null)
+
+	// Parallax scroll effect
+	const { scrollY } = useScroll()
+	const headerY = useTransform(scrollY, [0, 500], [0, 150])
+	const headerOpacity = useTransform(scrollY, [0, 300], [1, 0.3])
+	const watermarkX = useTransform(scrollY, [0, 500], [0, -100])
+	const titleScale = useTransform(scrollY, [0, 300], [1, 0.85])
 
 	pageRef.current = page
 	hasMoreRef.current = hasMore
@@ -35,7 +48,6 @@ const Innovations = () => {
 	const loadInnovations = useCallback(async (pageNum, append = false) => {
 		if (busyRef.current) return
 
-		// Cancel previous request
 		if (abortControllerRef.current) {
 			abortControllerRef.current.abort()
 		}
@@ -47,7 +59,6 @@ const Innovations = () => {
 		else setLoadingMore(true)
 
 		try {
-			// Build query parameters
 			const params = new URLSearchParams()
 			params.append('page', pageNum)
 			params.append('page_size', PAGE_SIZE)
@@ -73,6 +84,10 @@ const Innovations = () => {
 				setItems(prev => [...prev, ...newItems])
 			} else {
 				setItems(newItems)
+				// Set first 5 items as slider items
+				if (newItems.length > 0) {
+					setSliderItems(newItems.slice(0, 5))
+				}
 			}
 
 			return newItems
@@ -97,6 +112,21 @@ const Innovations = () => {
 		loadInnovations(1, false)
 	}, [loadInnovations])
 
+	// Auto-slider functionality
+	useEffect(() => {
+		if (sliderItems.length <= 1) return
+
+		sliderIntervalRef.current = setInterval(() => {
+			setCurrentSlide(prev => (prev + 1) % sliderItems.length)
+		}, 5000)
+
+		return () => {
+			if (sliderIntervalRef.current) {
+				clearInterval(sliderIntervalRef.current)
+			}
+		}
+	}, [sliderItems])
+
 	// Setup infinite scroll observer
 	useEffect(() => {
 		if (observerRef.current) {
@@ -113,7 +143,6 @@ const Innovations = () => {
 					!loadingMore
 				) {
 					const nextPage = pageRef.current + 1
-					console.log('Loading more innovations - page:', nextPage)
 					setPage(nextPage)
 					loadInnovations(nextPage, true)
 				}
@@ -136,62 +165,203 @@ const Innovations = () => {
 		}
 	}, [loadInnovations, loading, loadingMore])
 
+	const nextSlide = () => {
+		setCurrentSlide(prev => (prev + 1) % sliderItems.length)
+		resetSliderInterval()
+	}
+
+	const prevSlide = () => {
+		setCurrentSlide(prev => (prev - 1 + sliderItems.length) % sliderItems.length)
+		resetSliderInterval()
+	}
+
+	const resetSliderInterval = () => {
+		if (sliderIntervalRef.current) {
+			clearInterval(sliderIntervalRef.current)
+		}
+		if (sliderItems.length > 1) {
+			sliderIntervalRef.current = setInterval(() => {
+				setCurrentSlide(prev => (prev + 1) % sliderItems.length)
+			}, 5000)
+		}
+	}
+
+	// Handle slider item click
+	const handleSliderItemClick = (item) => {
+		// Navigate to innovation detail
+		window.location.href = `/innovations/${item.id}`
+	}
+
 	return (
 		<div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
 			<Navbar />
 
-			{/* Шапка страницы с фоновым текстом */}
-			<header className='relative pt-52 pb-24 px-6 bg-black overflow-hidden'>
-				{/* ГРАДИЕНТНЫЙ ФОН: От черного к красному справа */}
-				<div
-					className='absolute inset-0 z-0'
-					style={{
-						background:
-							'linear-gradient(to left, rgba(226, 30, 38, 0.12) 0%, rgba(0, 0, 0, 1) 60%)',
-					}}
-				/>
+			{/* Professional Header with Slider and Parallax - Shows Latest 5 Innovations */}
+			<motion.header
+				ref={headerRef}
+				style={{ y: headerY, opacity: headerOpacity }}
+				className='relative h-screen min-h-[700px] bg-black overflow-hidden'
+			>
+				{/* Slider Background */}
+				<div className='absolute inset-0 z-0'>
+					<AnimatePresence mode='wait'>
+						{sliderItems.length > 0 && (
+							<motion.div
+								key={currentSlide}
+								initial={{ opacity: 0, scale: 1.1 }}
+								animate={{ opacity: 1, scale: 1 }}
+								exit={{ opacity: 0, scale: 0.95 }}
+								transition={{ duration: 1.2, ease: [0.43, 0.13, 0.23, 0.96] }}
+								className='absolute inset-0 cursor-pointer'
+								onClick={() => handleSliderItemClick(sliderItems[currentSlide])}
+							>
+								<img
+									src={sliderItems[currentSlide]?.image}
+									alt={sliderItems[currentSlide]?.name}
+									className='w-full h-full object-cover'
+								/>
+								{/* Gradient Overlay */}
+								<div className='absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/90' />
+							</motion.div>
+						)}
+					</AnimatePresence>
+				</div>
 
-				{/* Световое пятно для объема сверху-справа */}
-				<div className='absolute top-0 right-[-5%] w-[600px] h-[600px] bg-[#e21e26]/15 blur-[120px] rounded-full pointer-events-none' />
+				{/* Slider Navigation Dots */}
+				{sliderItems.length > 1 && (
+					<div className='absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3'>
+						{sliderItems.map((_, index) => (
+							<button
+								key={index}
+								onClick={() => {
+									setCurrentSlide(index)
+									resetSliderInterval()
+								}}
+								className={`h-[2px] transition-all duration-500 ${
+									currentSlide === index
+										? 'w-12 bg-[#e21e26]'
+										: 'w-8 bg-white/30 hover:bg-white/50'
+								}`}
+							/>
+						))}
+					</div>
+				)}
 
-				{/* ФОНОВЫЙ ТЕКСТ (Watermark) в новом стиле */}
-				<div className='absolute inset-0 opacity-[0.05] pointer-events-none select-none overflow-hidden z-0'>
+				{/* Slider Arrows */}
+				{sliderItems.length > 1 && (
+					<>
+						<button
+							onClick={prevSlide}
+							className='absolute left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-full text-white hover:bg-white/20 transition-all duration-300 group'
+						>
+							<ChevronLeft className='w-5 h-5 group-hover:-translate-x-0.5 transition-transform' />
+						</button>
+						<button
+							onClick={nextSlide}
+							className='absolute right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-full text-white hover:bg-white/20 transition-all duration-300 group'
+						>
+							<ChevronRight className='w-5 h-5 group-hover:translate-x-0.5 transition-transform' />
+						</button>
+					</>
+				)}
+
+				{/* Watermark Text with Parallax */}
+				<motion.div
+					style={{ x: watermarkX }}
+					className='absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden z-10'
+				>
 					<span
-						className='absolute bottom-2 md:-bottom-12 -left-10 text-[8rem] md:text-[22rem] font-black uppercase leading-none text-transparent'
+						className='absolute bottom-0 md:-bottom-20 -left-10 text-[12rem] md:text-[25rem] font-black uppercase leading-none text-transparent'
 						style={{ WebkitTextStroke: '2px white' }}
 					>
 						{t('innovations_watermark')}
 					</span>
-				</div>
+				</motion.div>
 
-				<div className='max-w-5xl mx-auto text-center relative z-10'>
-					<motion.h1
-						initial={{ opacity: 0, y: 30 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.8, ease: 'easeOut' }}
-						className='text-5xl md:text-8xl font-[1000] uppercase tracking-tighter leading-[0.85] text-white mb-8 italic'
-					>
-						{t('innovations_title_main')}
-					</motion.h1>
+				{/* Content Overlay with Parallax */}
+				<motion.div
+					style={{ scale: titleScale }}
+					className='relative z-20 h-full flex flex-col items-center justify-center px-6'
+				>
+					<div className='max-w-6xl mx-auto text-center'>
+						{/* Featured Label */}
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.6 }}
+							className='mb-6'
+						>
+							<span className='inline-flex items-center gap-2 px-4 py-2 bg-[#e21e26]/10 backdrop-blur-sm border border-[#e21e26]/30 rounded-full'>
+								<span className='w-2 h-2 bg-[#e21e26] rounded-full animate-pulse' />
+								<span className='text-[10px] font-black uppercase tracking-[0.3em] text-white'>
+									{t('innovations_featured_label')}
+								</span>
+							</span>
+						</motion.div>
 
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						transition={{ delay: 0.4 }}
-						className='relative inline-block'
-					>
-						{/* Линия-разделитель */}
-						<div className='w-24 h-[1px] bg-[#e21e26] mx-auto mb-8' />
+						{/* Main Title */}
+						<motion.h1
+							initial={{ opacity: 0, y: 40 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+							className='text-6xl md:text-9xl font-[1000] uppercase tracking-tighter leading-[0.9] text-white mb-8'
+						>
+							{t('innovations_title_main')}
+						</motion.h1>
 
-						<p className='text-gray-400 text-sm md:text-lg leading-relaxed font-medium max-w-2xl mx-auto px-4'>
+						{/* Current Slide Title */}
+						{sliderItems[currentSlide] && (
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.6, delay: 0.4 }}
+								className='mb-8'
+							>
+								<h2 className='text-2xl md:text-4xl font-black uppercase tracking-wider text-white'>
+									{sliderItems[currentSlide].name}
+								</h2>
+							</motion.div>
+						)}
+
+						{/* Subtitle */}
+						<motion.p
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ duration: 0.8, delay: 0.5 }}
+							className='text-gray-300 text-base md:text-xl leading-relaxed font-light max-w-3xl mx-auto px-4 mb-12'
+						>
 							{t('innovations_subtitle')}
-						</p>
-					</motion.div>
-				</div>
+						</motion.p>
 
-				{/* Нижний декор: эффект сканирующей линии */}
-				<div className='absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#e21e26]/50 to-transparent' />
-			</header>
+						{/* CTA Button */}
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.6, delay: 0.8 }}
+						>
+							<button
+								onClick={() => handleSliderItemClick(sliderItems[currentSlide])}
+								className='group inline-flex items-center gap-3 px-8 py-4 bg-[#e21e26] text-white text-sm font-black uppercase tracking-widest rounded-full hover:bg-white hover:text-black transition-all duration-500'
+							>
+								<span>{t('innovations_btn_explore')}</span>
+								<ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
+							</button>
+						</motion.div>
+					</div>
+				</motion.div>
+
+				{/* Bottom Gradient Line */}
+				<div className='absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#e21e26] to-transparent z-20' />
+
+				{/* Slide Counter */}
+				{sliderItems.length > 0 && (
+					<div className='absolute bottom-8 right-8 z-20 text-white/40 text-xs font-mono tracking-wider'>
+						<span className='text-white text-lg font-black'>{String(currentSlide + 1).padStart(2, '0')}</span>
+						<span className='mx-1'>/</span>
+						<span>{String(sliderItems.length).padStart(2, '0')}</span>
+					</div>
+				)}
+			</motion.header>
 
 			<main className='max-w-[1400px] mx-auto px-6 py-20'>
 				{loading ? (
@@ -209,6 +379,21 @@ const Innovations = () => {
 					</div>
 				) : (
 					<>
+						{/* Section Title */}
+						<div className='mb-16 text-center'>
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true }}
+								className='inline-block'
+							>
+								<h2 className='text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4'>
+									{t('innovations_grid_title')}
+								</h2>
+								<div className='w-20 h-[2px] bg-[#e21e26] mx-auto' />
+							</motion.div>
+						</div>
+
 						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20'>
 							<AnimatePresence>
 								{items.map((item, index) => (
@@ -286,7 +471,7 @@ const InnovationCard = ({ item, index }) => (
 					className='w-full h-full object-cover transition-all duration-1000 md:grayscale group-hover:grayscale-0 group-hover:scale-105'
 				/>
 				<div className='absolute top-4 right-4 text-white text-[9px] font-black uppercase tracking-widest opacity-30'>
-					Robe
+					AlyX
 				</div>
 			</div>
 

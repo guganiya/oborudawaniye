@@ -118,6 +118,10 @@ const resources = {
 			innovations_empty: 'Nothing found',
 			innovations_all_loaded: 'All loaded ({{count}} innovations)',
 			innovations_btn_more: 'Load more',
+			"innovations_featured_label": "Spotlight Innovation",
+			"innovations_btn_explore": "Discover More",
+			"innovations_grid_title": "Research & Lab",
+			"innovations_count_label": "Ongoing Projects",
 
 			//news-newsgallery
 			gallery_no_images: 'No images available',
@@ -144,6 +148,11 @@ const resources = {
 			news_read_more: 'Read more',
 			news_category_default_news: 'News',
 			news_default_subject: 'General',
+
+			"news_subtitle": "Stay updated with the latest news, events, and announcements from AlyX lighting. Discover our innovations, projects, and industry insights.",
+			"news_featured_label": "Latest News",
+			"news_btn_explore": "Read Full Story",
+			"news_scroll_down": "Scroll Down",
 
 			//news-newscontent
 			news_products_in_article: 'Products in this article',
@@ -247,6 +256,15 @@ const resources = {
 			catalog_card_tag: 'Category',
 			catalog_card_desc: 'View all products in this category',
 			catalog_error_fetch: 'Failed to load categories. Please try again later.',
+			"catalog_title": "Catalog",
+			"catalog_subtitle": "Industrial Solutions & Products",
+			"catalog_featured_tag": "Featured Category",
+			"catalog_view_btn": "Explore Collection",
+			"catalog_search_placeholder": "Search by category name...",
+			"catalog_card_tag": "Available Now",
+			"catalog_error_fetch": "Unable to load products. Please try again later.",
+			"catalog_no_results": "No results found for",
+			"catalog_bg_text": "Inventory",
 
 			//subcategory
 			subcat_error_fetch: 'Failed to load subcategories.',
@@ -257,6 +275,18 @@ const resources = {
 			subcat_card_tag: 'Subcategory',
 			subcat_card_desc: 'Show equipment in section',
 			subcat_no_results: 'Subcategory not found',
+			"subcat_recommended": "Recommended for you",
+			"subcat_view_btn": "Explore section",
+			"subcat_breadcrumb_catalog": "Global Catalog",
+			"subcat_subtitle": "Sub-Category Index",
+			"subcat_units_label": "Units in this line",
+			"subcat_search_placeholder": "Quick filter...",
+			"subcat_card_tag": "Available",
+			"subcat_card_desc": "Technical Details",
+			"subcat_view_details": "View full specs",
+			"subcat_error_fetch": "Error loading data",
+			"subcat_no_results": "Zero matches found",
+			"subcat_default_parent": "Department",
 
 			//subcatproduct
 			products_catalog: 'Catalog',
@@ -266,6 +296,17 @@ const resources = {
 			products_loading_text: 'Loading products...',
 			products_end_of_catalog: 'End of catalog',
 			products_count_label: 'models',
+			"products_spotlight_tag": "Product Spotlight",
+			"products_view_details": "View full details",
+			"products_spec_label_size": "Dimensions / Size",
+			"products_spec_label_cat": "Category Segment",
+			"products_breadcrumb_catalog": "Global Index",
+			"products_search_placeholder": "Find specific product...",
+			"products_card_sku_prefix": "Unit Ref:",
+			"products_loading_text": "Syncing Inventory...",
+			"products_end_of_catalog": "End of listing",
+			"products_count_label": "Total Units",
+			"products_loading": "Loading category...",
 
 			//support
 			support_title: 'Support Center',
@@ -422,6 +463,11 @@ const resources = {
 			innovations_all_loaded: 'Все загружено ({{count}} инноваций)',
 			innovations_btn_more: 'Загрузить еще',
 
+			"innovations_featured_label": "Ключевая инновация",
+			"innovations_btn_explore": "Узнать больше",
+			"innovations_grid_title": "Лаборатория и Разработки",
+			"innovations_count_label": "Активных проектов",
+
 			//news-newsgallery
 			gallery_no_images: 'Изображения отсутствуют',
 			gallery_untitled: 'Без названия',
@@ -447,6 +493,10 @@ const resources = {
 			news_read_more: 'Читать далее',
 			news_category_default_news: 'Новости',
 			news_default_subject: 'Общее',
+			"news_subtitle": "Будьте в курсе последних новостей, событий и анонсов AlyX lighting. Узнайте о наших инновациях, проектах и отраслевых тенденциях.",
+			"news_featured_label": "Последние новости",
+			"news_btn_explore": "Читать полностью",
+			"news_scroll_down": "Прокрутите вниз",
 
 			//news-newscontent
 			news_products_in_article: 'Продукты в данной статье',
@@ -551,6 +601,15 @@ const resources = {
 			catalog_card_desc: 'Просмотр всех товаров в данной категории',
 			catalog_error_fetch:
 				'Не удалось загрузить категории. Пожалуйста, попробуйте позже.',
+			"catalog_title": "Каталог",
+			"catalog_subtitle": "Промышленные решения и товары",
+			"catalog_featured_tag": "Рекомендуемая категория",
+			"catalog_view_btn": "Смотреть коллекцию",
+			"catalog_search_placeholder": "Поиск по названию...",
+			"catalog_card_tag": "В наличии",
+			"catalog_error_fetch": "Не удалось загрузить товары. Попробуйте позже.",
+			"catalog_no_results": "Ничего не найдено по запросу",
+			"catalog_bg_text": "Склад",
 
 			//subcategory
 			subcat_error_fetch: 'Не удалось загрузить подкатегории.',
@@ -561,15 +620,28 @@ const resources = {
 			subcat_card_tag: 'Подкатегория',
 			subcat_card_desc: 'Показать оборудование в разделе',
 			subcat_no_results: 'Подкатегория не найдена',
+			"subcat_recommended": "Рекомендуем вам",
+			"subcat_view_btn": "Открыть раздел",
+			"subcat_units_label": "Единиц в линейке",
+			"subcat_card_tag": "В наличии",
+			"subcat_card_desc": "Тех. данные",
+			"subcat_view_details": "Все характеристики",
+			"subcat_error_fetch": "Ошибка загрузки данных",
+			"subcat_no_results": "Совпадений не найдено",
+			"subcat_default_parent": "Отдел",
 
 			//subcatproduct
 			products_catalog: 'Каталог',
 			products_loading: 'Загрузка...',
 			products_breadcrumb_catalog: 'Каталог',
-			products_search_placeholder: 'Поиск модели...',
 			products_loading_text: 'Загрузка товаров...',
-			products_end_of_catalog: 'Конец каталога',
-			products_count_label: 'моделей',
+			"products_spotlight_tag": "В центре внимания",
+			"products_view_details": "Подробнее",
+			"products_spec_label_size": "Размеры / Объем",
+			"products_spec_label_cat": "Сегмент категории",
+			"products_search_placeholder": "Найти конкретный товар...",
+			"products_card_sku_prefix": "Артикул:",
+			"products_count_label": "Всего единиц",
 
 			//support
 			support_title: 'Центр поддержки',

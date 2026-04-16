@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, Search, X, ArrowRight } from 'lucide-react'
-import { useTranslation } from 'react-i18next' // Добавлено
+import { Loader2, Search, X, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import apiClient from '../api/api'
 
 const Products = () => {
-	const { t, i18n } = useTranslation() // Добавлено
+	const { t, i18n } = useTranslation()
 	const [items, setItems] = useState([])
 	const [searchTerm, setSearchTerm] = useState('')
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
+	const [currentSlide, setCurrentSlide] = useState(0)
 
-	// Хелпер для получения имени категории на текущем языке
 	const getCategoryName = item => {
 		const lang = i18n.language
 		if (lang === 'en' && item.name_en) return item.name_en
@@ -28,19 +28,31 @@ const Products = () => {
 				setLoading(true)
 				const response = await apiClient.get('/get-product-categories')
 				setItems(response.data)
-				setError(null)
 			} catch (err) {
-				console.error('Failed to fetch product categories:', err)
 				setError(t('catalog_error_fetch'))
 			} finally {
 				setLoading(false)
 			}
 		}
-
 		fetchCategories()
 	}, [t])
 
-	// Фильтрация теперь учитывает локализованное имя
+	// Pick 3 random categories for the slider
+	const sliderItems = useMemo(() => {
+		if (items.length <= 3) return items
+		return [...items].sort(() => 0.5 - Math.random()).slice(0, 3)
+	}, [items])
+
+	// Auto-play slider
+	useEffect(() => {
+		if (sliderItems.length > 0) {
+			const timer = setInterval(() => {
+				setCurrentSlide(prev => (prev + 1) % sliderItems.length)
+			}, 6000)
+			return () => clearInterval(timer)
+		}
+	}, [sliderItems])
+
 	const filteredItems = items.filter(item =>
 		getCategoryName(item).toLowerCase().includes(searchTerm.toLowerCase()),
 	)
@@ -49,110 +61,133 @@ const Products = () => {
 		<div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
 			<Navbar />
 
-			{/* Минималистичная шапка */}
-			<header className='relative pt-52 pb-20 px-6 overflow-hidden bg-black'>
-				{/* 1. ГРАДИЕНТНЫЙ ФОН */}
-				<div
-					className='absolute inset-0 z-0'
-					style={{
-						background:
-							'linear-gradient(to left, rgba(226, 30, 38, 0.15) 0%, rgba(0, 0, 0, 1) 70%)',
-					}}
-				/>
+			{/* --- HERO SLIDER HEADER --- */}
+			<header className='relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-black'>
+				<AnimatePresence mode='wait'>
+					{sliderItems.length > 0 && (
+						<motion.div
+							key={sliderItems[currentSlide].id}
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 1 }}
+							className='absolute inset-0'
+						>
+							{/* Background Image with Ken Burns Effect */}
+							<motion.img
+								initial={{ scale: 1.1 }}
+								animate={{ scale: 1 }}
+								transition={{ duration: 6 }}
+								src={sliderItems[currentSlide].poster}
+								className='w-full h-full object-cover opacity-60'
+								alt='Hero'
+							/>
 
-				{/* 2. ДОБАВЬ ЭТОТ БЛОК (ФОНОВЫЙ ТЕКСТ) */}
-				<div className='absolute inset-0 z-0 opacity-[0.05] pointer-events-none select-none overflow-hidden'>
-					<span className='absolute -bottom-10 -left-10 text-[12rem] md:text-[20rem] font-black uppercase leading-none text-white italic'>
-						{t('catalog_bg_text')}
-					</span>
-				</div>
+							{/* Gradient Overlay */}
+							<div className='absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent' />
 
-				{/* 3. ДОПОЛНИТЕЛЬНОЕ СВЕЧЕНИЕ */}
-				<div className='absolute top-1/2 right-[-10%] -translate-y-1/2 w-[600px] h-[600px] bg-[#e21e26]/20 blur-[150px] rounded-full pointer-events-none' />
+							{/* Content */}
+							<div className='absolute inset-0 flex items-center px-6 md:px-20'>
+								<div className='max-w-[800px]'>
+									<motion.span
+										initial={{ opacity: 0, x: -20 }}
+										animate={{ opacity: 1, x: 0 }}
+										transition={{ delay: 0.5 }}
+										className='text-[#e21e26] font-black uppercase tracking-[0.4em] text-sm mb-4 block'
+									>
+										{t('catalog_featured_tag')}
+									</motion.span>
+									<motion.h1
+										initial={{ opacity: 0, y: 30 }}
+										animate={{ opacity: 1, y: 0 }}
+										transition={{ delay: 0.7 }}
+										className='text-white text-5xl md:text-8xl font-black uppercase leading-none italic mb-8'
+									>
+										{getCategoryName(sliderItems[currentSlide])}
+									</motion.h1>
+									<motion.div
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1 }}
+										transition={{ delay: 0.9 }}
+									>
+										<Link
+											to={`/subcategory/${sliderItems[currentSlide].id}`}
+											className='inline-flex items-center gap-4 bg-[#e21e26] text-white px-8 py-4 rounded-full font-bold uppercase text-xs tracking-widest hover:bg-white hover:text-black transition-all duration-300'
+										>
+											{t('catalog_view_btn')} <ArrowRight size={16} />
+										</Link>
+									</motion.div>
+								</div>
+							</div>
+						</motion.div>
+					)}
+				</AnimatePresence>
 
-				<div className='max-w-[1400px] mx-auto relative z-10 flex flex-col gap-6'>
-					<motion.h1
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0 }}
-						transition={{ duration: 0.8 }}
-						className='text-7xl md:text-[10rem] font-[1000] uppercase tracking-tighter leading-[0.85] text-white italic'
+				{/* Slider Controls */}
+				<div className='absolute bottom-10 right-10 flex gap-4 z-20'>
+					<button
+						onClick={() => setCurrentSlide(prev => (prev - 1 + sliderItems.length) % sliderItems.length)}
+						className='p-4 border border-white/20 text-white hover:bg-[#e21e26] hover:border-[#e21e26] transition-all rounded-full'
 					>
-						{t('catalog_title')}
-					</motion.h1>
-
-					<div className='flex flex-col md:flex-row md:items-center justify-between border-t border-white/10 pt-10 gap-8'>
-						<div className='flex flex-col gap-2'>
-							<p className='text-gray-400 text-sm font-bold uppercase tracking-widest'>
-								{t('catalog_subtitle')}
-							</p>
-						</div>
-
-						<div className='relative w-full md:w-1/2 lg:w-1/3 group'>
-							<div className='absolute -inset-1 bg-gradient-to-r from-[#e21e26]/50 to-transparent rounded-full blur opacity-25 group-focus-within:opacity-100 transition duration-500' />
-
-							<div className='relative'>
-								<input
-									type='text'
-									className='w-full bg-white/5 border border-white/10 backdrop-blur-xl p-4 rounded-full text-white px-14 focus:border-[#e21e26] transition-all outline-none placeholder:text-gray-500'
-									placeholder={t('catalog_search_placeholder')}
-									value={searchTerm}
-									onChange={e => setSearchTerm(e.target.value)}
-								/>
-								<Search
-									className='absolute left-5 top-1/2 -translate-y-1/2 text-[#e21e26]'
-									size={20}
-								/>
-
-								{searchTerm && (
-									<X
-										onClick={() => setSearchTerm('')}
-										className='absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer transition-colors'
-										size={18}
-									/>
-								)}
-							</div>
-						</div>
-					</div>
+						<ChevronLeft size={20} />
+					</button>
+					<button
+						onClick={() => setCurrentSlide(prev => (prev + 1) % sliderItems.length)}
+						className='p-4 border border-white/20 text-white hover:bg-[#e21e26] hover:border-[#e21e26] transition-all rounded-full'
+					>
+						<ChevronRight size={20} />
+					</button>
 				</div>
 
-				<div className='absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent' />
+				{/* Slider Indicators */}
+				<div className='absolute bottom-10 left-10 flex gap-2 z-20'>
+					{sliderItems.map((_, idx) => (
+						<div
+							key={idx}
+							className={`h-1 transition-all duration-500 ${idx === currentSlide ? 'w-12 bg-[#e21e26]' : 'w-4 bg-white/30'}`}
+						/>
+					))}
+				</div>
 			</header>
-			<main className='max-w-[1400px] mx-auto px-6 pb-32'>
-				<div className='h-[1px] w-full bg-gray-100 mb-20' />
 
+			{/* --- SEARCH BAR SECTION --- */}
+			<div className='bg-gray-50 border-b border-gray-100 py-12 px-6'>
+				<div className='max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8'>
+					<div>
+						<h2 className='text-3xl font-black uppercase tracking-tighter'>{t('catalog_title')}</h2>
+						<p className='text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em]'>{t('catalog_subtitle')}</p>
+					</div>
+
+					<div className='relative w-full md:w-96'>
+						<input
+							type='text'
+							placeholder={t('catalog_search_placeholder')}
+							value={searchTerm}
+							onChange={e => setSearchTerm(e.target.value)}
+							className='w-full bg-white border border-gray-200 p-4 pl-12 rounded-2xl text-xs font-bold uppercase tracking-widest focus:border-[#e21e26] outline-none transition-all'
+						/>
+						<Search className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-300' size={18} />
+					</div>
+				</div>
+			</div>
+
+			{/* --- GRID SECTION --- */}
+			<main className='max-w-[1400px] mx-auto px-6 py-20'>
 				{loading ? (
-					<div className='flex flex-col items-center justify-center py-20 gap-4'>
-						<Loader2 className='animate-spin text-[#e21e26]' size={40} />
-					</div>
-				) : error ? (
-					<div className='text-center py-20'>
-						<p className='text-red-500 font-bold uppercase tracking-widest'>
-							{error}
-						</p>
-					</div>
+					<div className='flex justify-center py-20'><Loader2 className='animate-spin text-[#e21e26]' size={40} /></div>
 				) : (
-					<>
-						{filteredItems.length > 0 ? (
-							<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16'>
-								<AnimatePresence mode='popLayout'>
-									{filteredItems.map((category, index) => (
-										<ProductCard
-											key={category.id}
-											category={category}
-											index={index}
-											getCategoryName={getCategoryName}
-										/>
-									))}
-								</AnimatePresence>
-							</div>
-						) : (
-							<div className='text-center py-40'>
-								<p className='text-gray-300 text-[10px] font-black uppercase tracking-[0.4em]'>
-									{t('catalog_no_results')} "{searchTerm}"
-								</p>
-							</div>
-						)}
-					</>
+					<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
+						<AnimatePresence mode='popLayout'>
+							{filteredItems.map((category, index) => (
+								<ProductCard
+									key={category.id}
+									category={category}
+									index={index}
+									getCategoryName={getCategoryName}
+								/>
+							))}
+						</AnimatePresence>
+					</div>
 				)}
 			</main>
 
@@ -161,45 +196,31 @@ const Products = () => {
 	)
 }
 
-const ProductCard = ({ category, index, getCategoryName }) => {
+const ProductCard = ({ category, getCategoryName }) => {
 	const { t } = useTranslation()
 	return (
 		<motion.div
 			layout
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0, scale: 0.95 }}
-			transition={{ duration: 0.4 }}
+			initial={{ opacity: 0, y: 20 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, scale: 0.9 }}
 			className='group'
 		>
-			<Link to={`/subcategory/${category.id}`} className='block no-underline'>
-				<div className='relative aspect-[3/4] overflow-hidden bg-[#f9f9f9] mb-6'>
+			<Link to={`/subcategory/${category.id}`} className='block'>
+				<div className='relative aspect-[4/5] overflow-hidden rounded-3xl bg-gray-100 mb-6'>
 					<img
 						src={category.poster}
 						alt={getCategoryName(category)}
-						className='w-full h-full object-cover transition-all duration-700 md:grayscale group-hover:grayscale-0 group-hover:scale-105'
+						className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-110'
 					/>
-					<div className='absolute bottom-4 left-4'>
-						<span className='bg-black text-white text-[7px] font-black uppercase px-2 py-1 tracking-widest'>
-							{t('catalog_card_tag')}
-						</span>
-					</div>
+					<div className='absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500' />
 				</div>
-
-				<div className='flex flex-col'>
-					<div className='flex justify-between items-start mb-2'>
-						<h3 className='text-black text-lg font-black uppercase tracking-tighter leading-tight group-hover:text-[#e21e26] transition-colors duration-300'>
-							{getCategoryName(category)}
-						</h3>
-						<ArrowRight
-							size={16}
-							className='opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-[#e21e26]'
-						/>
-					</div>
-					<p className='text-gray-400 text-[11px] font-medium leading-relaxed'>
-						{t('catalog_card_desc')}
-					</p>
-				</div>
+				<h3 className='text-xl font-black uppercase tracking-tighter group-hover:text-[#e21e26] transition-colors'>
+					{getCategoryName(category)}
+				</h3>
+				<p className='text-gray-400 text-[11px] font-bold uppercase tracking-widest mt-2'>
+					{t('catalog_card_tag')}
+				</p>
 			</Link>
 		</motion.div>
 	)

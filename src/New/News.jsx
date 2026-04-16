@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useTranslation } from 'react-i18next' // Добавлено
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { Search, ArrowRight, Loader2, X } from 'lucide-react'
+import { Search, ArrowRight, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import apiClient from '../api/api.js'
 
 // ─── Константы ────────────────────────────────────────────────────────────────
 const PAGE_SIZE = 3
+const SLIDER_NEWS_COUNT = 5
 const brandRed = '#e21e26'
 
 const GRID_PATTERN = [3, 6, 3, 5, 4, 3, 3, 3, 6, 3, 3, 3, 3, 3]
@@ -163,7 +164,7 @@ const NewsCard = ({ item, span, delay, t }) =>
 	)
 
 const News = () => {
-	const { t } = useTranslation() // Добавлено
+	const { t } = useTranslation()
 	// State
 	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(true)
@@ -172,6 +173,10 @@ const News = () => {
 	const [total, setTotal] = useState(0)
 	const [page, setPage] = useState(1)
 	const [topicOptions, setTopicOptions] = useState([])
+
+	// Slider state
+	const [sliderNews, setSliderNews] = useState([])
+	const [currentSlide, setCurrentSlide] = useState(0)
 
 	// Get URL params
 	const [searchParams, setSearchParams] = useSearchParams()
@@ -191,6 +196,14 @@ const News = () => {
 	const busyRef = useRef(false)
 	const abortControllerRef = useRef(null)
 	const isInitialMount = useRef(true)
+	const sliderIntervalRef = useRef(null)
+
+	// Parallax scroll effect
+	const { scrollY } = useScroll()
+	const headerY = useTransform(scrollY, [0, 500], [0, 150])
+	const headerOpacity = useTransform(scrollY, [0, 300], [1, 0.3])
+	const watermarkX = useTransform(scrollY, [0, 500], [0, -100])
+	const titleScale = useTransform(scrollY, [0, 300], [1, 0.85])
 
 	pageRef.current = page
 	filtersRef.current = activeFilters
@@ -252,6 +265,23 @@ const News = () => {
 		}
 	}, [])
 
+	// Load latest news for slider
+	const loadSliderNews = useCallback(async () => {
+		try {
+			const params = new URLSearchParams()
+			params.append('page', 1)
+			params.append('page_size', SLIDER_NEWS_COUNT)
+
+			const url = `/news?${params.toString()}`
+			const response = await apiClient.get(url)
+			const data = response.data
+			const newsItems = data.results || data.items || []
+			setSliderNews(newsItems.slice(0, SLIDER_NEWS_COUNT))
+		} catch (err) {
+			console.error('Slider news fetch error:', err)
+		}
+	}, [])
+
 	useEffect(() => {
 		if (isInitialMount.current) {
 			isInitialMount.current = false
@@ -265,7 +295,23 @@ const News = () => {
 
 	useEffect(() => {
 		loadNews(1, activeFilters, false)
+		loadSliderNews()
 	}, [])
+
+	// Auto-slider functionality
+	useEffect(() => {
+		if (sliderNews.length <= 1) return
+
+		sliderIntervalRef.current = setInterval(() => {
+			setCurrentSlide(prev => (prev + 1) % sliderNews.length)
+		}, 5000)
+
+		return () => {
+			if (sliderIntervalRef.current) {
+				clearInterval(sliderIntervalRef.current)
+			}
+		}
+	}, [sliderNews])
 
 	useEffect(() => {
 		if (observerRef.current) {
@@ -335,6 +381,31 @@ const News = () => {
 		setSearchParams({}, { replace: true })
 	}
 
+	const nextSlide = () => {
+		setCurrentSlide(prev => (prev + 1) % sliderNews.length)
+		resetSliderInterval()
+	}
+
+	const prevSlide = () => {
+		setCurrentSlide(prev => (prev - 1 + sliderNews.length) % sliderNews.length)
+		resetSliderInterval()
+	}
+
+	const resetSliderInterval = () => {
+		if (sliderIntervalRef.current) {
+			clearInterval(sliderIntervalRef.current)
+		}
+		if (sliderNews.length > 1) {
+			sliderIntervalRef.current = setInterval(() => {
+				setCurrentSlide(prev => (prev + 1) % sliderNews.length)
+			}, 5000)
+		}
+	}
+
+	const handleSliderClick = (item) => {
+		window.location.href = `/news-content/${item.id}`
+	}
+
 	const getSpan = index => GRID_PATTERN[index % GRID_PATTERN.length]
 	const hasActiveFilters = !!activeFilters.topic
 
@@ -342,30 +413,199 @@ const News = () => {
 		<div className='bg-[#f2f2f2] min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
 			<Navbar />
 
-			<section className='relative pt-40 pb-16 bg-black border-b border-white/10 overflow-hidden'>
-				{/* ГРАДИЕНТНЫЙ ФОН */}
-				<div
-					className='absolute inset-0 z-0'
-					style={{
-						background:
-							'linear-gradient(to left, rgba(226, 30, 38, 0.15) 0%, rgba(0, 0, 0, 1) 70%)',
-					}}
-				/>
-
-				{/* ФОНОВЫЙ ТЕКСТ (Watermark) */}
-				<div className='absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden'>
-					<span className='absolute bottom-0 left-0 md:-bottom-10 md:-left-10 text-[7rem] sm:text-[10rem] md:text-[20rem] font-black uppercase leading-[0.8] text-white'>
-						{t('news_watermark')}
-					</span>
+			{/* Professional Header with Slider and Parallax */}
+			<motion.header
+				style={{ y: headerY, opacity: headerOpacity }}
+				className='relative h-screen min-h-[700px] bg-black overflow-hidden'
+			>
+				{/* Slider Background */}
+				<div className='absolute inset-0 z-0'>
+					<AnimatePresence mode='wait'>
+						{sliderNews.length > 0 && (
+							<motion.div
+								key={currentSlide}
+								initial={{ opacity: 0, scale: 1.1 }}
+								animate={{ opacity: 1, scale: 1 }}
+								exit={{ opacity: 0, scale: 0.95 }}
+								transition={{ duration: 1.2, ease: [0.43, 0.13, 0.23, 0.96] }}
+								className='absolute inset-0 cursor-pointer'
+								onClick={() => handleSliderClick(sliderNews[currentSlide])}
+							>
+								<img
+									src={sliderNews[currentSlide]?.poster || sliderNews[currentSlide]?.image || '/placeholder-image.jpg'}
+									alt={sliderNews[currentSlide]?.title}
+									className='w-full h-full object-cover'
+								/>
+								{/* Gradient Overlay */}
+								<div className='absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/90' />
+							</motion.div>
+						)}
+					</AnimatePresence>
 				</div>
 
-				<div className='max-w-[1500px] mx-auto px-6 md:px-12 relative z-10'>
-					<div className='flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14'>
-						<h1 className='text-5xl md:text-8xl font-black uppercase tracking-tighter italic leading-none text-white'>
-							{t('news_title_main')}
-						</h1>
+				{/* Slider Navigation Dots */}
+				{sliderNews.length > 1 && (
+					<div className='absolute bottom-32 left-1/2 -translate-x-1/2 z-20 flex gap-3'>
+						{sliderNews.map((_, index) => (
+							<button
+								key={index}
+								onClick={() => {
+									setCurrentSlide(index)
+									resetSliderInterval()
+								}}
+								className={`h-[2px] transition-all duration-500 ${
+									currentSlide === index
+										? 'w-12 bg-[#e21e26]'
+										: 'w-8 bg-white/30 hover:bg-white/50'
+								}`}
+							/>
+						))}
 					</div>
+				)}
 
+				{/* Slider Arrows - Fixed z-index and pointer-events */}
+				{sliderNews.length > 1 && (
+					<>
+						<button
+							onClick={(e) => {
+								e.stopPropagation()
+								prevSlide()
+							}}
+							className='absolute left-8 top-1/2 -translate-y-1/2 z-[100] w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white hover:bg-white/30 hover:scale-110 transition-all duration-300 group pointer-events-auto cursor-pointer'
+							aria-label="Previous slide"
+						>
+							<ChevronLeft className='w-5 h-5 group-hover:-translate-x-0.5 transition-transform' />
+						</button>
+						<button
+							onClick={(e) => {
+								e.stopPropagation()
+								nextSlide()
+							}}
+							className='absolute right-8 top-1/2 -translate-y-1/2 z-[100] w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white hover:bg-white/30 hover:scale-110 transition-all duration-300 group pointer-events-auto cursor-pointer'
+							aria-label="Next slide"
+						>
+							<ChevronRight className='w-5 h-5 group-hover:translate-x-0.5 transition-transform' />
+						</button>
+					</>
+				)}
+
+				{/* Watermark Text with Parallax */}
+				<motion.div
+					style={{ x: watermarkX }}
+					className='absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden z-10'
+				>
+					<span
+						className='absolute bottom-0 md:-bottom-20 -left-10 text-[12rem] md:text-[25rem] font-black uppercase leading-none text-transparent'
+						style={{ WebkitTextStroke: '2px white' }}
+					>
+						{t('news_watermark')}
+					</span>
+				</motion.div>
+
+				{/* Content Overlay with Parallax */}
+				<motion.div
+					style={{ scale: titleScale }}
+					className='relative z-20 h-full flex flex-col items-center justify-center px-6'
+				>
+					<div className='max-w-6xl mx-auto text-center'>
+						{/* Featured Label */}
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.6 }}
+							className='mb-6'
+						>
+							<span className='inline-flex items-center gap-2 px-4 py-2 bg-[#e21e26]/10 backdrop-blur-sm border border-[#e21e26]/30 rounded-full'>
+								<span className='w-2 h-2 bg-[#e21e26] rounded-full animate-pulse' />
+								<span className='text-[10px] font-black uppercase tracking-[0.3em] text-white'>
+									{t('news_featured_label')}
+								</span>
+							</span>
+						</motion.div>
+
+						{/* Main Title */}
+						<motion.h1
+							initial={{ opacity: 0, y: 40 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+							className='text-6xl md:text-9xl font-[1000] uppercase tracking-tighter leading-[0.9] text-white mb-8'
+						>
+							{t('news_title_main')}
+						</motion.h1>
+
+						{/* Current Slide Info */}
+						{sliderNews[currentSlide] && (
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.6, delay: 0.4 }}
+								className='mb-8'
+							>
+								<h2 className='text-2xl md:text-4xl font-black uppercase tracking-wider text-white max-w-3xl mx-auto'>
+									{sliderNews[currentSlide].title}
+								</h2>
+								<p className='text-gray-300 text-sm md:text-base mt-3 max-w-2xl mx-auto line-clamp-2'>
+									{sliderNews[currentSlide].short_description || sliderNews[currentSlide].description}
+								</p>
+							</motion.div>
+						)}
+
+						{/* Subtitle */}
+						<motion.p
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ duration: 0.8, delay: 0.5 }}
+							className='text-gray-300 text-base md:text-xl leading-relaxed font-light max-w-3xl mx-auto px-4 mb-12'
+						>
+							{t('news_subtitle')}
+						</motion.p>
+
+						{/* CTA Button */}
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.6, delay: 0.8 }}
+						>
+							<button
+								onClick={() => handleSliderClick(sliderNews[currentSlide])}
+								className='group inline-flex items-center gap-3 px-8 py-4 bg-[#e21e26] text-white text-sm font-black uppercase tracking-widest rounded-full hover:bg-white hover:text-black transition-all duration-500'
+							>
+								<span>{t('news_btn_explore')}</span>
+								<ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
+							</button>
+						</motion.div>
+					</div>
+				</motion.div>
+
+				{/* Bottom Gradient Line */}
+				<div className='absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#e21e26] to-transparent z-20' />
+
+				{/* Slide Counter */}
+				{sliderNews.length > 0 && (
+					<div className='absolute bottom-8 right-8 z-20 text-white/40 text-xs font-mono tracking-wider'>
+						<span className='text-white text-lg font-black'>{String(currentSlide + 1).padStart(2, '0')}</span>
+						<span className='mx-1'>/</span>
+						<span>{String(sliderNews.length).padStart(2, '0')}</span>
+					</div>
+				)}
+
+				{/* Scroll Indicator */}
+				<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ delay: 1.5 }}
+					className='absolute bottom-8 left-8 z-20'
+				>
+					<div className='flex flex-col items-center gap-2'>
+						<span className='text-[9px] font-black uppercase tracking-[0.3em] text-white/40'>{t('news_scroll_down')}</span>
+						<div className='w-px h-12 bg-gradient-to-b from-white/40 to-transparent' />
+					</div>
+				</motion.div>
+			</motion.header>
+
+			{/* Filter Section */}
+			<section className='bg-black border-t border-b border-white/10'>
+				<div className='max-w-[1500px] mx-auto px-6 md:px-12 py-8'>
 					<div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
 						<div className='space-y-3'>
 							<label className='text-[10px] font-black uppercase tracking-[0.2em] text-gray-400'>
