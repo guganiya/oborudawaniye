@@ -247,24 +247,31 @@ const Innovations = () => {
 					</div>
 				)}
 
-				{/* Slider Arrows */}
+				{/* Slider Arrows - Fixed for clickability */}
 				{sliderItems.length > 1 && (
 					<>
 						<button
-							onClick={prevSlide}
-							className='absolute left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-full text-white hover:bg-white/20 transition-all duration-300 group'
+							onClick={(e) => {
+								e.stopPropagation()
+								prevSlide()
+							}}
+							className='absolute left-8 top-1/2 -translate-y-1/2 z-[100] w-14 h-14 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/30 rounded-full text-white hover:bg-[#e21e26] hover:border-[#e21e26] hover:scale-110 transition-all duration-300 group pointer-events-auto cursor-pointer'
+							aria-label="Previous slide"
 						>
-							<ChevronLeft className='w-5 h-5 group-hover:-translate-x-0.5 transition-transform' />
+							<ChevronLeft className='w-6 h-6 group-hover:-translate-x-0.5 transition-transform' />
 						</button>
 						<button
-							onClick={nextSlide}
-							className='absolute right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-full text-white hover:bg-white/20 transition-all duration-300 group'
+							onClick={(e) => {
+								e.stopPropagation()
+								nextSlide()
+							}}
+							className='absolute right-8 top-1/2 -translate-y-1/2 z-[100] w-14 h-14 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/30 rounded-full text-white hover:bg-[#e21e26] hover:border-[#e21e26] hover:scale-110 transition-all duration-300 group pointer-events-auto cursor-pointer'
+							aria-label="Next slide"
 						>
-							<ChevronRight className='w-5 h-5 group-hover:translate-x-0.5 transition-transform' />
+							<ChevronRight className='w-6 h-6 group-hover:translate-x-0.5 transition-transform' />
 						</button>
 					</>
 				)}
-
 				{/* Watermark Text with Parallax */}
 				<motion.div
 					style={{ x: watermarkX }}

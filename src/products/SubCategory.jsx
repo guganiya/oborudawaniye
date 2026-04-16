@@ -67,7 +67,7 @@ const SubCategory = () => {
 			<Navbar />
 
 			{/* --- CINEMATIC RECOMMENDATION SLIDER --- */}
-			<header className='relative h-[70vh] min-h-[550px] bg-black overflow-hidden'>
+			<header className='relative h-[100vh] min-h-[550px] bg-black overflow-hidden'>
 				<AnimatePresence mode='wait'>
 					{featuredItems.length > 0 && (
 						<motion.div

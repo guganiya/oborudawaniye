@@ -62,7 +62,7 @@ const Products = () => {
 			<Navbar />
 
 			{/* --- HERO SLIDER HEADER --- */}
-			<header className='relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-black'>
+			<header className='relative h-[100vh] min-h-[600px] w-full overflow-hidden bg-black'>
 				<AnimatePresence mode='wait'>
 					{sliderItems.length > 0 && (
 						<motion.div
