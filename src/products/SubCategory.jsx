@@ -104,11 +104,11 @@ const SubCategory = () => {
 							{/* Image Side */}
 							<div className='w-full lg:w-1/2 h-full relative'>
 								<motion.img
-									initial={{ scale: 1.1 }}
+									initial={{ scale: 0.9 }}
 									animate={{ scale: 1 }}
 									transition={{ duration: 5 }}
 									src={featuredItems[currentSlide].poster}
-									className='absolute inset-0 w-full h-full object-cover opacity-70 lg:opacity-100'
+									className='absolute inset-0 w-full h-full object-contain object-center opacity-70 lg:opacity-100'
 								/>
 								<div className='absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-black via-transparent to-transparent' />
 							</div>
@@ -188,7 +188,7 @@ const SubCategory = () => {
 										<div className='relative aspect-[3/4] overflow-hidden rounded-[2rem] bg-gray-100 mb-6'>
 											<img
 												src={sub.poster}
-												className='w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0'
+												className='w-full h-full object-contain transition-transform duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0'
 												alt={getLocalizedName(sub)}
 											/>
 											<div className='absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500' />

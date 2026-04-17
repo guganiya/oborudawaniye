@@ -128,11 +128,11 @@ const SubCategoryProducts = () => {
 						>
 							{/* Immersive Image */}
 							<motion.img
-								initial={{ scale: 1.1 }}
+								initial={{ scale: 0.9 }}
 								animate={{ scale: 1 }}
 								transition={{ duration: 7 }}
 								src={spotlightItems[currentSlide].poster}
-								className='w-full h-full object-cover opacity-60 grayscale-[0.5]'
+								className='w-full h-full object-contain opacity-60 grayscale-[0.5]'
 								alt='Spotlight'
 							/>
 							<div className='absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent' />
@@ -285,7 +285,7 @@ const ProductCard = ({ product, getLoc }) => {
 					<img
 						src={product.poster}
 						alt={getLoc(product, 'name')}
-						className='w-full h-full object-cover transition-transform duration-1000 scale-100 group-hover:scale-110 grayscale group-hover:grayscale-0'
+						className='w-full h-full object-contain transition-transform duration-1000 scale-100 group-hover:scale-110 grayscale group-hover:grayscale-0'
 					/>
 					<div className='absolute bottom-6 left-6'>
                         <span className='bg-white text-black text-[8px] font-black uppercase px-3 py-1.5 rounded-full shadow-xl'>

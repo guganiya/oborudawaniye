@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, {useState, useEffect, useMemo, memo} from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, Search, X, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -75,11 +75,11 @@ const Products = () => {
 						>
 							{/* Background Image with Ken Burns Effect */}
 							<motion.img
-								initial={{ scale: 1.1 }}
+								initial={{ scale: 0.9}}
 								animate={{ scale: 1 }}
 								transition={{ duration: 6 }}
 								src={sliderItems[currentSlide].poster}
-								className='w-full h-full object-cover opacity-60'
+								className='w-full h-full object-contain object-center opacity-100'
 								alt='Hero'
 							/>
 
@@ -195,35 +195,57 @@ const Products = () => {
 		</div>
 	)
 }
+const ProductCard = memo(({ category, getCategoryName }) => {
+	const { t } = useTranslation();
+	const categoryName = getCategoryName(category);
 
-const ProductCard = ({ category, getCategoryName }) => {
-	const { t } = useTranslation()
+	const cardVariants = {
+		initial: { opacity: 0, y: 20 },
+		animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+		exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }
+	};
+
 	return (
 		<motion.div
 			layout
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			exit={{ opacity: 0, scale: 0.9 }}
-			className='group'
+			variants={cardVariants}
+			initial="initial"
+			animate="animate"
+			exit="exit"
+			className="group"
 		>
-			<Link to={`/subcategory/${category.id}`} className='block'>
-				<div className='relative aspect-[4/5] overflow-hidden rounded-3xl bg-gray-100 mb-6'>
+			<Link
+				to={`/subcategory/${category.id}`}
+				className="block focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#e21e26] rounded-3xl"
+				aria-label={`${t('view_category')}: ${categoryName}`}
+			>
+				{/* Main Container */}
+				<div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-gray-100 border border-gray-200/80 shadow-sm transition-all duration-500 group-hover:border-[#e21e26]/40 group-hover:shadow-2xl">
+
+					{/* 1. Full Image */}
 					<img
 						src={category.poster}
-						alt={getCategoryName(category)}
-						className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-110'
+						alt="" // Decorative since the text is redundant for screen readers
+						loading="lazy"
+						decoding="async"
+						className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-700 ease-in-out group-hover:scale-110"
 					/>
-					<div className='absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500' />
+
+					{/* 2. Global Dark Overlay (For base text contrast) */}
+					<div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/10 to-black/60 transition-opacity duration-500 group-hover:opacity-80" aria-hidden="true" />
+
+					{/* 3. The Text Container with Blurred Background */}
+					{/* We position this at the bottom and use backdrop-blur */}
+					<div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+						<div className="bg-black/40 backdrop-blur-md rounded-2xl px-5 py-4 border border-white/10 transition-colors duration-300 group-hover:bg-[#e21e26]/70">
+							<h3 className="text-xl font-extrabold uppercase tracking-tight text-white m-0">
+								{categoryName}
+							</h3>
+						</div>
+					</div>
 				</div>
-				<h3 className='text-xl font-black uppercase tracking-tighter group-hover:text-[#e21e26] transition-colors'>
-					{getCategoryName(category)}
-				</h3>
-				<p className='text-gray-400 text-[11px] font-bold uppercase tracking-widest mt-2'>
-					{t('catalog_card_tag')}
-				</p>
 			</Link>
 		</motion.div>
-	)
-}
-
+	);
+});
 export default Products

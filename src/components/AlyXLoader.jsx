@@ -1,26 +1,65 @@
-import React from 'react'
+import React from 'react';
+import './AlyxLoader.css';
 
-// Replace with your actual logo import
-// import Logo from '../assets/logo.svg';
-
-const AlyxLoader = () => {
+const LightningLoader = () => {
 	return (
-		<div className='fixed inset-0 z-[9999] flex items-center justify-center bg-white/80 backdrop-blur-sm'>
-			<div className='relative flex items-center justify-center'>
-				{/* The Professional Spinner */}
-				<div className='h-50 w-50 animate-spin rounded-full border-4 border-gray-100 border-t-[#ff0000]'></div>
-
-				{/* The Logo - Perfectly Centered */}
-				<div className='absolute inset-0 flex items-center justify-center '>
-					<img
-						src='/logo/LOGO-ALYX-BLACK.png' // Path to your logo
-						alt='Loading...'
-						className='h-30 w-30 object-contain'
+		<div className="lightning-loader">
+			{/* Left corner lightning bolt */}
+			<div className="lightning-bolt left-bolt">
+				<svg viewBox="0 0 200 200" preserveAspectRatio="none">
+					<polyline
+						points="0,0 80,40 60,80 140,120 100,170 200,200"
+						fill="none"
+						stroke="url(#boltGradientLeft)"
+						strokeWidth="4"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						className="bolt-path"
 					/>
-				</div>
+				</svg>
 			</div>
-		</div>
-	)
-}
 
-export default AlyxLoader
+			{/* Right corner lightning bolt */}
+			<div className="lightning-bolt right-bolt">
+				<svg viewBox="0 0 200 200" preserveAspectRatio="none">
+					<polyline
+						points="200,0 120,40 140,80 60,120 100,170 0,200"
+						fill="none"
+						stroke="url(#boltGradientRight)"
+						strokeWidth="4"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						className="bolt-path"
+					/>
+				</svg>
+			</div>
+
+			{/* Center logo - only visible when lightning flashes */}
+			<div className="logo-container">
+				<img
+					src="/logo/LOGO-ALYX-BLACK.png"
+					alt="ALYX"
+					className="center-logo"
+				/>
+			</div>
+
+			{/* SVG gradients for lightning colors */}
+			<svg width="0" height="0">
+				<defs>
+					<linearGradient id="boltGradientLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+						<stop offset="0%" stopColor="#FFF9C4" />
+						<stop offset="50%" stopColor="#FFD54F" />
+						<stop offset="100%" stopColor="#FF6F00" />
+					</linearGradient>
+					<linearGradient id="boltGradientRight" x1="100%" y1="0%" x2="0%" y2="100%">
+						<stop offset="0%" stopColor="#FFF9C4" />
+						<stop offset="50%" stopColor="#FFD54F" />
+						<stop offset="100%" stopColor="#FF6F00" />
+					</linearGradient>
+				</defs>
+			</svg>
+		</div>
+	);
+};
+
+export default LightningLoader;
