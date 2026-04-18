@@ -25,13 +25,20 @@
 }
 body {
 	background-color: #f8f8f8;
+
+}
+/* index.css or App.css */
+body, #root {
+	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 @layer components {
 	.hero-item {
 		@apply w-[130px] h-[220px] md:w-[160px] md:h-[270px] lg:w-[200px] lg:h-[300px] 
             list-none absolute top-1/2 -translate-y-1/2 z-10 
-            bg-center bg-cover rounded-[20px] 
+            bg-center bg-cover rounded-[5px]
             transition-all duration-700 ease-in-out;
 		box-shadow: 0 20px 30px rgba(0, 0, 0, 0.5);
 	}

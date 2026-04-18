@@ -95,7 +95,7 @@ const VideoSection = () => {
 				</h2>
 
 				<div className='grid max-w-[1300px] w-full grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-stretch mb-20'>
-					<div className='md:col-span-2 relative h-[350px] md:h-[550px] overflow-hidden rounded-[2rem] md:rounded-[2.5rem] bg-black group cursor-pointer'>
+					<div className='md:col-span-2 relative h-[350px] md:h-[550px]  rounded-[5px] overflow-hidden bg-black group cursor-pointer'>
 						<div
 							onClick={() => handlePlayVideo(currentVideo)}
 							className={`absolute inset-0 block transition-all duration-500 ease-in-out ${
@@ -138,7 +138,7 @@ const VideoSection = () => {
 					</div>
 
 					<div className='flex flex-col gap-6 md:gap-8'>
-						<div className='relative h-[350px] overflow-hidden rounded-[2rem] md:rounded-[2.5rem] bg-black shadow-lg group cursor-pointer'>
+						<div className='relative h-[350px] overflow-hidden rounded-[5px] bg-black shadow-lg group cursor-pointer'>
 							<div
 								onClick={() => handlePlayVideo(nextVideoData)}
 								className={`absolute inset-0 block transition-all duration-500 ease-in-out ${

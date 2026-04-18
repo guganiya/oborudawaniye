@@ -190,7 +190,7 @@ const Contacts = () => {
 					<motion.div {...fadeInUp}>
 						<h1 className='text-5xl md:text-[8rem] font-[1000] uppercase tracking-tighter leading-[0.9] md:leading-[0.85] text-white'>
 							{t('contacts_hero_title_1')} <br className='hidden md:block' />
-							<span style={{ color: '#e21e26' }} className='italic'>
+							<span style={{ color: '#e21e26' }}>
 								{t('contacts_hero_title_2')}
 							</span>
 						</h1>

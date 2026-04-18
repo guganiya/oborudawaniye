@@ -154,7 +154,7 @@ const SubCategoryProducts = () => {
 											initial={{ opacity: 0, y: 30 }}
 											animate={{ opacity: 1, y: 0 }}
 											transition={{ delay: 0.5 }}
-											className='text-white text-5xl md:text-8xl font-[1000] uppercase leading-[0.85] italic tracking-tighter'
+											className='text-white text-5xl md:text-8xl font-[1000] uppercase leading-[0.85]  tracking-tighter'
 										>
 											{getLoc(spotlightItems[currentSlide], 'name')}
 										</motion.h1>
@@ -276,29 +276,69 @@ const SubCategoryProducts = () => {
 		</div>
 	)
 }
-
 const ProductCard = ({ product, getLoc }) => {
 	return (
-		<motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='group'>
+		<motion.div
+			layout
+			initial={{ opacity: 0, y: 20 }}
+			animate={{ opacity: 1, y: 0 }}
+			className='group'
+		>
 			<Link to={`/product/${product.id}`} className='block'>
-				<div className='relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-gray-50 border border-gray-100 mb-6'>
+				{/* --- IMAGE CONTAINER --- */}
+				<div className='relative aspect-[4/5] overflow-hidden rounded-[5px] bg-[#1a1a1a] mb-6 shadow-sm border border-gray-100/10'>
+
+					{/* 1. Blurred Background Image */}
 					<img
 						src={product.poster}
-						alt={getLoc(product, 'name')}
-						className='w-full h-full object-contain transition-transform duration-1000 scale-100 group-hover:scale-110 grayscale group-hover:grayscale-0'
+						alt=""
+						className='absolute inset-0 w-full h-full object-cover blur-[10px] scale-110 opacity-40 transition-transform duration-1000 group-hover:scale-125'
 					/>
-					<div className='absolute bottom-6 left-6'>
-                        <span className='bg-white text-black text-[8px] font-black uppercase px-3 py-1.5 rounded-full shadow-xl'>
-                            {product.size}
-                        </span>
+
+					{/* 2. Sharp Centered Product */}
+					<div className='absolute inset-0 flex items-center justify-center z-10'>
+						<img
+							src={product.poster}
+							alt={getLoc(product, 'name')}
+							className='w-full h-full object-contain transition-all duration-700 ease-out scale-100 group-hover:scale-110 grayscale group-hover:grayscale-0'
+						/>
+					</div>
+
+					{/* 3. Glass Overlay on Hover */}
+					<div className='absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0' />
+
+					{/* 4. Floating Badge (Size) */}
+					<div className='absolute top-4 left-4 z-20'>
+                   <span className='bg-white/90 backdrop-blur-md text-black text-[10px] font-black uppercase px-3 py-1.5 rounded-[5px] shadow-sm tracking-widest'>
+                      {product.size}
+                   </span>
+					</div>
+
+					{/* 5. Hover Action Icon */}
+					<div className='absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300'>
+						<div className='w-8 h-8 bg-[#e21e26] text-white flex items-center justify-center rounded-[5px]'>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+								<line x1="7" y1="17" x2="17" y2="7"></line>
+								<polyline points="7 7 17 7 17 17"></polyline>
+							</svg>
+						</div>
 					</div>
 				</div>
 
-				<div className='px-4'>
-					<h3 className='text-lg font-black uppercase tracking-tighter group-hover:text-[#e21e26] transition-colors leading-tight'>
+				{/* --- TEXT CONTENT --- */}
+				<div className='px-2'>
+					<div className='flex items-center gap-2 mb-2'>
+						<div className='h-[2px] w-0 group-hover:w-6 bg-[#e21e26] transition-all duration-500 rounded-full' />
+						<span className='text-[10px] font-bold text-[#e21e26] uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity'>
+                        View Details
+                    </span>
+					</div>
+
+					<h3 className='text-xl font-black uppercase tracking-tighter group-hover:text-[#e21e26] transition-colors leading-none'>
 						{getLoc(product, 'name')}
 					</h3>
-					<p className='text-gray-400 text-[10px] font-bold mt-2 uppercase tracking-tight line-clamp-1'>
+
+					<p className='text-gray-500 text-[11px] font-medium mt-3 uppercase tracking-tight line-clamp-2 leading-relaxed opacity-80'>
 						{getLoc(product, 'short_description')}
 					</p>
 				</div>

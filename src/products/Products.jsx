@@ -101,7 +101,7 @@ const Products = () => {
 										initial={{ opacity: 0, y: 30 }}
 										animate={{ opacity: 1, y: 0 }}
 										transition={{ delay: 0.7 }}
-										className='text-white text-5xl md:text-8xl font-black uppercase leading-none italic mb-8'
+										className='text-white text-5xl md:text-8xl font-black uppercase leading-none mb-8'
 									>
 										{getCategoryName(sliderItems[currentSlide])}
 									</motion.h1>
@@ -216,11 +216,11 @@ const ProductCard = memo(({ category, getCategoryName }) => {
 		>
 			<Link
 				to={`/subcategory/${category.id}`}
-				className="block focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#e21e26] rounded-3xl"
+				className="block focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#e21e26] rounded-[5px]"
 				aria-label={`${t('view_category')}: ${categoryName}`}
 			>
 				{/* Main Container */}
-				<div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-gray-100 border border-gray-200/80 shadow-sm transition-all duration-500 group-hover:border-[#e21e26]/40 group-hover:shadow-2xl">
+				<div className="relative aspect-[4/5] overflow-hidden rounded-[5px] bg-gray-100 border border-gray-200/80 shadow-sm transition-all duration-500 group-hover:border-[#e21e26]/40 group-hover:shadow-2xl">
 
 					{/* 1. Full Image */}
 					<img
@@ -237,7 +237,7 @@ const ProductCard = memo(({ category, getCategoryName }) => {
 					{/* 3. The Text Container with Blurred Background */}
 					{/* We position this at the bottom and use backdrop-blur */}
 					<div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-						<div className="bg-black/40 backdrop-blur-md rounded-2xl px-5 py-4 border border-white/10 transition-colors duration-300 group-hover:bg-[#e21e26]/70">
+						<div className="bg-black/40 backdrop-blur-md rounded-[5px] px-5 py-4 border border-white/10 transition-colors duration-300 group-hover:bg-[#e21e26]/70">
 							<h3 className="text-xl font-extrabold uppercase tracking-tight text-white m-0">
 								{categoryName}
 							</h3>

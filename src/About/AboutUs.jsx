@@ -48,7 +48,7 @@ const AnimatedNumber = ({ value }) => {
 	return (
 		<span
 			ref={ref}
-			className='text-3xl md:text-5xl font-black text-white italic leading-none'
+			className='text-3xl md:text-5xl font-black text-white leading-none'
 		>
 			{displayValue}
 			<span>{value.includes('+') ? '+' : ''}</span>
@@ -121,7 +121,7 @@ const TeamCard = ({ member, index }) => {
 							size={14}
 							className='absolute -top-2 -left-2 text-gray-300'
 						/>
-						<p className='text-[12px] text-gray-500 italic leading-relaxed px-4'>
+						<p className='text-[12px] text-gray-500 leading-relaxed px-4'>
 							{member.phrase}
 						</p>
 					</div>
@@ -237,7 +237,7 @@ const AboutUs = () => {
 					<motion.h1
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						className='text-6xl md:text-9xl font-[1000] uppercase tracking-tighter italic mb-12 text-white'
+						className='text-6xl md:text-9xl font-[1000] uppercase tracking-tighter mb-12 text-white'
 					>
 						{t('about_title')}
 					</motion.h1>
