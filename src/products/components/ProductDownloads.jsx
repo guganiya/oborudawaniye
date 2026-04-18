@@ -187,7 +187,7 @@ const ProductDownloads = ({ productFiles, productDocumentations }) => {
 		return (
 			<section className='mt-32 border-t border-gray-100 pt-16 px-5 md:px-12'>
 				<div className='flex flex-col items-center justify-center mb-16'>
-					<h2 className='text-4xl md:text-5xl font-black uppercase italic tracking-tighter mb-4'>
+					<h2 className='text-4xl md:text-5xl font-black uppercase  tracking-tighter mb-4'>
 						{t('dl_title')}
 						<span className='text-[#e21e26]'>.</span>
 					</h2>
@@ -228,7 +228,7 @@ const ProductDownloads = ({ productFiles, productDocumentations }) => {
 			</AnimatePresence>
 
 			<div className='flex flex-col items-center justify-center mb-16'>
-				<h2 className='text-4xl md:text-5xl font-black uppercase italic tracking-tighter mb-4'>
+				<h2 className='text-4xl md:text-5xl font-black uppercase  tracking-tighter mb-4'>
 					{t('dl_title')}
 					<span className='text-[#e21e26]'>.</span>
 				</h2>
@@ -263,7 +263,7 @@ const ProductDownloads = ({ productFiles, productDocumentations }) => {
 								<button
 									onClick={() => handleDownload(item, `${category}-${index}`)}
 									disabled={downloading === `${category}-${index}`}
-									className='w-full flex flex-col items-center justify-center p-6 bg-white border border-gray-100 rounded-2xl transition-all duration-300 hover:border-[#e21e26] hover:shadow-xl group text-center cursor-pointer'
+									className='w-full flex flex-col items-center justify-center p-6 bg-white border border-gray-100  transition-all duration-300 hover:border-[#e21e26] hover:shadow-xl group text-center cursor-pointer'
 								>
 									<div className='relative'>
 										<div className='w-14 h-14 rounded-full bg-[#e21e26]/10 flex items-center justify-center text-[#e21e26] mb-5 group-hover:scale-110 transition-transform duration-300 group-hover:bg-[#e21e26] group-hover:text-white'>
@@ -281,7 +281,7 @@ const ProductDownloads = ({ productFiles, productDocumentations }) => {
 									</span>
 
 									{item.fileExtension && (
-										<span className='text-[9px] font-mono uppercase text-gray-400 bg-gray-50 px-2 py-0.5 rounded'>
+										<span className='text-[9px] font-mono uppercase text-gray-400 bg-gray-50 px-2 py-0.5'>
 											.{item.fileExtension}
 										</span>
 									)}
@@ -291,7 +291,7 @@ const ProductDownloads = ({ productFiles, productDocumentations }) => {
 									</div>
 								</button>
 
-								<div className='absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white px-3 py-1 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10'>
+								<div className='absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white px-3 py-1 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10'>
 									{t('dl_tooltip')}
 									<div className='absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black rotate-45'></div>
 								</div>

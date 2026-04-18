@@ -247,7 +247,7 @@ const SearchPage = () => {
 					<motion.h1
 						initial={{ opacity: 0, x: -20 }}
 						animate={{ opacity: 1, x: 0 }}
-						className='text-6xl md:text-9xl font-[1000] uppercase tracking-tighter leading-none text-white italic mb-16'
+						className='text-6xl md:text-9xl font-[1000] uppercase tracking-tighter leading-none text-white mb-16'
 					>
 						{t('search.title')}{' '}
 					</motion.h1>

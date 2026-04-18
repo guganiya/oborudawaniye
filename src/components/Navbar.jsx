@@ -66,13 +66,13 @@ const Navbar = () => {
 
 	return (
 		<nav className='fixed top-0 left-0 w-full z-[100] bg-white/60 backdrop-blur-xl border-b border-black/5'>
-			<div className='max-w-[1500px] mx-auto px-6 md:px-8 h-20 md:h-24 flex items-center justify-between'>
+			<div className='max-w-[1500px] mx-auto px-6 md:px-8 h-40 md:h-30 flex items-center justify-between'>
 				{/* Логотип */}
 				<Link to='/' className='z-[110]'>
 					<img
 						src='/logo/LOGO-ALYX-BLACK.png'
 						alt={t('nav_logo_alt')}
-						className='h-20 md:h-20 w-auto object-contain'
+						className='h-20 lg:35 md:h-30 sm:h-25 w-auto object-contain'
 					/>
 				</Link>
 
@@ -82,7 +82,7 @@ const Navbar = () => {
 						<Link
 							key={item.path}
 							to={item.path}
-							className='relative group text-[12px] font-bold uppercase tracking-[0.15em] text-black transition-colors duration-300'
+							className='relative group text-[14px] font-bold uppercase tracking-[0.15em] text-black transition-colors duration-300'
 						>
 							<span className='group-hover:text-[#e21e26] transition-colors'>
 								{item.name}
@@ -111,7 +111,7 @@ const Navbar = () => {
 								alt={currentLang.code}
 								className='w-5 h-auto object-contain rounded-sm'
 							/>
-							<span className='text-[12px] font-bold tracking-tighter'>
+							<span className='text-[14px] font-bold tracking-tighter'>
 								{currentLang.code}
 							</span>
 							<ChevronDown
@@ -137,7 +137,7 @@ const Navbar = () => {
 												className='w-5 h-auto object-contain rounded-sm'
 											/>
 											<span
-												className={`text-[11px] font-bold uppercase tracking-wider ${i18n.language === lng ? 'text-[#e21e26]' : 'text-black'}`}
+												className={`text-[14px] font-bold uppercase tracking-wider ${i18n.language === lng ? 'text-[#e21e26]' : 'text-black'}`}
 											>
 												{languages[lng].name}
 											</span>

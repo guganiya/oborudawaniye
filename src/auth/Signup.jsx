@@ -95,7 +95,7 @@ const Signup = () => {
 				animate={{ opacity: 1, scale: 1 }}
 				className='w-full max-w-[450px] bg-white p-10 md:p-14 border border-black/5 shadow-sm'
 			>
-				<h1 className='text-3xl font-black uppercase tracking-tighter mb-2 italic text-center'>
+				<h1 className='text-3xl font-black uppercase tracking-tighter mb-2  text-center'>
 					{t('auth_signup_title')}
 					<span style={{ color: brandRed }}>.</span>
 				</h1>

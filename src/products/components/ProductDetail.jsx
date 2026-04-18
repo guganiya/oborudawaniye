@@ -260,9 +260,9 @@ const ProductDetail = ({ productDetails }) => {
 				</div>
 
 				<div className='flex flex-col'>
-					<h1 className='text-4xl md:text-6xl font-black uppercase tracking-tighter italic leading-none mb-8'>
+					<h1 className='text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-8'>
 						{product.title}
-						<span className='text-[#e21e26]'>.</span>
+
 					</h1>
 
 					<div className='relative mb-12'>

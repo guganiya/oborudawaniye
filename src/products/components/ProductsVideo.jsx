@@ -97,7 +97,7 @@ const ProductsVideo = ({ productVideos }) => {
 
 	if (!videoData || videoData.length === 0) {
 		return (
-			<div className='min-h-[400px] flex items-center justify-center bg-gray-50 rounded-3xl'>
+			<div className='min-h-[400px] flex items-center justify-center bg-gray-50 rounded-[5px]'>
 				<div className='text-center'>
 					<div className='text-gray-400 font-black uppercase tracking-widest text-sm mb-2'>
 						{t('video_no_video')}
@@ -128,7 +128,7 @@ const ProductsVideo = ({ productVideos }) => {
 				</div>
 
 				<div className='grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-stretch'>
-					<div className='lg:col-span-2 relative h-[450px] md:h-[550px] lg:h-[650px] overflow-hidden rounded-3xl bg-black group cursor-pointer'>
+					<div className='lg:col-span-2 relative h-[450px] md:h-[550px] lg:h-[650px] overflow-hidden rounded-5[px] bg-black group cursor-pointer'>
 						<div
 							onClick={() => handlePlayVideo(currentVideo)}
 							className={`absolute inset-0 transition-all duration-500 ease-in-out ${
@@ -165,7 +165,7 @@ const ProductsVideo = ({ productVideos }) => {
 					</div>
 
 					<div className='flex flex-col gap-6'>
-						<div className='relative flex-1 min-h-[280px] md:min-h-[350px] overflow-hidden rounded-3xl bg-gray-100 group cursor-pointer'>
+						<div className='relative flex-1 min-h-[280px] md:min-h-[350px] overflow-hidden rounded-[5px] bg-gray-100 group cursor-pointer'>
 							<div
 								onClick={() => handlePlayVideo(nextVideoData)}
 								className={`absolute inset-0 transition-all duration-500 ease-in-out ${
