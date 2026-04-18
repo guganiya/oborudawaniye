@@ -18,6 +18,7 @@ const resources = {
 			lang_en: 'English',
 			lang_ru: 'Russian',
 			lang_tk: 'Turkmen',
+			"solutions_title": "We have solutions for every market and every need",
 
 			//404
 			'404_error_found': 'Error Found',
@@ -347,6 +348,7 @@ const resources = {
 			lang_en: 'Английский',
 			lang_ru: 'Русский',
 			lang_tk: 'Туркменский',
+			"solutions_title": "У нас есть решения для любого рынка и любых нужд",
 
 			//404
 			'404_error_found': 'Ошибка обнаружена',
