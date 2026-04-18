@@ -5,6 +5,7 @@ import Hero from './components/Hero'
 import New from './components/News'
 import Newsletter from './components/Newsletter'
 import VideoSection from './components/VideoSection'
+import HighlightProducts from "./components/HighlightProducts.jsx";
 
 const Home = () => {
 	return (
@@ -12,8 +13,9 @@ const Home = () => {
 			<Navbar />
 
 			<Hero />
-			<VideoSection />
+			{/*<VideoSection />*/}
 			<New />
+			<HighlightProducts />
 			<Newsletter />
 
 			<Footer />

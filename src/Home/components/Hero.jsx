@@ -1,108 +1,122 @@
-import React, { useState, useEffect, useCallback } from 'react' // Добавили хуки
+import React, { useState, useEffect, useCallback } from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import { data, Link } from 'react-router-dom'
 import apiClient from '../../api/api'
 import { useLoader } from '../../LoaderContext.jsx'
-import { useTranslation } from 'react-i18next' // Добавлено
+import { useTranslation } from 'react-i18next'
 
 const Hero = () => {
-	const { t } = useTranslation() // Добавлено
-	const brandRed = '#e21e26'
+	const { t } = useTranslation()
+	const brandRed = '#ff0000'
+	const brandYellow = '#ff0000'
 	const { showLoader, hideLoader } = useLoader()
 
 	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(false)
+	const [currentIndex, setCurrentIndex] = useState(0)
+
+	// Fetch Banners
 	useEffect(() => {
 		const getBanners = async () => {
 			setLoading(true)
 			showLoader()
 			try {
 				const response = await apiClient.get('/get-banners')
-				const data = await response.data
-				setItems(data)
+				// Assuming response.data is an array of banner objects
+				setItems(response.data)
 			} catch (error) {
-				console.log(error)
+				console.error("Error fetching banners:", error)
 			} finally {
 				setLoading(false)
 				hideLoader()
 			}
 		}
 		getBanners()
-	}, [])
+	}, [showLoader, hideLoader])
 
-	// Используем useCallback, чтобы функцию можно было безопасно использовать в useEffect
 	const handleNext = useCallback(() => {
-		setItems(prev => {
-			const [first, ...rest] = prev
-			return [...rest, first]
-		})
-	}, [])
+		setCurrentIndex((prev) => (prev === items.length - 1 ? 0 : prev + 1))
+	}, [items.length])
 
 	const handlePrev = useCallback(() => {
-		setItems(prev => {
-			const last = prev[prev.length - 1]
-			const rest = prev.slice(0, -1)
-			return [last, ...rest]
-		})
-	}, [])
+		setCurrentIndex((prev) => (prev === 0 ? items.length - 1 : prev - 1))
+	}, [items.length])
 
-	// Автоплей каждые 3 секунды
+	// Autoplay every 5 seconds
 	useEffect(() => {
-		const timer = setInterval(() => {
-			handleNext()
-		}, 5000)
-
-		// Очистка таймера при кликах или размонтировании
+		if (items.length <= 1) return
+		const timer = setInterval(handleNext, 5000)
 		return () => clearInterval(timer)
-	}, [handleNext, items]) // items в зависимостях, чтобы таймер сбрасывался при смене слайда
+	}, [handleNext, items.length])
+
+	if (loading || items.length === 0) {
+		return <main className='w-full h-[85vh] bg-black mt-23' />
+	}
+
+	const currentSlide = items[currentIndex]
 
 	return (
-		<main className='relative w-full h-[85vh] overflow-hidden bg-black mt-23'>
-			<ul className='slider'>
-				{!loading
-					? items.map(item => (
-							<li
-								key={item.id}
-								className='hero-item'
-								style={{ backgroundImage: `url(${item.banner_image})` }}
-							>
-								<div className='active-slide-overlay absolute inset-0 bg-black/20 z-10 hidden' />
-								<div className='hero-content'>
-									<h2 className='text-2xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] mb-4 text-white max-w-[260px] md:max-w-4xl break-words'>
-										{item.title.split(' ')[0]} <br />
-										<span style={{ color: brandRed }}>
-											{item.title.split(' ').slice(1).join(' ')}
-										</span>
-									</h2>
+		<main className='relative w-full h-[85vh] overflow-hidden bg-black mt-23 font-sans'>
+			{/* Background Layer */}
+			<div
+				className='absolute inset-0 bg-contain bg-no-repeat bg-center transition-opacity duration-1000'
+				style={{ backgroundImage: `url(${currentSlide.banner_image})` }}
+			>
+				{/* Subtle dark overlay to match the photo depth */}
+				<div className='absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10' />
+			</div>
 
-									<p className='text-gray-200 text-[9px] md:text-xs uppercase tracking-[0.2em] leading-relaxed mb-6 md:mb-10 opacity-80 font-bold max-w-[160px] md:max-w-sm'>
-										{item.short_description}
-									</p>
+			{/* Main Content */}
+			<div className='relative z-20 h-full flex flex-col justify-center px-6 md:px-24'>
+				<div className='max-w-4xl'>
+					{/* Multi-color Title Logic */}
+					<h2 className='text-4xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] mb-4 text-white'>
+						{currentSlide.title.split(' ')[0]} <br />
+						<span style={{ color: brandRed }}>
+                            {currentSlide.title.split(' ').slice(1).join(' ')}
+                        </span>
+					</h2>
 
-									<a
-										href={item.url}
-										className='inline-block px-6 py-3 md:px-10 md:py-4 border-2 border-white text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#e21e26] hover:border-[#e21e26]'
-									>
-										{t('hero_btn_more')}
-									</a>
-								</div>
-							</li>
-						))
-					: ''}
-			</ul>
+					<p className='text-gray-200 text-[10px] md:text-sm uppercase tracking-[0.2em] leading-relaxed mb-8 opacity-90 font-bold max-w-lg'>
+						{currentSlide.short_description}
+					</p>
 
-			<nav className='absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-4 select-none'>
+					{/* The Yellow Button from the photo */}
+					<a
+						href={currentSlide.url}
+						style={{ backgroundColor: brandYellow }}
+						className='inline-block px-8 py-3 md:px-12 md:py-4 text-white text-[10px] md:text-xs font-black uppercase tracking-widest transition-transform hover:scale-105 active:scale-95'
+					>
+						{t('hero_btn_more') || 'Discover More'}
+					</a>
+				</div>
+			</div>
+
+			{/* Dashboard / Stepper Indicators (Bottom Center) */}
+			<div className='absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-3'>
+				{items.map((_, index) => (
+					<button
+						key={index}
+						onClick={() => setCurrentIndex(index)}
+						className={`h-[2px] transition-all duration-300 ${
+							index === currentIndex ? 'w-12 bg-white' : 'w-6 bg-white/30 hover:bg-white/60'
+						}`}
+					/>
+				))}
+			</div>
+
+			{/* Navigation Arrows (Sides) */}
+			<nav className='absolute inset-y-0 w-full flex items-center justify-between px-6 z-30 pointer-events-none'>
 				<button
 					onClick={handlePrev}
-					className='p-4 rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all duration-300 hover:bg-[#e21e26] hover:border-[#e21e26] hover:text-white active:scale-90 cursor-pointer'
+					className='pointer-events-auto p-2 text-white/40 hover:text-white transition-colors cursor-pointer'
 				>
-					<ArrowLeft size={20} />
+					<ArrowLeft size={32} strokeWidth={1.5} />
 				</button>
 				<button
 					onClick={handleNext}
-					className='p-4 rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all duration-300 hover:bg-[#e21e26] hover:border-[#e21e26] hover:text-white active:scale-90 cursor-pointer'
+					className='pointer-events-auto p-2 text-white/40 hover:text-white transition-colors cursor-pointer'
 				>
-					<ArrowRight size={20} />
+					<ArrowRight size={32} strokeWidth={1.5} />
 				</button>
 			</nav>
 		</main>

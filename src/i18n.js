@@ -301,6 +301,12 @@ const resources = {
 			support_error_fetch: 'Failed to load files.',
 			support_error_download: 'Failed to download file.',
 
+
+			"view_all": "View All",
+			"product_highlights_title": "Product highlights",
+			"nothing_to_show": "Nothing to show",
+
+
 			search: {
 				bg_text: 'Search',
 				title: 'Explore',
@@ -322,6 +328,7 @@ const resources = {
 				awaiting_params: 'Awaiting specific parameters',
 				clear_filters_btn: 'Clear filters',
 				all_loaded: 'All loaded ({{count}} products)',
+				new:"new",
 			},
 		},
 	},
@@ -371,6 +378,11 @@ const resources = {
 			footer_link_contact: 'Связаться с нами',
 			footer_copyright: '© 2026 AlyX LIGHTING. ВСЕ ПРАВА ЗАЩИЩЕНЫ.',
 			footer_back_to_top: 'Наверх',
+			new:"Новый",
+
+			"view_all": "Смотреть все",
+			"product_highlights_title": "Популярные товары",
+			"nothing_to_show": "Нет данных для отображения",
 
 			//contact
 			contacts_bg_text: 'Контакт',
