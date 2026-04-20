@@ -1,418 +1,262 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useMemo,
-} from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { useTranslation } from "react-i18next";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import {
   Loader2,
   ChevronRight,
   Search,
   X,
   ArrowRight,
-  Maximize2,
-  ChevronLeft,
-  Box,
   ArrowLeft,
-} from "lucide-react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import apiClient from "../api/api";
+  Home
+} from 'lucide-react'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import apiClient from '../api/api'
 
 const SubCategoryProducts = () => {
-  const { subId } = useParams();
-  const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { subId } = useParams()
+  const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
 
-  const [items, setItems] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [items, setItems] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [total, setTotal] = useState(0)
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [page, setPage] = useState(1)
 
-  const sentinelRef = useRef(null);
-  const observerRef = useRef(null);
-  const pageRef = useRef(1);
-  const busyRef = useRef(false);
+  const sentinelRef = useRef(null)
+  const observerRef = useRef(null)
+  const busyRef = useRef(false)
 
   const getLoc = (item, field) => {
-    if (!item) return "";
-    const lang = i18n.language;
-    if (lang === "en" && item[`${field}_en`]) return item[`${field}_en`];
-    if (lang === "tk" && item[`${field}_tk`]) return item[`${field}_tk`];
-    return item[`${field}_ru`] || item[field];
-  };
+    if (!item) return ''
+    const lang = i18n.language
+    if (lang === 'en' && item[`${field}_en`]) return item[`${field}_en`]
+    if (lang === 'tk' && item[`${field}_tk`]) return item[`${field}_tk`]
+    return item[`${field}_ru`] || item[field]
+  }
 
-  // Top 5 products for the spotlight
-  const spotlightItems = useMemo(() => items.slice(0, 5), [items]);
+  const spotlightItems = useMemo(() => items.slice(0, 5), [items])
 
   useEffect(() => {
     if (spotlightItems.length > 0) {
       const timer = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % spotlightItems.length);
-      }, 7000);
-      return () => clearInterval(timer);
+        setCurrentSlide(prev => (prev + 1) % spotlightItems.length)
+      }, 7000)
+      return () => clearInterval(timer)
     }
-  }, [spotlightItems]);
+  }, [spotlightItems])
 
   const loadProducts = useCallback(
-    async (pageNum, append = false) => {
-      if (busyRef.current) return;
-      busyRef.current = true;
-      if (!append) setLoading(true);
-      else setLoadingMore(true);
+      async (pageNum, append = false) => {
+        if (busyRef.current) return
+        busyRef.current = true
 
-      try {
-        const response = await apiClient.get("/products", {
-          params: { subcategory: subId, page: pageNum },
-        });
-        const data = response.data;
-        const newItems = data.results || [];
-        setTotal(data.count || 0);
-        setHasMore(data.next !== null);
-        if (append) setItems((prev) => [...prev, ...newItems]);
-        else setItems(newItems);
-      } catch (err) {
-        console.error("Fetch error:", err);
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-        busyRef.current = false;
-      }
-    },
-    [subId],
-  );
+        if (!append) setLoading(true)
+        else setLoadingMore(true)
 
-  useEffect(() => {
-    pageRef.current = 1;
-    setItems([]);
-    loadProducts(1, false);
-  }, [subId, loadProducts]);
+        try {
+          const response = await apiClient.get('/products', {
+            params: { subcategory: subId, page: pageNum },
+          })
+          const data = response.data
+          const newItems = data.results || []
 
-  useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect();
-    observerRef.current = new IntersectionObserver(
-      ([entry]) => {
-        if (
-          entry.isIntersecting &&
-          hasMore &&
-          !busyRef.current &&
-          searchTerm === ""
-        ) {
-          const nextPage = pageRef.current + 1;
-          pageRef.current = nextPage;
-          loadProducts(nextPage, true);
+          setTotal(data.count || 0)
+          setHasMore(data.next !== null)
+
+          if (append) {
+            setItems(prev => [...prev, ...newItems])
+          } else {
+            setItems(newItems)
+          }
+        } catch (err) {
+          console.error('Fetch error:', err)
+          setHasMore(false)
+        } finally {
+          setLoading(false)
+          setLoadingMore(false)
+          busyRef.current = false
         }
       },
-      { rootMargin: "400px" },
-    );
-    if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
-    return () => observerRef.current?.disconnect();
-  }, [hasMore, loadProducts, searchTerm]);
+      [subId],
+  )
 
-  const filteredItems = items.filter((product) => {
-    const name = getLoc(product, "name").toLowerCase();
-    const desc = getLoc(product, "short_description").toLowerCase();
-    const query = searchTerm.toLowerCase();
-    return name.includes(query) || desc.includes(query);
-  });
+  // Reset when subId changes
+  useEffect(() => {
+    setPage(1)
+    setItems([])
+    setHasMore(true)
+    loadProducts(1, false)
+  }, [subId, loadProducts])
 
-  const subcategoryName =
-    items.length > 0 ? getLoc(items[0], "subcategory") : t("products_loading");
+  // INFINITE SCROLL LOGIC
+  useEffect(() => {
+    if (!hasMore || searchTerm !== '' || loading) return
+
+    if (observerRef.current) observerRef.current.disconnect()
+
+    observerRef.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && !busyRef.current && hasMore) {
+            setPage(prev => {
+              const nextPage = prev + 1
+              loadProducts(nextPage, true)
+              return nextPage
+            })
+          }
+        },
+        { rootMargin: '400px' }
+    )
+
+    if (sentinelRef.current) {
+      observerRef.current.observe(sentinelRef.current)
+    }
+
+    return () => observerRef.current?.disconnect()
+  }, [hasMore, searchTerm, loadProducts, loading])
+
+  const filteredItems = items.filter(product => {
+    const name = getLoc(product, 'name').toLowerCase()
+    const desc = getLoc(product, 'short_description').toLowerCase()
+    const query = searchTerm.toLowerCase()
+    return name.includes(query) || desc.includes(query)
+  })
+
+  const subcategoryName = items.length > 0 ? getLoc(items[0], 'subcategory') : t('products_loading')
 
   return (
-    <div className="bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white text-black">
-      <Navbar />
+      <div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white text-black'>
+        <Navbar />
 
-      {/* --- PRODUCT SPOTLIGHT HEADER --- */}
-      <header className="relative h-[80vh] mt-30 bg-black overflow-hidden">
-        <AnimatePresence mode="wait">
-          {spotlightItems.length > 0 ? (
-            <motion.div
-              key={spotlightItems[currentSlide].id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
-              className="absolute inset-0"
-            >
-              {/* Immersive Image */}
-              <motion.img
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 7 }}
-                src={spotlightItems[currentSlide].poster}
-                className="w-full h-full object-contain opacity-60 grayscale-[0.5]"
-                alt="Spotlight"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-
-              {/* Content Overlay */}
-              <div className="absolute inset-0 flex items-center px-6 md:px-20">
-                <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 items-end gap-12">
-                  <div className="space-y-6">
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 }}
-                      className="flex items-center gap-3 text-[#e21e26] text-[10px] font-black uppercase tracking-[0.4em]"
-                    >
-                      <div className="w-8 h-[1px] bg-[#e21e26]" />
-                      {t("products_spotlight_tag")}
-                    </motion.div>
-                    <motion.h1
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
-                      className="text-white text-5xl md:text-8xl font-[1000] uppercase leading-[0.85]  tracking-tighter"
-                    >
-                      {getLoc(spotlightItems[currentSlide], "name")}
-                    </motion.h1>
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.6 }}
-                      className="text-white/60 text-sm md:text-lg max-w-lg font-medium leading-relaxed"
-                    >
-                      {getLoc(
-                        spotlightItems[currentSlide],
-                        "short_description",
-                      )}
-                    </motion.p>
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.7 }}
-                    >
-                      <Link
-                        to={`/product/${spotlightItems[currentSlide].id}`}
-                        className="inline-flex items-center gap-4 bg-[#e21e26] text-white px-10 py-5 rounded-full font-black uppercase text-[10px] tracking-widest hover:bg-white hover:text-black transition-all duration-300"
-                      >
-                        {t("products_view_details")} <ArrowRight size={16} />
-                      </Link>
-                    </motion.div>
-                  </div>
-
-                  {/* Tech Specs Side */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8 }}
-                    className="hidden lg:flex flex-col gap-4 border-l border-white/10 pl-12 pb-4"
-                  >
-                    <div className="flex flex-col">
-                      <span className="text-white/30 text-[9px] font-black uppercase tracking-widest mb-1">
-                        {t("products_spec_label_size")}
-                      </span>
-                      <span className="text-white text-2xl font-bold">
-                        {spotlightItems[currentSlide].size}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-white/30 text-[9px] font-black uppercase tracking-widest mb-1">
-                        {t("products_spec_label_cat")}
-                      </span>
-                      <span className="text-white text-lg font-bold uppercase">
-                        {getLoc(spotlightItems[currentSlide], "subcategory")}
-                      </span>
-                    </div>
-                  </motion.div>
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="animate-spin text-white/20" size={40} />
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Slider Navigation */}
-        <div className="absolute bottom-12 right-6 md:right-20 flex items-center gap-8 z-20">
-          <div className="flex gap-2">
-            {spotlightItems.map((_, idx) => (
-              <div
-                key={idx}
-                className={`h-[2px] transition-all duration-700 ${idx === currentSlide ? "w-16 bg-[#e21e26]" : "w-4 bg-white/20"}`}
-              />
-            ))}
-          </div>
-          <div className="flex gap-4">
-            <button
-              onClick={() =>
-                setCurrentSlide(
-                  (prev) =>
-                    (prev - 1 + spotlightItems.length) % spotlightItems.length,
-                )
-              }
-              className="p-4 border border-white/10 rounded-full text-white hover:bg-[#e21e26] hover:border-[#e21e26] transition-all"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <button
-              onClick={() =>
-                setCurrentSlide((prev) => (prev + 1) % spotlightItems.length)
-              }
-              className="p-4 border border-white/10 rounded-full text-white hover:bg-[#e21e26] hover:border-[#e21e26] transition-all"
-            >
-              <ArrowRight size={20} />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* --- SEARCH & BREADCRUMBS BAR --- */}
-      <div className="sticky top-0 z-40 bg-white border-b border-gray-100 py-6 px-6">
-        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <nav className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-400">
-            <Link to="/products" className="hover:text-black transition-colors">
-              {t("products_breadcrumb_catalog")}
-            </Link>
-            <ChevronRight size={10} />
-            <span className="text-[#e21e26]">
-              {subcategoryName} ({total})
-            </span>
-          </nav>
-
-          <div className="relative w-full md:w-96">
-            <input
-              type="text"
-              placeholder={t("products_search_placeholder")}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-50 border-none p-4 pl-12 rounded-2xl text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-[#e21e26] outline-none transition-all"
-            />
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-black"
-              size={18}
-            />
-            {searchTerm && (
-              <X
-                onClick={() => setSearchTerm("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer"
-                size={16}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-
-      <main className="max-w-[1400px] mx-auto px-4 md:px-6 py-20 relative z-10">
-        {loading && items.length === 0 ? (
-          <div className="flex justify-center py-40">
-            <Loader2 className="animate-spin text-[#e21e26]" size={48} />
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-20">
-              <AnimatePresence mode="popLayout">
-                {filteredItems.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    getLoc={getLoc}
+        {/* --- SPOTLIGHT --- */}
+        <header className='relative h-[80vh] min-h-[600px] bg-black overflow-hidden'>
+          <AnimatePresence mode='wait'>
+            {spotlightItems.length > 0 ? (
+                <motion.div
+                    key={spotlightItems[currentSlide].id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className='absolute inset-0'
+                >
+                  <motion.img
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 8 }}
+                      src={spotlightItems[currentSlide].poster}
+                      className='w-full h-full object-cover opacity-50'
+                      alt='Spotlight'
                   />
-                ))}
-              </AnimatePresence>
-            </div>
+                  <div className='absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent' />
 
-            {searchTerm === "" && <div ref={sentinelRef} className="h-20" />}
-            {loadingMore && (
-              <div className="flex justify-center py-10">
-                <Loader2 className="animate-spin text-[#e21e26]" size={32} />
-              </div>
+                  <div className='absolute inset-0 flex items-center px-6 md:px-20'>
+                    <div className='max-w-[1400px] w-full mx-auto space-y-6'>
+                      <motion.h1
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className='text-white text-6xl md:text-8xl font-black uppercase leading-tight tracking-tighter'
+                      >
+                        {getLoc(spotlightItems[currentSlide], 'name')}
+                      </motion.h1>
+                      <Link
+                          to={`/product/${spotlightItems[currentSlide].id}`}
+                          className='inline-flex items-center gap-4 bg-[#e21e26] text-white px-8 py-4 rounded-full font-bold uppercase text-[12px] tracking-widest hover:bg-white hover:text-black transition-all'
+                      >
+                        {t('products_view_details')} <ArrowRight size={18} />
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+            ) : (
+                <div className='flex h-full items-center justify-center'><Loader2 className='animate-spin text-white' /></div>
             )}
-          </>
-        )}
-      </main>
+          </AnimatePresence>
+        </header>
 
-      <Footer />
-    </div>
-  );
-};
-const ProductCard = ({ product, getLoc }) => {
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group"
-    >
-      <Link to={`/product/${product.id}`} className="block">
-        {/* --- IMAGE CONTAINER --- */}
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[5px] bg-[#1a1a1a] mb-6 shadow-sm border border-gray-100/10">
-          {/* 1. Blurred Background Image */}
-          <img
-            src={product.poster}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover blur-[10px] scale-110 opacity-40 transition-transform duration-1000 group-hover:scale-125"
-          />
+        {/* --- BREADCRUMBS & SEARCH --- */}
+        <div className='sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100 py-4 px-6'>
+          <div className='max-w-[1400px] mx-auto flex flex-col md:row justify-between items-center gap-4'>
+            <nav className='flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400'>
+              <Link to="/" className="flex items-center gap-1 hover:text-[#e21e26]">
+                <Home size={14} /> {t('dashboard')}
+              </Link>
+              <ChevronRight size={12} />
+              <Link to='/products' className='hover:text-black'>{t('catalog')}</Link>
+              <ChevronRight size={12} />
+              <span className='text-[#e21e26]'>{subcategoryName}</span>
+            </nav>
 
-          {/* 2. Sharp Centered Product */}
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <img
-              src={product.poster}
-              alt={getLoc(product, "name")}
-              className="w-full h-full object-contain transition-all duration-700 ease-out scale-100 group-hover:scale-110 grayscale group-hover:grayscale-0"
-            />
-          </div>
-
-          {/* 3. Glass Overlay on Hover */}
-          <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0" />
-
-          {/* 4. Floating Badge (Size) */}
-          <div className="absolute top-4 left-4 z-20">
-            <span className="bg-white/90 backdrop-blur-md text-black text-[10px] font-black uppercase px-3 py-1.5 rounded-[5px] shadow-sm tracking-widest">
-              {product.size}
-            </span>
-          </div>
-
-          {/* 5. Hover Action Icon */}
-          <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
-            <div className="w-8 h-8 bg-[#e21e26] text-white flex items-center justify-center rounded-[5px]">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="7" y1="17" x2="17" y2="7"></line>
-                <polyline points="7 7 17 7 17 17"></polyline>
-              </svg>
+            <div className='relative w-full md:w-80'>
+              <Search className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400' size={16} />
+              <input
+                  type='text'
+                  placeholder={t('search')}
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className='w-full bg-gray-100 border-none py-3 pl-12 pr-10 rounded-full text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-[#e21e26]'
+              />
+              {searchTerm && <X onClick={() => setSearchTerm('')} className='absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer' size={16} />}
             </div>
           </div>
         </div>
 
-        {/* --- TEXT CONTENT --- */}
-        <div className="px-2">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-[2px] w-0 group-hover:w-6 bg-[#e21e26] transition-all duration-500 rounded-full" />
-            <span className="text-[10px] font-bold text-[#e21e26] uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
-              View Details
-            </span>
+        {/* --- MAIN GRID --- */}
+        <main className='max-w-[1400px] mx-auto px-6 py-20 min-h-screen'>
+          {loading && items.length === 0 ? (
+              <div className='flex justify-center py-20'><Loader2 className='animate-spin text-[#e21e26]' size={40} /></div>
+          ) : (
+              <>
+                <div className='grid grid-cols-2 lg:grid-cols-4 gap-10'>
+                  {filteredItems.map(product => (
+                      <ProductCard key={product.id} product={product} getLoc={getLoc} />
+                  ))}
+                </div>
+
+                {/* Sentinel for Infinite Scroll */}
+                {searchTerm === '' && hasMore && (
+                    <div ref={sentinelRef} className='flex justify-center py-20'>
+                      <Loader2 className='animate-spin text-[#e21e26]' size={32} />
+                    </div>
+                )}
+              </>
+          )}
+        </main>
+
+        <Footer />
+      </div>
+  )
+}
+
+const ProductCard = ({ product, getLoc }) => (
+    <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='group'>
+      <Link to={`/product/${product.id}`}>
+        <div className='relative aspect-[3/4] overflow-hidden bg-gray-100 rounded-2xl mb-4'>
+          <img
+              src={product.poster}
+              className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0'
+              alt={product.name}
+          />
+          <div className='absolute bottom-4 left-4'>
+                    <span className='bg-black text-white text-[10px] font-black px-3 py-1 rounded-md uppercase'>
+                        {product.size}
+                    </span>
           </div>
-
-          <h3 className="text-xl font-black uppercase tracking-tighter group-hover:text-[#e21e26] transition-colors leading-none">
-            {getLoc(product, "name")}
-          </h3>
-
-          <p className="text-gray-500 text-[11px] font-medium mt-3 uppercase tracking-tight line-clamp-2 leading-relaxed opacity-80">
-            {getLoc(product, "short_description")}
-          </p>
         </div>
+        <h3 className='text-lg font-black uppercase tracking-tight group-hover:text-[#e21e26] transition-colors'>
+          {getLoc(product, 'name')}
+        </h3>
+        <p className='text-gray-400 text-xs mt-1 uppercase font-bold truncate'>
+          {getLoc(product, 'short_description')}
+        </p>
       </Link>
     </motion.div>
-  );
-};
+)
 
-export default SubCategoryProducts;
+export default SubCategoryProducts
