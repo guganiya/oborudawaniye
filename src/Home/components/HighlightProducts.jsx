@@ -35,7 +35,7 @@ const ProductHighlights = () => {
 
     return (
 
-        <section className='bg-white py-16 px-6 md:px-20 font-sans border-t border-gray-100'>
+        <section className='bg-white py-16 px-6 md:px-20 font-sans border-t border-gray-100 overflow-hidden'>
             {/* Header Section */}
             <div className='flex justify-between items-center mb-10'>
                 <h2 className='text-2xl md:text-4xl font-extrabold text-[#222] tracking-tight'>
