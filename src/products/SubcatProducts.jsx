@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import {
@@ -9,7 +9,8 @@ import {
   X,
   ArrowRight,
   ArrowLeft,
-  Home
+  Home,
+  LayoutGrid
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -17,63 +18,74 @@ import apiClient from '../api/api'
 
 const SubCategoryProducts = () => {
   const { subId } = useParams()
-  const navigate = useNavigate()
   const { t, i18n } = useTranslation()
 
+  // Состояния для данных
   const [items, setItems] = useState([])
+  const [total, setTotal] = useState(0)
+  const [subcategoryName, setSubcategoryName] = useState('')
+
+  // Состояния для управления UI
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
-  const [total, setTotal] = useState(0)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [page, setPage] = useState(1)
 
+  // Рефы для работы с Intersection Observer и предотвращения дублей
   const sentinelRef = useRef(null)
-  const observerRef = useRef(null)
   const busyRef = useRef(false)
+  const observerRef = useRef(null)
 
+  // Локализация полей
   const getLoc = (item, field) => {
     if (!item) return ''
     const lang = i18n.language
     if (lang === 'en' && item[`${field}_en`]) return item[`${field}_en`]
-    if (lang === 'tk' && item[`${field}_tk`]) return item[`${field}_tk`]
+    if (lang === 'tk' && item[`${field}_tk`] ) return item[`${field}_tk`]
     return item[`${field}_ru`] || item[field]
   }
 
+  // Слайдер: берем первые 5 элементов
   const spotlightItems = useMemo(() => items.slice(0, 5), [items])
 
   useEffect(() => {
-    if (spotlightItems.length > 0) {
+    if (spotlightItems.length > 1) {
       const timer = setInterval(() => {
         setCurrentSlide(prev => (prev + 1) % spotlightItems.length)
-      }, 7000)
+      }, 8000)
       return () => clearInterval(timer)
     }
   }, [spotlightItems])
 
+  // Основная функция загрузки (поддерживает пагинацию APIView)
   const loadProducts = useCallback(
-      async (pageNum, append = false) => {
+      async (pageNum, isAppend = false) => {
         if (busyRef.current) return
         busyRef.current = true
 
-        if (!append) setLoading(true)
+        if (!isAppend) setLoading(true)
         else setLoadingMore(true)
 
         try {
           const response = await apiClient.get('/products', {
             params: { subcategory: subId, page: pageNum },
           })
-          const data = response.data
-          const newItems = data.results || []
 
-          setTotal(data.count || 0)
-          setHasMore(data.next !== null)
+          // Извлекаем данные из формата DRF Pagination
+          const { results, next, count } = response.data
 
-          if (append) {
-            setItems(prev => [...prev, ...newItems])
+          setTotal(count || 0)
+          setHasMore(next !== null) // Если next: null, значит страниц больше нет
+
+          if (isAppend) {
+            setItems(prev => [...prev, ...results])
           } else {
-            setItems(newItems)
+            setItems(results)
+            if (results.length > 0) {
+              setSubcategoryName(getLoc(results[0], 'subcategory'))
+            }
           }
         } catch (err) {
           console.error('Fetch error:', err)
@@ -84,24 +96,22 @@ const SubCategoryProducts = () => {
           busyRef.current = false
         }
       },
-      [subId],
+      [subId, i18n.language]
   )
 
-  // Reset when subId changes
+  // Сброс при смене подкатегории
   useEffect(() => {
     setPage(1)
     setItems([])
     setHasMore(true)
     loadProducts(1, false)
-  }, [subId, loadProducts])
+  }, [subId])
 
-  // INFINITE SCROLL LOGIC
+  // INFINITE SCROLL: следит за sentinelRef внизу страницы
   useEffect(() => {
     if (!hasMore || searchTerm !== '' || loading) return
 
-    if (observerRef.current) observerRef.current.disconnect()
-
-    observerRef.current = new IntersectionObserver(
+    const observer = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && !busyRef.current && hasMore) {
             setPage(prev => {
@@ -114,115 +124,144 @@ const SubCategoryProducts = () => {
         { rootMargin: '400px' }
     )
 
-    if (sentinelRef.current) {
-      observerRef.current.observe(sentinelRef.current)
-    }
-
-    return () => observerRef.current?.disconnect()
+    if (sentinelRef.current) observer.observe(sentinelRef.current)
+    return () => observer.disconnect()
   }, [hasMore, searchTerm, loadProducts, loading])
 
-  const filteredItems = items.filter(product => {
-    const name = getLoc(product, 'name').toLowerCase()
-    const desc = getLoc(product, 'short_description').toLowerCase()
-    const query = searchTerm.toLowerCase()
-    return name.includes(query) || desc.includes(query)
-  })
-
-  const subcategoryName = items.length > 0 ? getLoc(items[0], 'subcategory') : t('products_loading')
+  // Локальный поиск
+  const filteredItems = useMemo(() => {
+    return items.filter(product => {
+      const name = getLoc(product, 'name').toLowerCase()
+      const desc = (getLoc(product, 'short_description') || '').toLowerCase()
+      const query = searchTerm.toLowerCase()
+      return name.includes(query) || desc.includes(query)
+    })
+  }, [items, searchTerm, i18n.language])
 
   return (
-      <div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white text-black'>
+      <div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
         <Navbar />
 
-        {/* --- SPOTLIGHT --- */}
-        <header className='relative h-[80vh] min-h-[600px] bg-black overflow-hidden'>
+        {/* --- SPOTLIGHT HEADER --- */}
+        <section className='relative h-[75vh] min-h-[500px] bg-black overflow-hidden'>
           <AnimatePresence mode='wait'>
             {spotlightItems.length > 0 ? (
                 <motion.div
-                    key={spotlightItems[currentSlide].id}
+                    key={spotlightItems[currentSlide]?.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8 }}
+                    transition={{ duration: 1 }}
                     className='absolute inset-0'
                 >
-                  <motion.img
-                      initial={{ scale: 1.1 }}
-                      animate={{ scale: 1 }}
-                      transition={{ duration: 8 }}
-                      src={spotlightItems[currentSlide].poster}
-                      className='w-full h-full object-cover opacity-50'
-                      alt='Spotlight'
+                  <img
+                      src={spotlightItems[currentSlide]?.poster}
+                      className='w-full h-full object-cover opacity-60 grayscale-[0.3]'
+                      alt='Banner'
                   />
-                  <div className='absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent' />
+                  <div className='absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent' />
 
                   <div className='absolute inset-0 flex items-center px-6 md:px-20'>
-                    <div className='max-w-[1400px] w-full mx-auto space-y-6'>
+                    <div className='max-w-[1400px] mx-auto w-full'>
+                      <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className='text-[#e21e26] text-[11px] font-black uppercase tracking-[0.4em] mb-4 flex items-center gap-3'
+                      >
+                        <div className='w-10 h-[2px] bg-[#e21e26]' /> {t('new_collection')}
+                      </motion.div>
                       <motion.h1
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className='text-white text-6xl md:text-8xl font-black uppercase leading-tight tracking-tighter'
+                          className='text-white text-5xl md:text-8xl font-black uppercase leading-tight tracking-tighter mb-8'
                       >
                         {getLoc(spotlightItems[currentSlide], 'name')}
                       </motion.h1>
                       <Link
-                          to={`/product/${spotlightItems[currentSlide].id}`}
-                          className='inline-flex items-center gap-4 bg-[#e21e26] text-white px-8 py-4 rounded-full font-bold uppercase text-[12px] tracking-widest hover:bg-white hover:text-black transition-all'
+                          to={`/product/${spotlightItems[currentSlide]?.id}`}
+                          className='inline-flex items-center gap-4 bg-white text-black px-10 py-5 rounded-full font-black uppercase text-[10px] tracking-widest hover:bg-[#e21e26] hover:text-white transition-all duration-300 shadow-2xl'
                       >
-                        {t('products_view_details')} <ArrowRight size={18} />
+                        {t('view_details')} <ArrowRight size={16} />
                       </Link>
                     </div>
                   </div>
                 </motion.div>
-            ) : (
-                <div className='flex h-full items-center justify-center'><Loader2 className='animate-spin text-white' /></div>
+            ) : !loading && (
+                <div className='flex h-full items-center justify-center text-white/20 uppercase tracking-[0.5em] text-sm'>
+                  Empty Collection
+                </div>
             )}
           </AnimatePresence>
-        </header>
 
-        {/* --- BREADCRUMBS & SEARCH --- */}
-        <div className='sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100 py-4 px-6'>
-          <div className='max-w-[1400px] mx-auto flex flex-col md:row justify-between items-center gap-4'>
+          {/* Spotlight Navigation */}
+          {spotlightItems.length > 1 && (
+              <div className='absolute bottom-12 right-6 md:right-20 flex items-center gap-6 z-20'>
+                <div className='flex gap-2'>
+                  {spotlightItems.map((_, i) => (
+                      <button
+                          key={i}
+                          onClick={() => setCurrentSlide(i)}
+                          className={`h-[2px] transition-all duration-500 ${i === currentSlide ? 'w-12 bg-[#e21e26]' : 'w-4 bg-white/30'}`}
+                      />
+                  ))}
+                </div>
+              </div>
+          )}
+        </section>
+
+        {/* --- STICKY NAV BAR --- */}
+        <div className='sticky top-0 z-[100] bg-white/90 backdrop-blur-xl border-b border-gray-100 py-4 px-6'>
+          <div className='max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4'>
             <nav className='flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400'>
-              <Link to="/" className="flex items-center gap-1 hover:text-[#e21e26]">
-                <Home size={14} /> {t('dashboard')}
-              </Link>
+              <Link to='/catalog' className='hover:text-black transition-colors'>{t('catalog')}</Link>
               <ChevronRight size={12} />
-              <Link to='/products' className='hover:text-black'>{t('catalog')}</Link>
-              <ChevronRight size={12} />
-              <span className='text-[#e21e26]'>{subcategoryName}</span>
+              <span className='text-[#e21e26]'>{subcategoryName || t('products')} ({total})</span>
             </nav>
 
-            <div className='relative w-full md:w-80'>
-              <Search className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400' size={16} />
+            <div className='relative w-full md:w-96'>
+              <Search className='absolute left-5 top-1/2 -translate-y-1/2 text-gray-400' size={18} />
               <input
                   type='text'
-                  placeholder={t('search')}
+                  placeholder={t('search_placeholder')}
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className='w-full bg-gray-100 border-none py-3 pl-12 pr-10 rounded-full text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-[#e21e26]'
+                  className='w-full bg-gray-50 border-none py-4 pl-14 pr-12 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-black transition-all'
               />
-              {searchTerm && <X onClick={() => setSearchTerm('')} className='absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer' size={16} />}
+              {searchTerm && <X onClick={() => setSearchTerm('')} className='absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-[#e21e26]' size={16} />}
             </div>
           </div>
         </div>
 
-        {/* --- MAIN GRID --- */}
-        <main className='max-w-[1400px] mx-auto px-6 py-20 min-h-screen'>
+        {/* --- GRID --- */}
+        <main className='max-w-[1400px] mx-auto px-6 py-20'>
           {loading && items.length === 0 ? (
-              <div className='flex justify-center py-20'><Loader2 className='animate-spin text-[#e21e26]' size={40} /></div>
+              <div className='flex flex-col items-center justify-center py-40 gap-4'>
+                <Loader2 className='animate-spin text-[#e21e26]' size={48} />
+                <span className='text-[10px] font-black uppercase tracking-widest text-gray-400'>{t('loading')}</span>
+              </div>
           ) : (
               <>
-                <div className='grid grid-cols-2 lg:grid-cols-4 gap-10'>
-                  {filteredItems.map(product => (
-                      <ProductCard key={product.id} product={product} getLoc={getLoc} />
-                  ))}
+                <div className='grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16'>
+                  <AnimatePresence mode='popLayout'>
+                    {filteredItems.map(product => (
+                        <ProductCard key={product.id} product={product} getLoc={getLoc} />
+                    ))}
+                  </AnimatePresence>
                 </div>
 
-                {/* Sentinel for Infinite Scroll */}
-                {searchTerm === '' && hasMore && (
-                    <div ref={sentinelRef} className='flex justify-center py-20'>
-                      <Loader2 className='animate-spin text-[#e21e26]' size={32} />
+                {/* Bottom Loader & Sentinel */}
+                {searchTerm === '' && (
+                    <div ref={sentinelRef} className='mt-20 flex justify-center'>
+                      {hasMore ? (
+                          <div className='flex flex-col items-center gap-2'>
+                            <Loader2 className='animate-spin text-[#e21e26]' size={24} />
+                            <span className='text-[9px] font-black uppercase tracking-[0.3em] text-gray-300'>Syncing...</span>
+                          </div>
+                      ) : (
+                          <div className='text-gray-300 text-[10px] font-black uppercase tracking-widest border-t border-gray-50 pt-10 w-full text-center'>
+                            End of Collection
+                          </div>
+                      )}
                     </div>
                 )}
               </>
@@ -234,29 +273,56 @@ const SubCategoryProducts = () => {
   )
 }
 
-const ProductCard = ({ product, getLoc }) => (
-    <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='group'>
-      <Link to={`/product/${product.id}`}>
-        <div className='relative aspect-[3/4] overflow-hidden bg-gray-100 rounded-2xl mb-4'>
-          <img
-              src={product.poster}
-              className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0'
-              alt={product.name}
-          />
-          <div className='absolute bottom-4 left-4'>
-                    <span className='bg-black text-white text-[10px] font-black px-3 py-1 rounded-md uppercase'>
-                        {product.size}
-                    </span>
-          </div>
-        </div>
-        <h3 className='text-lg font-black uppercase tracking-tight group-hover:text-[#e21e26] transition-colors'>
-          {getLoc(product, 'name')}
-        </h3>
-        <p className='text-gray-400 text-xs mt-1 uppercase font-bold truncate'>
-          {getLoc(product, 'short_description')}
-        </p>
-      </Link>
-    </motion.div>
-)
+/* --- PRODUCT CARD COMPONENT --- */
+const ProductCard = ({ product, getLoc }) => {
+  return (
+      <motion.div
+          layout
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='group cursor-pointer'
+      >
+        <Link to={`/product/${product.id}`} className='block'>
+          <div className='relative aspect-[3/4] overflow-hidden rounded-3xl bg-gray-50 mb-6'>
+            {/* Blurred Glow Background */}
+            <img
+                src={product.poster}
+                className='absolute inset-0 w-full h-full object-cover blur-2xl opacity-20 scale-150 transition-transform duration-1000 group-hover:scale-110'
+                alt=''
+            />
+            {/* Main Product Image */}
+            <img
+                src={product.poster}
+                className='relative z-10 w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-110 grayscale group-hover:grayscale-0'
+                alt={product.name}
+            />
 
-export default SubCategoryProducts
+            {/* Badge */}
+            <div className='absolute top-5 left-5 z-20'>
+            <span className='bg-white/80 backdrop-blur-md text-black text-[9px] font-black px-4 py-2 rounded-xl uppercase tracking-tighter shadow-sm'>
+              {product.size || 'Unique'}
+            </span>
+            </div>
+
+            {/* Hover Arrow Icon */}
+            <div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center z-20'>
+              <div className='w-12 h-12 bg-[#e21e26] rounded-full flex items-center justify-center text-white scale-0 group-hover:scale-100 transition-transform duration-500'>
+                <ArrowRight size={24} />
+              </div>
+            </div>
+          </div>
+
+          <div className='space-y-2 px-2'>
+            <h3 className='text-xl font-black uppercase tracking-tighter group-hover:text-[#e21e26] transition-colors line-clamp-1'>
+              {getLoc(product, 'name')}
+            </h3>
+            <p className='text-gray-400 text-[11px] font-bold uppercase tracking-tight line-clamp-2 leading-relaxed opacity-70'>
+              {getLoc(product, 'short_description')}
+            </p>
+          </div>
+        </Link>
+      </motion.div>
+  )
+}
+
+export default SubCategoryProducts;
