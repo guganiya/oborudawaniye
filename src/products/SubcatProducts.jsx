@@ -143,7 +143,7 @@ const SubCategoryProducts = () => {
         <Navbar />
 
         {/* --- SPOTLIGHT HEADER --- */}
-        <section className='relative h-[75vh] min-h-[500px] bg-black overflow-hidden'>
+        <section className='relative h-[75vh] min-h-[500px] bg-black overflow-hidden mt-30'>
           <AnimatePresence mode='wait'>
             {spotlightItems.length > 0 ? (
                 <motion.div
