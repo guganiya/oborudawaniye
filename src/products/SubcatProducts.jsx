@@ -156,7 +156,7 @@ const SubCategoryProducts = () => {
                 >
                   <img
                       src={spotlightItems[currentSlide]?.poster}
-                      className='w-full h-full object-cover opacity-60 grayscale-[0.3]'
+                      className='w-full h-full object-contain opacity-60 grayscale-[0.3]'
                       alt='Banner'
                   />
                   <div className='absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent' />
@@ -293,7 +293,7 @@ const ProductCard = ({ product, getLoc }) => {
             {/* Main Product Image */}
             <img
                 src={product.poster}
-                className='relative z-10 w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-110 grayscale group-hover:grayscale-0'
+                className='relative z-10 w-full h-full object-contain transition-all duration-700 ease-in-out group-hover:scale-110 grayscale group-hover:grayscale-0'
                 alt={product.name}
             />
 
