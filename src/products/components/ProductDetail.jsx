@@ -227,9 +227,7 @@ const ProductDetail = ({ productDetails }) => {
 										<span className='text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 block mb-2'>
 											{t('product_short_desc')}
 										</span>
-										<p className='text-gray-600 text-sm leading-relaxed'>
-											{product.shortDescription}
-										</p>
+										<div className='text-gray-600 text-sm leading-relaxed' dangerouslySetInnerHTML={{ __html: product.shortDescription }} />
 									</div>
 								)}
 								<div className='grid grid-cols-2 gap-4 text-sm'>
@@ -270,9 +268,8 @@ const ProductDetail = ({ productDetails }) => {
 							animate={{ height: isExpanded ? 'auto' : '100px' }}
 							className='overflow-hidden relative'
 						>
-							<p className='text-gray-500 text-lg leading-relaxed font-medium'>
-								{product.description}
-							</p>
+							<div className='text-gray-500 text-lg leading-relaxed font-medium' dangerouslySetInnerHTML={{ __html: product.description }} />
+
 							{!isExpanded && (
 								<div className='absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent' />
 							)}
