@@ -9,8 +9,6 @@ import {
   X,
   ArrowRight,
   ArrowLeft,
-  Home,
-  LayoutGrid
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -20,12 +18,12 @@ const SubCategoryProducts = () => {
   const { subId } = useParams()
   const { t, i18n } = useTranslation()
 
-  // Состояния для данных
+  // Data states
   const [items, setItems] = useState([])
   const [total, setTotal] = useState(0)
   const [subcategoryName, setSubcategoryName] = useState('')
 
-  // Состояния для управления UI
+  // UI states
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -33,12 +31,11 @@ const SubCategoryProducts = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [page, setPage] = useState(1)
 
-  // Рефы для работы с Intersection Observer и предотвращения дублей
+  // Refs for infinite scroll
   const sentinelRef = useRef(null)
   const busyRef = useRef(false)
-  const observerRef = useRef(null)
 
-  // Локализация полей
+  // Localization helper
   const getLoc = (item, field) => {
     if (!item) return ''
     const lang = i18n.language
@@ -47,7 +44,7 @@ const SubCategoryProducts = () => {
     return item[`${field}_ru`] || item[field]
   }
 
-  // Слайдер: берем первые 5 элементов
+  // Spotlight items (Slider)
   const spotlightItems = useMemo(() => items.slice(0, 5), [items])
 
   useEffect(() => {
@@ -59,7 +56,7 @@ const SubCategoryProducts = () => {
     }
   }, [spotlightItems])
 
-  // Основная функция загрузки (поддерживает пагинацию APIView)
+  // Fetch logic
   const loadProducts = useCallback(
       async (pageNum, isAppend = false) => {
         if (busyRef.current) return
@@ -73,11 +70,9 @@ const SubCategoryProducts = () => {
             params: { subcategory: subId, page: pageNum },
           })
 
-          // Извлекаем данные из формата DRF Pagination
           const { results, next, count } = response.data
-
           setTotal(count || 0)
-          setHasMore(next !== null) // Если next: null, значит страниц больше нет
+          setHasMore(next !== null)
 
           if (isAppend) {
             setItems(prev => [...prev, ...results])
@@ -99,15 +94,14 @@ const SubCategoryProducts = () => {
       [subId, i18n.language]
   )
 
-  // Сброс при смене подкатегории
   useEffect(() => {
     setPage(1)
     setItems([])
     setHasMore(true)
     loadProducts(1, false)
-  }, [subId])
+  }, [subId, loadProducts])
 
-  // INFINITE SCROLL: следит за sentinelRef внизу страницы
+  // Infinite scroll observer
   useEffect(() => {
     if (!hasMore || searchTerm !== '' || loading) return
 
@@ -128,7 +122,6 @@ const SubCategoryProducts = () => {
     return () => observer.disconnect()
   }, [hasMore, searchTerm, loadProducts, loading])
 
-  // Локальный поиск
   const filteredItems = useMemo(() => {
     return items.filter(product => {
       const name = getLoc(product, 'name').toLowerCase()
@@ -143,7 +136,7 @@ const SubCategoryProducts = () => {
         <Navbar />
 
         {/* --- SPOTLIGHT HEADER --- */}
-        <section className='relative h-[75vh] min-h-[500px] bg-black overflow-hidden mt-30'>
+        <section className='relative h-[75vh] min-h-[500px] bg-black overflow-hidden mt-20'>
           <AnimatePresence mode='wait'>
             {spotlightItems.length > 0 ? (
                 <motion.div
@@ -193,7 +186,6 @@ const SubCategoryProducts = () => {
             )}
           </AnimatePresence>
 
-          {/* Spotlight Navigation */}
           {spotlightItems.length > 1 && (
               <div className='absolute bottom-12 right-6 md:right-20 flex items-center gap-6 z-20'>
                 <div className='flex gap-2'>
@@ -241,15 +233,15 @@ const SubCategoryProducts = () => {
               </div>
           ) : (
               <>
-                <div className='grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16'>
+                {/* Updated Grid to match the Swiper proportions but in a static grid */}
+                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'>
                   <AnimatePresence mode='popLayout'>
                     {filteredItems.map(product => (
-                        <ProductCard key={product.id} product={product} getLoc={getLoc} />
+                        <ProductCard key={product.id} product={product} getLoc={getLoc} t={t} />
                     ))}
                   </AnimatePresence>
                 </div>
 
-                {/* Bottom Loader & Sentinel */}
                 {searchTerm === '' && (
                     <div ref={sentinelRef} className='mt-20 flex justify-center'>
                       {hasMore ? (
@@ -273,52 +265,44 @@ const SubCategoryProducts = () => {
   )
 }
 
-/* --- PRODUCT CARD COMPONENT --- */
-const ProductCard = ({ product, getLoc }) => {
+/* --- UPDATED PRODUCT CARD COMPONENT (Matches Highlights Style) --- */
+const ProductCard = ({ product, getLoc, t }) => {
   return (
       <motion.div
           layout
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className='group cursor-pointer'
+          className='h-full'
       >
-        <Link to={`/product/${product.id}`} className='block'>
-          <div className='relative aspect-[3/4] overflow-hidden rounded-3xl bg-gray-50 mb-6'>
-            {/* Blurred Glow Background */}
+        <Link
+            to={`/product/${product.id}`}
+            className='group block bg-white border border-gray-100 p-4 h-full transition-shadow hover:shadow-xl relative'
+        >
+          {/* NEW Tag - Styled exactly like Highlights */}
+          <span className='absolute top-4 right-4 text-[#ff0000] text-[10px] font-black uppercase tracking-tighter z-10'>
+
+              {product.size || 'Standard'}
+
+          </span>
+
+          {/* Product Image Container - Aspect Square like Highlights */}
+          <div className='aspect-square flex items-center justify-center mb-6 mt-6 overflow-hidden'>
             <img
                 src={product.poster}
-                className='absolute inset-0 w-full h-full object-cover blur-2xl opacity-20 scale-150 transition-transform duration-1000 group-hover:scale-110'
-                alt=''
+                alt={getLoc(product, 'name')}
+                className='max-h-full object-contain transition-transform duration-500 group-hover:scale-110'
             />
-            {/* Main Product Image */}
-            <img
-                src={product.poster}
-                className='relative z-10 w-full h-full object-contain transition-all duration-700 ease-in-out group-hover:scale-110 grayscale group-hover:grayscale-0'
-                alt={product.name}
-            />
-
-            {/* Badge */}
-            <div className='absolute top-5 left-5 z-20'>
-            <span className='bg-white/80 backdrop-blur-md text-black text-[9px] font-black px-4 py-2 rounded-xl uppercase tracking-tighter shadow-sm'>
-              {product.size || 'Unique'}
-            </span>
-            </div>
-
-            {/* Hover Arrow Icon */}
-            <div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center z-20'>
-              <div className='w-12 h-12 bg-[#e21e26] rounded-full flex items-center justify-center text-white scale-0 group-hover:scale-100 transition-transform duration-500'>
-                <ArrowRight size={24} />
-              </div>
-            </div>
           </div>
 
-          <div className='space-y-2 px-2'>
-            <h3 className='text-xl font-black uppercase tracking-tighter group-hover:text-[#e21e26] transition-colors line-clamp-1'>
+          {/* Info Section - Styled exactly like Highlights */}
+          <div className='mt-auto'>
+            <h3 className='text-sm md:text-[15px] font-bold text-[#1a1a1a] mb-1 group-hover:text-[#ff0000] transition-colors line-clamp-1'>
               {getLoc(product, 'name')}
             </h3>
-            <p className='text-gray-400 text-[11px] font-bold uppercase tracking-tight line-clamp-2 leading-relaxed opacity-70'>
-              {getLoc(product, 'short_description')}
+            <p className='text-[11px] text-gray-500 uppercase font-medium mb-1'>
+              {getLoc(product, 'subcategory') || getLoc(product, 'category')}
             </p>
+
           </div>
         </Link>
       </motion.div>
