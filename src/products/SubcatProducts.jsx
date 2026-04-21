@@ -205,7 +205,7 @@ const SubCategoryProducts = () => {
         <div className='sticky top-0 z-[100] bg-white/90 backdrop-blur-xl border-b border-gray-100 py-4 px-6'>
           <div className='max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4'>
             <nav className='flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400'>
-              <Link to='/catalog' className='hover:text-black transition-colors'>{t('catalog')}</Link>
+              <Link to='/products' className='hover:text-black transition-colors'>{t('catalog')}</Link>
               <ChevronRight size={12} />
               <span className='text-[#e21e26]'>{subcategoryName || t('products')} ({total})</span>
             </nav>
