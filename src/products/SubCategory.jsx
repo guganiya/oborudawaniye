@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import {useParams, Link, useNavigate} from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
@@ -7,7 +7,7 @@ import {
   X,
   Layers,
   ArrowRight,
-  ArrowLeft,
+  ArrowLeft, ChevronRight,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar";
@@ -73,7 +73,7 @@ const SubCategory = () => {
     subcategories.length > 0
       ? getLocalizedName(subcategories[0], "category")
       : t("subcat_default_parent");
-
+  const navigate = useNavigate()
   return (
     <div className="bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white text-[#1a1a1a]">
       <Navbar />
@@ -172,17 +172,12 @@ const SubCategory = () => {
       <section className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-black/5">
         <div className="max-w-[1400px] mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-4">
-            <div className="bg-black text-white p-2 rounded-lg">
-              <Layers size={18} />
-            </div>
-            <nav className="flex flex-col">
-              <span className="text-[9px] font-black text-[#e21e26] uppercase tracking-widest leading-none mb-1">
-                {t("subcat_breadcrumb_catalog")}
-              </span>
-              <h2 className="text-sm font-bold uppercase tracking-tighter">
-                {parentCategoryName} ({filteredItems.length})
-              </h2>
+            <nav className='flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400'>
+              <Link to='/products' className='hover:text-black transition-colors'>{t('catalog')}</Link>
+              <ChevronRight size={12} />
+              <button className='text-[#e21e26] text-[10px] uppercase cursor-pointer'>{parentCategoryName}</button>
             </nav>
+
           </div>
 
           <div className="relative w-full md:w-96">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import {useParams, Link, useNavigate} from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import {
@@ -22,7 +22,7 @@ const SubCategoryProducts = () => {
   const [items, setItems] = useState([])
   const [total, setTotal] = useState(0)
   const [subcategoryName, setSubcategoryName] = useState('')
-
+  const [categoryName, setCategoryName] = useState('')
   // UI states
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
@@ -78,6 +78,9 @@ const SubCategoryProducts = () => {
             setItems(prev => [...prev, ...results])
           } else {
             setItems(results)
+            if (results.length > 0){
+              setCategoryName(results[0].category)
+            }
             if (results.length > 0) {
               setSubcategoryName(getLoc(results[0], 'subcategory'))
             }
@@ -130,7 +133,7 @@ const SubCategoryProducts = () => {
       return name.includes(query) || desc.includes(query)
     })
   }, [items, searchTerm, i18n.language])
-
+  const navigate = useNavigate();
   return (
       <div className='bg-white min-h-screen font-sans selection:bg-[#e21e26] selection:text-white'>
         <Navbar />
@@ -207,7 +210,9 @@ const SubCategoryProducts = () => {
             <nav className='flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400'>
               <Link to='/products' className='hover:text-black transition-colors'>{t('catalog')}</Link>
               <ChevronRight size={12} />
-              <span className='text-[#e21e26]'>{subcategoryName || t('products')} ({total})</span>
+              <button onClick={() => navigate(-1)} className='text-[#e21e26] text-[10px] uppercase cursor-pointer'>{categoryName}</button>
+              <ChevronRight size={12} />
+              <button className='text-[#e21e26] text-[10px] uppercase'>{subcategoryName} ({total})</button>
             </nav>
 
             <div className='relative w-full md:w-96'>

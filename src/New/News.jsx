@@ -182,7 +182,7 @@ const News = () => {
               className="bg-transparent outline-none text-xs font-bold uppercase tracking-widest p-2 cursor-pointer"
             >
               <option value="">
-                {t("all_categories") || "All Categories"}
+                {t("news_filter_all")}
               </option>
               {topicOptions.map((opt) => (
                 <option key={opt.id} value={opt.id}>

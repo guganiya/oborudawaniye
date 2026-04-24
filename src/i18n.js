@@ -301,7 +301,7 @@ const resources = {
 			support_download_btn: 'Download',
 			support_error_fetch: 'Failed to load files.',
 			support_error_download: 'Failed to download file.',
-
+			featured_news: "Fetaured News",
 
 			"view_all": "View All",
 			"product_highlights_title": "Product highlights",
@@ -358,7 +358,7 @@ const resources = {
 				'Страница, которую вы ищете, не существует или была перемещена в другой раздел.',
 			'404_btn_home': 'На главную',
 			'404_btn_back': 'Вернуться назад',
-
+			featured_news: "Главные новости" ,
 			//footer
 			footer_logo_alt: 'Логотип Alyx',
 			footer_description:

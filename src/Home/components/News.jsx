@@ -61,7 +61,7 @@ const News = () => {
 
 						{/* Date */}
 						<span className='text-[11px] text-gray-400 font-medium mb-2 uppercase'>
-                            {item.created_at || 'Apr 01, 2026'}
+                            {item.date}
                         </span>
 
 						{/* Title */}
