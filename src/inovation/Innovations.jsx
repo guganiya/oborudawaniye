@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 import apiClient from "../api/api";
 import { useTranslation } from "react-i18next";
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 5;
 const brandRed = "#e21e26";
 
 const Innovations = () => {

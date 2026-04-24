@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion"; // Добавил импорт для анимаций
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 5;
 const brandRed = "#e21e26";
 
 const SearchPage = () => {

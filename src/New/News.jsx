@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import apiClient from "../api/api.js";
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 5;
 const brandRed = "#e21e26";
 
 const News = () => {
