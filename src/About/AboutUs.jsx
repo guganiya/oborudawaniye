@@ -131,36 +131,6 @@ const TeamCard = ({ member, index }) => {
 	)
 }
 
-const CompanyStats = () => {
-	const { t } = useTranslation()
-	const stats = [
-		{ label: t('stats_years'), value: '30+' },
-		{ label: t('stats_patents'), value: '150+' },
-		{ label: t('stats_countries'), value: '100+' },
-		{ label: t('stats_clients'), value: '5000+' },
-	]
-
-	return (
-		<div className='grid grid-cols-2 md:grid-cols-4 gap-8'>
-			{stats.map((stat, index) => (
-				<motion.div
-					key={stat.label}
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ delay: index * 0.1 }}
-					className='text-center'
-				>
-					<AnimatedNumber value={stat.value} />
-					<span className='block text-[10px] font-black uppercase tracking-widest text-[#e21e26] mt-2'>
-						{stat.label}
-					</span>
-				</motion.div>
-			))}
-		</div>
-	)
-}
-
 const ValueCard = ({ icon, title, text, delay }) => (
 	<motion.div
 		initial={{ opacity: 0, y: 30 }}
@@ -252,8 +222,6 @@ const AboutUs = () => {
 							{t('about_description')}
 						</motion.p>
 
-						{/* Здесь будет компонент статистики, убедись что в нем белые/серые тексты */}
-						<CompanyStats />
 					</div>
 				</div>
 			</section>

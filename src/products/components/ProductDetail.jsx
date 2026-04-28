@@ -169,7 +169,7 @@ const ProductDetail = ({ productDetails }) => {
 							<img
 								src={product.gallery[currentImageIndex]?.url || product.image}
 								alt={product.gallery[currentImageIndex]?.alt || product.title}
-								className='w-full h-full object-cover transition-all duration-1000'
+								className='w-full h-full object-contain transition-all duration-1000'
 							/>
 						</motion.div>
 
@@ -224,9 +224,7 @@ const ProductDetail = ({ productDetails }) => {
 							<div className='space-y-4'>
 								{product.description && (
 									<div>
-										<span className='text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 block mb-2'>
-											{t('product_short_desc')}
-										</span>
+
 										<div className='text-gray-500 text-lg leading-relaxed font-medium' dangerouslySetInnerHTML={{ __html: product.description }} />
 									</div>
 								)}
@@ -268,6 +266,9 @@ const ProductDetail = ({ productDetails }) => {
 							animate={{ height: isExpanded ? 'auto' : '100px' }}
 							className='overflow-hidden relative'
 						>
+							<span className='text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 block mb-2'>
+											{t('product_short_desc')}
+										</span>
 							<div className='text-gray-600 text-sm leading-relaxed' dangerouslySetInnerHTML={{ __html: product.shortDescription }} />
 							{!isExpanded && (
 								<div className='absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent' />

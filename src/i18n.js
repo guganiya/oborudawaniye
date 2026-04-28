@@ -618,6 +618,7 @@ const resources = {
 
 			//subcatproduct
 			products_catalog: 'Каталог',
+			catalog: "Каталог",
 			products_loading: 'Загрузка...',
 			products_breadcrumb_catalog: 'Каталог',
 			products_loading_text: 'Загрузка товаров...',
