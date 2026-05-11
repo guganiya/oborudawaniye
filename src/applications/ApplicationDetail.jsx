@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
 import ProductHighlights from "../Home/components/HighlightProducts.jsx";
+import {motion} from "framer-motion";
 
 const ApplicationDetails = () => {
   const { id } = useParams();
@@ -22,6 +23,8 @@ const ApplicationDetails = () => {
       try {
         const response = await apiClient.get(`/get-applications/${id}`);
         setData(response.data);
+        console.log(response.data
+        )
       } catch (error) {
         console.error("Error fetching application details:", error);
       } finally {
@@ -137,6 +140,50 @@ const ApplicationDetails = () => {
       )}
 
       <ProductHighlights />
+
+      {/* --- RELATED PRODUCTS SECTION --- */}
+      {data.related_products && data.related_products.length > 0 && (
+          <section className="py-24 px-6 md:px-24 border-t border-gray-100 bg-white">
+            <div className="max-w-7xl mx-auto">
+              <h2 className="text-center text-[14px] md:text-[16px] font-black uppercase tracking-[0.4em] text-black mb-20">
+                {t("innovation_related_products") || "Related Products"}
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
+                {data.related_products.map((product, index) => (
+                    <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1 }}
+                    >
+                      <Link
+                          to={`/product/${product.id}`}
+                          className="group flex flex-col items-center text-center"
+                      >
+                        <div className="relative w-full aspect-square bg-[#f9f9f9] rounded-2xl mb-8 p-10 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:shadow-xl group-hover:bg-white">
+                          <img
+                              src={product.poster}
+                              alt={product.name}
+                              className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-700"
+                              onError={(e) => {
+                                e.target.src = "/placeholder-image.jpg";
+                              }}
+                          />
+                        </div>
+
+                        <h4 className="text-[13px] font-black uppercase tracking-widest text-black group-hover:text-red-600 transition-colors">
+                          {product.name}
+                        </h4>
+                        <div className="mt-4 w-6 h-[2px] bg-gray-200 group-hover:w-12 group-hover:bg-red-600 transition-all duration-500" />
+                      </Link>
+                    </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+      )}
       <Footer></Footer>
 
       {/* Инлайновые стили для анимации зума */}
