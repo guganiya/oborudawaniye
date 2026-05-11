@@ -13,17 +13,21 @@ import {
 	X,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useTranslation } from 'react-i18next' // Импорт
+import { useTranslation } from 'react-i18next'
 import apiClient from '../api/api.js'
 
 const Contacts = () => {
-	const { t } = useTranslation() // Инициализация
+	const { t } = useTranslation()
 	const brandRed = '#e21e26'
+
 	const [full_name, setFullName] = useState('')
 	const [email, setEmail] = useState('')
 	const [message, setMessage] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [modal, setModal] = useState({ isOpen: false, type: '', message: '' })
+
+	// FormBold Endpoint
+	const FORMBOLD_URL = "https://formbold.com/s/oJqXE"
 
 	const fadeInUp = {
 		initial: { opacity: 0, y: 20 },
@@ -31,9 +35,10 @@ const Contacts = () => {
 		transition: { duration: 0.6 },
 	}
 
-	const handleSubmit = async e => {
+	const handleSubmit = async (e) => {
 		e.preventDefault()
 
+		// Validation logic
 		if (!full_name.trim() || !email.trim() || !message.trim()) {
 			setModal({
 				isOpen: true,
@@ -55,13 +60,27 @@ const Contacts = () => {
 
 		setLoading(true)
 
-		const formData = new FormData()
-		formData.append('full_name', full_name)
-		formData.append('email', email)
-		formData.append('message', message)
-
 		try {
-			await apiClient.post('/post-feedback', formData)
+			// 1. Existing API Client (JSON)
+			const apiPromise = apiClient.post('/post-feedback', {
+				full_name: full_name.trim(),
+				email: email.trim(),
+				message: message.trim()
+			})
+
+			// 2. FormBold Integration (Using fetch)
+			const formBoldPromise = fetch(FORMBOLD_URL, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					name: full_name,
+					email: email,
+					message: message
+				})
+			})
+
+			// Run both simultaneously
+			await Promise.all([apiPromise, formBoldPromise])
 
 			setModal({
 				isOpen: true,
@@ -69,13 +88,13 @@ const Contacts = () => {
 				message: t('contacts_success_msg'),
 			})
 
+			// Reset fields on success
 			setFullName('')
 			setEmail('')
 			setMessage('')
 		} catch (err) {
-			console.log(err)
-			const errorMessage =
-				err.response?.data?.message || t('contacts_err_generic')
+			console.error("Submission Error:", err)
+			const errorMessage = err.response?.data?.message || t('contacts_err_generic')
 			setModal({
 				isOpen: true,
 				type: 'error',
@@ -91,10 +110,8 @@ const Contacts = () => {
 	}
 
 	useEffect(() => {
-		const handleEsc = e => {
-			if (e.key === 'Escape' && modal.isOpen) {
-				closeModal()
-			}
+		const handleEsc = (e) => {
+			if (e.key === 'Escape' && modal.isOpen) closeModal()
 		}
 		window.addEventListener('keydown', handleEsc)
 		return () => window.removeEventListener('keydown', handleEsc)
@@ -104,19 +121,20 @@ const Contacts = () => {
 		<div className='bg-white min-h-screen text-black selection:bg-[#e21e26] selection:text-white font-sans'>
 			<Navbar />
 
+			{/* Modal Notification System */}
 			<AnimatePresence>
 				{modal.isOpen && (
 					<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
-						className='fixed inset-0 z-50 flex items-center justify-center px-4'
+						className='fixed inset-0 z-[100] flex items-center justify-center px-4'
 					>
 						<motion.div
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							exit={{ opacity: 0 }}
-							className='absolute inset-0 bg-black/50 backdrop-blur-sm'
+							className='absolute inset-0 bg-black/60 backdrop-blur-sm'
 							onClick={closeModal}
 						/>
 
@@ -124,7 +142,7 @@ const Contacts = () => {
 							initial={{ scale: 0.9, opacity: 0, y: 20 }}
 							animate={{ scale: 1, opacity: 1, y: 0 }}
 							exit={{ scale: 0.9, opacity: 0, y: 20 }}
-							className='relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 md:p-8'
+							className='relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8'
 						>
 							<button
 								onClick={closeModal}
@@ -156,8 +174,7 @@ const Contacts = () => {
 							<button
 								onClick={closeModal}
 								style={{
-									backgroundColor:
-										modal.type === 'success' ? '#10b981' : brandRed,
+									backgroundColor: modal.type === 'success' ? '#10b981' : brandRed,
 								}}
 								className='w-full py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-opacity'
 							>
@@ -169,21 +186,21 @@ const Contacts = () => {
 					</motion.div>
 				)}
 			</AnimatePresence>
+
+			{/* Hero Header Section */}
 			<section className='relative pt-32 md:pt-52 pb-12 md:pb-24 bg-black border-b border-white/10 overflow-hidden'>
-				{/* ГРАДИЕНТНЫЙ ФОН */}
 				<div
 					className='absolute inset-0 z-0'
 					style={{
-						background:
-							'linear-gradient(to left, rgba(226, 30, 38, 0.15) 0%, rgba(0, 0, 0, 1) 70%)',
+						background: 'linear-gradient(to left, rgba(226, 30, 38, 0.15) 0%, rgba(0, 0, 0, 1) 70%)',
 					}}
 				/>
 
-				{/* ФОНОВЫЙ ТЕКСТ (Watermark) */}
+				{/* Background Watermark Text */}
 				<div className='absolute inset-0 opacity-[0.03] pointer-events-none z-0'>
-					<span className='absolute -bottom-5 md:-bottom-10 -left-5 md:-left-10 text-[6rem] md:text-[20rem] font-black uppercase leading-none select-none text-white'>
-						{t('contacts_bg_text')}
-					</span>
+                <span className='absolute -bottom-5 md:-bottom-10 -left-5 md:-left-10 text-[6rem] md:text-[20rem] font-black uppercase leading-none select-none text-white'>
+                   {t('contacts_bg_text')}
+                </span>
 				</div>
 
 				<div className='max-w-[1500px] mx-auto px-6 md:px-12 relative z-10'>
@@ -191,11 +208,10 @@ const Contacts = () => {
 						<h1 className='text-5xl md:text-[8rem] font-[1000] uppercase tracking-tighter leading-[0.9] md:leading-[0.85] text-white'>
 							{t('contacts_hero_title_1')} <br className='hidden md:block' />
 							<span style={{ color: '#e21e26' }}>
-								{t('contacts_hero_title_2')}
-							</span>
+                         {t('contacts_hero_title_2')}
+                      </span>
 						</h1>
 
-						{/* Декоративная линия перед описанием */}
 						<div className='w-12 h-[2px] bg-[#e21e26] mt-8 mb-4 md:mt-12' />
 
 						<p className='text-gray-400 text-[10px] md:text-sm uppercase tracking-[0.2em] md:tracking-[0.4em] font-bold max-w-xl leading-relaxed'>
@@ -205,33 +221,35 @@ const Contacts = () => {
 				</div>
 			</section>
 
+			{/* Contact Content Grid */}
 			<main className='max-w-[1500px] mx-auto px-6 md:px-12 py-16 md:py-32'>
 				<div className='grid grid-cols-1 lg:grid-cols-12 gap-16 md:gap-20'>
+					{/* Information Column */}
 					<div className='lg:col-span-5 space-y-12 md:y-20'>
 						<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-10 md:gap-12'>
 							{[
 								{
 									icon: Mail,
 									label: t('contacts_label_email'),
-									value: 'pro-sales@lumina.com',
-									href: 'mailto:pro-sales@lumina.com',
+									value: 'info.alyxlighting@proton.me',
+									href: 'mailto:info.alyxlighting@proton.me',
 								},
 								{
 									icon: Phone,
 									label: t('contacts_label_call'),
-									value: '+420 123 456 789',
-									href: 'tel:+420123456789',
+									value: '+8613522140196',
+									href: 'tel:+8613522140196',
 								},
 								{
 									icon: MapPin,
 									label: t('contacts_label_office'),
-									value: 'Hazlov 541, Czech Republic',
-									href: '#',
+									value: 'Office: 17/F, YAM TZE Commercial building 23 Thomson road Wan Chau Hong Kong',
+									href: null,
 								},
 								{
 									icon: Clock,
 									label: t('contacts_label_hours'),
-									value: t('contacts_value_hours'),
+									value: " Monday - Friday 10:00 - 18:00",
 									href: null,
 								},
 							].map((item, idx) => (
@@ -250,8 +268,8 @@ const Contacts = () => {
 											style={{ color: brandRed }}
 										/>
 										<span className='text-[9px] md:text-[10px] font-black uppercase tracking-widest'>
-											{item.label}
-										</span>
+                                  {item.label}
+                               </span>
 									</div>
 									{item.href ? (
 										<a
@@ -270,6 +288,7 @@ const Contacts = () => {
 						</div>
 					</div>
 
+					{/* Form Column */}
 					<div className='lg:col-span-7'>
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
@@ -282,8 +301,8 @@ const Contacts = () => {
 								<h3 className='text-2xl md:text-3xl font-black uppercase tracking-tighter mb-2'>
 									{t('contacts_form_title')}{' '}
 									<span style={{ color: brandRed }}>
-										{t('contacts_form_title_accent')}
-									</span>
+                               {t('contacts_form_title_accent')}
+                            </span>
 								</h3>
 								<p className='text-gray-500 text-xs md:text-sm mb-8 md:mb-12 font-medium'>
 									{t('contacts_form_subtitle')}
@@ -302,7 +321,8 @@ const Contacts = () => {
 												required
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
-											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
+											<label className={`absolute left-0 transition-all text-[9px] md:text-[10px] font-black uppercase tracking-widest pointer-events-none 
+                                     ${full_name ? '-top-4 text-[#e21e26]' : 'top-3 md:top-4 text-gray-600 peer-focus:-top-4 peer-focus:text-[#e21e26]'}`}>
 												{t('contacts_input_name')}
 											</label>
 										</div>
@@ -315,21 +335,23 @@ const Contacts = () => {
 												required
 												className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer'
 											/>
-											<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
+											<label className={`absolute left-0 transition-all text-[9px] md:text-[10px] font-black uppercase tracking-widest pointer-events-none 
+                                     ${email ? '-top-4 text-[#e21e26]' : 'top-3 md:top-4 text-gray-600 peer-focus:-top-4 peer-focus:text-[#e21e26]'}`}>
 												{t('contacts_input_email')}
 											</label>
 										</div>
 									</div>
 
 									<div className='relative'>
-										<textarea
-											rows='4'
-											value={message}
-											onChange={e => setMessage(e.target.value)}
-											required
-											className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer resize-none'
-										></textarea>
-										<label className='absolute left-0 top-3 md:top-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-gray-600 pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-[#e21e26] peer-valid:-top-4'>
+                               <textarea
+								   rows='4'
+								   value={message}
+								   onChange={e => setMessage(e.target.value)}
+								   required
+								   className='w-full bg-transparent border-b border-white/10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest outline-none focus:border-[#e21e26] transition-colors peer resize-none'
+							   ></textarea>
+										<label className={`absolute left-0 transition-all text-[9px] md:text-[10px] font-black uppercase tracking-widest pointer-events-none 
+                                  ${message ? '-top-4 text-[#e21e26]' : 'top-3 md:top-4 text-gray-600 peer-focus:-top-4 peer-focus:text-[#e21e26]'}`}>
 											{t('contacts_input_message')}
 										</label>
 									</div>
@@ -339,22 +361,22 @@ const Contacts = () => {
 										disabled={loading}
 										className='group relative w-full py-5 md:py-6 bg-white text-black overflow-hidden rounded-full transition-all hover:bg-[#e21e26] hover:text-white cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
 									>
-										<span className='relative z-10 flex items-center justify-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em]'>
-											{loading ? (
-												<>
-													<Loader2 size={16} className='animate-spin' />
-													{t('contacts_btn_sending')}
-												</>
-											) : (
-												<>
-													{t('contacts_btn_send')}{' '}
-													<ArrowRight
-														size={14}
-														className='group-hover:translate-x-2 transition-transform'
-													/>
-												</>
-											)}
-										</span>
+                               <span className='relative z-10 flex items-center justify-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em]'>
+                                  {loading ? (
+									  <>
+										  <Loader2 size={16} className='animate-spin' />
+										  {t('contacts_btn_sending')}
+									  </>
+								  ) : (
+									  <>
+										  {t('contacts_btn_send')}{' '}
+										  <ArrowRight
+											  size={14}
+											  className='group-hover:translate-x-2 transition-transform'
+										  />
+									  </>
+								  )}
+                               </span>
 									</button>
 								</form>
 							</div>

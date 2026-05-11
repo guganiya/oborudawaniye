@@ -330,6 +330,7 @@ const resources = {
 				clear_filters_btn: 'Clear filters',
 				all_loaded: 'All loaded ({{count}} products)',
 				new:"new",
+				new_collection: "New collection",
 			},
 		},
 	},
@@ -629,6 +630,7 @@ const resources = {
 			"products_search_placeholder": "Найти конкретный товар...",
 			"products_card_sku_prefix": "Артикул:",
 			"products_count_label": "Всего единиц",
+			new_collection: "Новая коллекция",
 
 			//support
 			support_title: 'Центр поддержки',
